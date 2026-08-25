@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1787632554631,
+      "tag": "0000_sparkling_champions",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787633323036,
+      "tag": "0001_clammy_starjammers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787634112963,
+      "tag": "0002_same_vector",
+      "breakpoints": true
+    }
+  ]
+}
