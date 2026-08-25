@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { siteUrl } from "@/lib/site";
 import OrderCalculator from "./components/OrderCalculator";
 
 const services = [
@@ -54,22 +55,22 @@ export default function Home() {
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://cleania.sites.openai.com/#organization",
+        "@id": `${siteUrl}/#organization`,
         name: "Cleania",
-        url: "https://cleania.sites.openai.com/",
+        url: `${siteUrl}/`,
       },
       {
         "@type": "WebSite",
-        "@id": "https://cleania.sites.openai.com/#website",
-        url: "https://cleania.sites.openai.com/",
+        "@id": `${siteUrl}/#website`,
+        url: `${siteUrl}/`,
         name: "Cleania",
         inLanguage: "ru-RU",
-        publisher: { "@id": "https://cleania.sites.openai.com/#organization" },
+        publisher: { "@id": `${siteUrl}/#organization` },
       },
       {
         "@type": "Service",
         serviceType: "Профессиональная уборка помещений",
-        provider: { "@id": "https://cleania.sites.openai.com/#organization" },
+        provider: { "@id": `${siteUrl}/#organization` },
         areaServed: "Новосибирск",
         offers: {
           "@type": "AggregateOffer",

@@ -1,5 +1,5 @@
 export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://cleania.sites.openai.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://cleania.psypaxpro.chatgpt.site";
 
 export const serviceCatalog = {
   "regular-cleaning": {

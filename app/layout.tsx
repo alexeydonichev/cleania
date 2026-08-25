@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cleania.sites.openai.com"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Cleania — уборка без звонков и ожидания",
     template: "%s — Cleania",
