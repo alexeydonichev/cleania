@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type ServiceKey = "regular" | "deep" | "renovation" | "office";
 type ExtraKey =
@@ -50,9 +50,17 @@ export default function OrderCalculator() {
   const [files, setFiles] = useState<File[]>([]);
   const [consent, setConsent] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(
     null,
   );
+  const nameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const readyTimer = window.setTimeout(() => setIsReady(true), 0);
+    return () => window.clearTimeout(readyTimer);
+  }, []);
 
   useEffect(() => {
     fetch("/api/pricing")
@@ -128,10 +136,15 @@ export default function OrderCalculator() {
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setResult(null);
-    if (!name.trim() || phone.replace(/\D/g, "").length < 10 || !consent) {
+    const phoneIsValid = phone.replace(/\D/g, "").length >= 10;
+    if (!name.trim() || !phoneIsValid || !consent) {
       setResult({
         ok: false,
         message: "Укажите имя, корректный телефон и подтвердите согласие.",
+      });
+      window.requestAnimationFrame(() => {
+        if (!name.trim()) nameRef.current?.focus();
+        else if (!phoneIsValid) phoneRef.current?.focus();
       });
       return;
     }
@@ -195,7 +208,12 @@ export default function OrderCalculator() {
 
   return (
     <div className="calculator-card">
-      <form className="calculator-form" id="order-form" onSubmit={submitOrder}>
+      <form
+        className="calculator-form"
+        id="order-form"
+        noValidate={isReady}
+        onSubmit={submitOrder}
+      >
         <fieldset className="calculator-group">
           <legend>
             <span>01</span> Что нужно убрать?
@@ -317,7 +335,10 @@ export default function OrderCalculator() {
             <label>
               <span>Ваше имя</span>
               <input
+                ref={nameRef}
                 autoComplete="name"
+                name="customerName"
+                required
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Алексей"
@@ -326,11 +347,15 @@ export default function OrderCalculator() {
             <label>
               <span>Телефон</span>
               <input
+                ref={phoneRef}
                 autoComplete="tel"
                 inputMode="tel"
+                name="customerPhone"
+                required
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 placeholder="+7 999 000-00-00"
+                title="Укажите номер телефона минимум из 10 цифр"
               />
             </label>
             <label>
@@ -363,6 +388,7 @@ export default function OrderCalculator() {
           <label className="consent">
             <input
               type="checkbox"
+              required
               checked={consent}
               onChange={(event) => setConsent(event.target.checked)}
             />
@@ -419,11 +445,24 @@ export default function OrderCalculator() {
             className="button estimate-button"
             type="submit"
             form="order-form"
-            disabled={isSubmitting}
+            disabled={!isReady || isSubmitting}
           >
-            {isSubmitting ? "Создаём заявку…" : "Оформить за 2 минуты"}{" "}
+            {!isReady
+              ? "Подключаем форму…"
+              : isSubmitting
+                ? "Создаём заявку…"
+                : "Оформить за 2 минуты"}{" "}
             <span aria-hidden="true">→</span>
           </button>
+          {result && (
+            <p
+              className={`form-message estimate-result ${
+                result.ok ? "success" : "error"
+              }`}
+            >
+              {result.message}
+            </p>
+          )}
           <p className="estimate-safe">
             <span>✓</span> Оплата после уборки · чек на почту
           </p>

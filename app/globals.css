@@ -809,6 +809,10 @@ fieldset {
   cursor: wait;
   opacity: 0.7;
 }
+.estimate-result {
+  margin-top: 15px;
+  text-align: left;
+}
 .estimate-safe {
   margin: 15px 0 0;
   color: #c0d0c8;
