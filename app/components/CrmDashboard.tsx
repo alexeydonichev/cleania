@@ -228,10 +228,10 @@ export default function CrmDashboard({
     });
     const result = (await response.json()) as { crew?: Crew; error?: string };
     if (!response.ok || !result.crew)
-      return setNotice(result.error || "Не удалось добавить бригаду");
+      return setNotice(result.error || "Не удалось добавить сотрудника");
     setCrews((current) => [...current, result.crew!]);
     event.currentTarget.reset();
-    setNotice("Бригада добавлена");
+    setNotice("Сотрудник добавлен");
     router.refresh();
   }
 
@@ -254,7 +254,7 @@ export default function CrmDashboard({
     ["overview", "Обзор", "⌂"],
     ["orders", "Заявки", "↳"],
     ["schedule", "Расписание", "□"],
-    ["crews", "Бригады", "◇"],
+    ["crews", "Сотрудники", "◇"],
     ["analytics", "Аналитика", "↗"],
     ["settings", "Настройки", "⚙"],
   ] as const;
@@ -582,7 +582,7 @@ export default function CrmDashboard({
           <div className="crm-view">
             <div className="crm-section-head">
               <div>
-                <h2>Бригады</h2>
+                <h2>Сотрудники</h2>
                 <p>
                   Мощность команды и ответственные. Фиктивных сотрудников в
                   системе нет.
@@ -613,19 +613,19 @@ export default function CrmDashboard({
                 </article>
               ))}
               {!crews.length && (
-                <Empty text="Добавьте первую реальную бригаду" />
+                <Empty text="Добавьте первого реального сотрудника" />
               )}
             </section>
             <form className="crm-panel add-crew" onSubmit={addCrew}>
               <div>
-                <h3>Добавить бригаду</h3>
+                <h3>Добавить сотрудника</h3>
                 <p>
                   Название достаточно; остальные поля можно заполнить позже.
                 </p>
               </div>
               <label>
-                <span>Название</span>
-                <input name="name" required placeholder="Бригада 1" />
+                <span>Имя или название</span>
+                <input name="name" required placeholder="Анна / Смена 1" />
               </label>
               <label>
                 <span>Ответственный</span>

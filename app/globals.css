@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f4f1e8;
-  --paper-2: #ebe7dc;
-  --surface: #fffef9;
-  --ink: #13231c;
-  --muted: #5f6b65;
-  --line: #d8d6cc;
-  --green: #176b4b;
-  --green-dark: #0f4935;
-  --mint: #dcecdf;
-  --orange: #e66f42;
-  --shadow: 0 22px 70px rgba(28, 44, 35, 0.08);
+  --paper: #f7f9f4;
+  --paper-2: #edf5ff;
+  --surface: #ffffff;
+  --ink: #0d1714;
+  --muted: #52605b;
+  --line: #dbe3df;
+  --green: #087b57;
+  --green-dark: #071c16;
+  --mint: #e7fbdc;
+  --orange: #ff6a3d;
+  --blue: #1636d9;
+  --lime: #caff3d;
+  --shadow: 0 24px 80px rgba(9, 28, 22, 0.1);
 }
 
 * {
@@ -86,21 +88,22 @@ fieldset {
   transform: translateY(0);
 }
 .shell {
-  width: min(100% - 64px, 1480px);
+  width: min(100% - 48px, 1640px);
   margin-inline: auto;
 }
 .site-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  min-height: 82px;
+  min-height: 76px;
   width: 100%;
   padding: 0 clamp(24px, 3.1vw, 60px);
   border-bottom: 1px solid var(--line);
-  background: rgba(244, 241, 232, 0.92);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(18px);
 }
 .brand {
   display: inline-flex;
@@ -109,19 +112,19 @@ fieldset {
   width: max-content;
   font-size: 22px;
   font-weight: 720;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 .brand-mark {
   display: grid;
   place-items: center;
   width: 37px;
   height: 37px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: var(--ink);
   color: white;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 23px;
-  font-style: italic;
+  font-style: normal;
 }
 .desktop-nav {
   display: flex;
@@ -177,7 +180,7 @@ fieldset {
   gap: 22px;
   padding: 0 26px;
   border: 1px solid var(--green);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--green);
   color: white;
   font-size: 14px;
@@ -189,8 +192,8 @@ fieldset {
     box-shadow 0.2s ease;
 }
 .button:hover {
-  background: var(--green-dark);
-  box-shadow: 0 12px 30px rgba(23, 107, 75, 0.2);
+  background: var(--ink);
+  box-shadow: 0 12px 30px rgba(8, 123, 87, 0.24);
   transform: translateY(-2px);
 }
 .button-small {
@@ -199,15 +202,42 @@ fieldset {
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
-  gap: clamp(36px, 6vw, 100px);
+  position: relative;
   min-height: 720px;
-  align-items: center;
-  padding-block: clamp(54px, 7vw, 104px);
+  width: min(100% - 32px, 1840px);
+  margin: 18px auto 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--green-dark);
+  color: var(--ink);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(247, 249, 244, 0.96) 0%, rgba(247, 249, 244, 0.82) 38%, rgba(7, 28, 22, 0.08) 68%, rgba(7, 28, 22, 0.44) 100%),
+    linear-gradient(0deg, rgba(7, 28, 22, 0.35), transparent 48%);
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
+  gap: 44px;
+  min-height: 720px;
+  align-items: end;
+  padding-block: 64px;
 }
 .hero-copy {
-  padding-left: clamp(0px, 2vw, 28px);
+  max-width: 820px;
 }
 .eyebrow {
   display: flex;
@@ -230,14 +260,15 @@ fieldset {
 .quality-copy h2,
 .b2b-inner h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: -0.055em;
-  line-height: 0.96;
+  font-family: inherit;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 0.98;
 }
 .hero h1 {
   max-width: 720px;
-  font-size: clamp(54px, 6.1vw, 96px);
+  color: var(--ink);
+  font-size: 88px;
 }
 .hero h1 em,
 .section-heading h2 em,
@@ -250,7 +281,7 @@ fieldset {
   max-width: 570px;
   margin: 35px 0 0;
   color: var(--muted);
-  font-size: clamp(17px, 1.35vw, 21px);
+  font-size: 20px;
   line-height: 1.65;
 }
 .hero-actions {
@@ -269,83 +300,127 @@ fieldset {
   color: var(--ink);
   font-size: 16px;
 }
-.hero-visual {
-  position: relative;
-  min-height: 610px;
-  margin: 0;
-  overflow: hidden;
-  border-radius: 130px 8px 8px 8px;
-  background: #d9ded6;
+.ghost-button {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border: 1px solid rgba(13, 23, 20, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.38);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 720;
+  backdrop-filter: blur(12px);
 }
-.hero-visual > img {
+.ghost-button:hover {
+  border-color: var(--ink);
+  background: white;
+}
+.hero-live-panel {
   width: 100%;
-  height: 610px;
-  object-fit: cover;
-  object-position: center;
-}
-.hero-visual::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 55%, rgba(11, 37, 27, 0.42));
-  content: "";
-  pointer-events: none;
-}
-.hero-visual figcaption {
-  position: absolute;
-  z-index: 2;
-  right: 30px;
-  bottom: 27px;
-  left: 30px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  max-width: 460px;
+  justify-self: end;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(7, 28, 22, 0.76);
   color: white;
+  box-shadow: 0 28px 80px rgba(4, 17, 13, 0.28);
+  backdrop-filter: blur(18px);
 }
-.hero-visual figcaption span {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-}
-.hero-visual figcaption strong {
-  font-family: Georgia, serif;
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.1;
-  text-align: right;
-}
-.floating-note {
-  position: absolute;
-  z-index: 3;
-  top: 38px;
-  left: -32px;
+.hero-live-top,
+.hero-live-bottom {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-width: 220px;
-  padding: 17px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 5px;
-  background: rgba(255, 254, 249, 0.94);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
+  justify-content: space-between;
+  gap: 18px;
 }
-.floating-note b,
-.floating-note small {
+.hero-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-live-top span {
+  color: var(--lime);
+  font-size: 12px;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero-live-top b {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+.hero-live-panel h2 {
+  margin: 44px 0 14px;
+  font-size: 34px;
+  font-weight: 820;
+  line-height: 1.05;
+}
+.hero-live-panel p {
+  margin: 0 0 34px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.hero-live-bottom strong,
+.hero-live-bottom small {
   display: block;
 }
-.floating-note b {
-  font-size: 13px;
+.hero-live-bottom strong {
+  color: var(--lime);
+  font-size: 32px;
+  line-height: 1;
 }
-.floating-note small {
-  margin-top: 2px;
-  color: var(--muted);
+.hero-live-bottom small {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.66);
   font-size: 11px;
 }
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border: 3px solid #b8ddc8;
-  border-radius: 50%;
-  background: var(--green);
+.hero-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-controls button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+.hero-controls button span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.hero-controls button[aria-pressed="true"] {
+  border-color: var(--lime);
+}
+.hero-controls button[aria-pressed="true"] span {
+  background: var(--lime);
+}
+.hero-progress {
+  height: 3px;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.hero-progress::before {
+  display: block;
+  width: var(--hero-progress);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--lime);
+  content: "";
+  transition: width 0.3s ease;
 }
 
 .ticker {
@@ -355,11 +430,14 @@ fieldset {
   justify-content: center;
   gap: clamp(20px, 3vw, 58px);
   padding-inline: 24px;
+  margin-top: 18px;
   border-block: 1px solid var(--line);
-  color: #49564f;
-  font-family: Georgia, serif;
-  font-size: clamp(14px, 1.2vw, 18px);
-  font-style: italic;
+  background: var(--lime);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 760;
 }
 .ticker i {
   width: 5px;
@@ -376,7 +454,7 @@ fieldset {
 .section-heading h2,
 .quality-copy h2,
 .b2b-inner h2 {
-  font-size: clamp(46px, 5vw, 78px);
+  font-size: 68px;
 }
 .split-heading {
   display: grid;
@@ -663,7 +741,7 @@ fieldset {
 .estimate-panel {
   padding: clamp(22px, 2.5vw, 38px);
   border-left: 1px solid var(--line);
-  background: var(--green-dark);
+  background: var(--ink);
   color: white;
 }
 .estimate-sticky {
@@ -680,10 +758,10 @@ fieldset {
 }
 .estimate-price {
   display: block;
-  font-family: Georgia, serif;
-  font-size: clamp(50px, 4vw, 70px);
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-family: inherit;
+  font-size: 64px;
+  font-weight: 840;
+  letter-spacing: 0;
   line-height: 1;
 }
 .estimate-price small {
@@ -742,7 +820,9 @@ fieldset {
 }
 
 .services-section {
-  background: var(--paper-2);
+  background:
+    linear-gradient(135deg, rgba(22, 54, 217, 0.08), transparent 38%),
+    var(--paper-2);
 }
 .compact-heading {
   display: flex;
@@ -763,18 +843,20 @@ fieldset {
   padding: 29px;
   border-right: 1px solid #c7c6bd;
   border-bottom: 1px solid #c7c6bd;
+  background: rgba(255, 255, 255, 0.5);
   transition:
     background 0.25s,
     color 0.25s;
 }
 .service-card:hover {
-  background: var(--green);
+  background: var(--ink);
   color: white;
 }
 .service-number {
-  color: #8a918c;
-  font-family: Georgia, serif;
+  color: var(--blue);
+  font-family: inherit;
   font-size: 13px;
+  font-weight: 820;
 }
 .service-card:hover .service-number,
 .service-card:hover p {
@@ -782,10 +864,10 @@ fieldset {
 }
 .service-card h3 {
   margin: 0 0 13px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 28px;
-  font-weight: 400;
-  letter-spacing: -0.035em;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .service-card p {
   margin: 0;
@@ -824,7 +906,7 @@ fieldset {
 .quality-image img {
   width: 100%;
   height: 640px;
-  border-radius: 5px 120px 5px 5px;
+  border-radius: 8px;
   object-fit: cover;
 }
 .quality-image > span {
@@ -835,14 +917,14 @@ fieldset {
   width: 135px;
   height: 135px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 8px;
   background: var(--orange);
   color: white;
-  font-family: Georgia, serif;
+  font-family: inherit;
+  font-weight: 840;
   font-size: 18px;
   line-height: 1.1;
   text-align: center;
-  transform: rotate(-8deg);
 }
 .quality-intro {
   max-width: 650px;
@@ -868,8 +950,8 @@ fieldset {
 }
 .guarantee-list li > span {
   color: var(--green);
-  font-family: Georgia, serif;
   font-size: 12px;
+  font-weight: 820;
 }
 .guarantee-list h3 {
   margin: 0 0 7px;
@@ -972,8 +1054,9 @@ fieldset {
   justify-content: space-between;
   padding-bottom: 13px;
   border-bottom: 1px solid #54665d;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 23px;
+  font-weight: 780;
 }
 .footer-bottom {
   display: flex;
@@ -1001,10 +1084,10 @@ fieldset {
 .inner-title h1,
 .business-hero h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(58px, 7vw, 108px);
-  font-weight: 400;
-  letter-spacing: -0.06em;
+  font-family: inherit;
+  font-size: 84px;
+  font-weight: 840;
+  letter-spacing: 0;
   line-height: 0.93;
 }
 .inner-hero > div > p:not(.eyebrow),
@@ -1042,8 +1125,9 @@ fieldset {
 }
 .inner-actions dd {
   margin: 4px 0 0;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 18px;
+  font-weight: 780;
 }
 .service-details {
   display: grid;
@@ -1057,10 +1141,10 @@ fieldset {
 .contact-card h2,
 .business-process h2 {
   margin: 0;
-  font-family: Georgia, serif;
-  font-size: clamp(38px, 4vw, 60px);
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-family: inherit;
+  font-size: 54px;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .service-details ul,
 .exclusions ul {
@@ -1176,8 +1260,8 @@ fieldset {
   margin-bottom: 25px;
 }
 .business-form-head span {
-  font-family: Georgia, serif;
   font-size: 27px;
+  font-weight: 820;
 }
 .business-form-head b {
   color: var(--green);
@@ -1226,14 +1310,13 @@ fieldset {
 }
 .business-proof span {
   color: var(--orange);
-  font-family: Georgia, serif;
   font-size: 12px;
+  font-weight: 820;
 }
 .business-proof h3 {
   margin: 40px 0 12px;
-  font-family: Georgia, serif;
   font-size: 25px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .business-proof p {
   margin: 0;
@@ -1265,8 +1348,8 @@ fieldset {
 }
 .business-process li > span {
   color: var(--green);
-  font-family: Georgia, serif;
   font-size: 12px;
+  font-weight: 820;
 }
 .business-process li > b {
   margin-top: 55px;
@@ -1297,8 +1380,8 @@ fieldset {
 }
 .contact-card > span:first-child {
   color: var(--orange);
-  font-family: Georgia, serif;
   font-size: 12px;
+  font-weight: 820;
 }
 .contact-card h2 {
   margin-top: 45px;
@@ -1334,10 +1417,10 @@ fieldset {
 }
 .legal-page h1 {
   margin: 0;
-  font-family: Georgia, serif;
-  font-size: clamp(48px, 6vw, 82px);
-  font-weight: 400;
-  letter-spacing: -0.05em;
+  font-family: inherit;
+  font-size: 72px;
+  font-weight: 840;
+  letter-spacing: 0;
   line-height: 1;
 }
 .legal-date {
@@ -1363,10 +1446,28 @@ fieldset {
   line-height: 1.75;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1320px) {
   .shell {
-    width: min(100% - 40px, 1480px);
+    width: min(100% - 40px, 1640px);
   }
+  .hero-content {
+    grid-template-columns: 1fr;
+    min-height: 660px;
+    align-items: end;
+    padding-block: 44px;
+  }
+  .hero h1 {
+    max-width: 760px;
+    font-size: 68px;
+  }
+  .hero-live-panel {
+    justify-self: start;
+    width: min(100%, 560px);
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 1100px) {
   .desktop-nav {
     display: none;
   }
@@ -1377,17 +1478,11 @@ fieldset {
     grid-column: 2;
   }
   .hero {
-    grid-template-columns: 1fr 1fr;
-    gap: 35px;
-    min-height: 620px;
+    min-height: 660px;
   }
   .hero h1 {
-    font-size: clamp(50px, 6vw, 70px);
-  }
-  .hero-visual,
-  .hero-visual > img {
-    height: 530px;
-    min-height: 530px;
+    max-width: 760px;
+    font-size: 62px;
   }
   .choice-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1418,7 +1513,7 @@ fieldset {
     padding-bottom: 74px;
   }
   .shell {
-    width: min(100% - 28px, 1480px);
+    width: min(100% - 28px, 1640px);
   }
   .site-header {
     position: sticky;
@@ -1440,36 +1535,32 @@ fieldset {
   }
   .header-actions { display:none; }
   .mobile-menu { position:relative; display:block; grid-column:2; justify-self:end; }
-  .mobile-menu summary { display:grid; width:42px; height:42px; place-items:center; border:1px solid var(--line); border-radius:50%; background:var(--surface); cursor:pointer; font-size:0; list-style:none; }
+  .mobile-menu summary { display:grid; width:42px; height:42px; place-items:center; border:1px solid var(--line); border-radius:8px; background:var(--surface); cursor:pointer; font-size:0; list-style:none; }
   .mobile-menu summary::after { content:'☰'; color:var(--ink); font-size:18px; }
   .mobile-menu summary::-webkit-details-marker { display:none; }
   .mobile-menu[open] summary::after { content:'×'; font-size:24px; }
   .mobile-menu nav { position:absolute; top:49px; right:0; display:flex; width:min(82vw,290px); flex-direction:column; padding:9px; border:1px solid var(--line); border-radius:7px; background:var(--surface); box-shadow:var(--shadow); }
   .mobile-menu nav a { min-height:48px; padding:14px 12px; border-bottom:1px solid var(--line); font-size:14px; font-weight:650; }.mobile-menu nav a:last-child { border-bottom:0; }
   .hero {
+    min-height: 720px;
+    width: calc(100% - 20px);
+    margin-top: 10px;
+  }
+  .hero-scrim {
+    background:
+      linear-gradient(180deg, rgba(247, 249, 244, 0.96) 0%, rgba(247, 249, 244, 0.9) 45%, rgba(7, 28, 22, 0.18) 68%, rgba(7, 28, 22, 0.78) 100%),
+      linear-gradient(90deg, rgba(247, 249, 244, 0.94), rgba(247, 249, 244, 0.25));
+  }
+  .hero-content {
     display: flex;
-    min-height: auto;
+    min-height: 720px;
     flex-direction: column;
-    gap: 35px;
-    padding-block: 48px 54px;
-  }
-  .hero-copy {
-    order: 1;
-    padding: 0;
-  }
-  .hero-visual {
-    order: 2;
-    width: 100%;
-    height: 390px;
-    min-height: 390px;
-    border-radius: 65px 4px 4px 4px;
-  }
-  .hero-visual > img {
-    height: 390px;
-    min-height: 390px;
+    justify-content: flex-end;
+    gap: 26px;
+    padding-block: 28px;
   }
   .hero h1 {
-    font-size: clamp(48px, 14vw, 68px);
+    font-size: 44px;
     line-height: 0.98;
   }
   .hero-lead {
@@ -1486,21 +1577,32 @@ fieldset {
   .hero-actions .button {
     width: 100%;
   }
-  .micro-proof {
-    padding-left: 4px;
+  .ghost-button {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.75);
   }
-  .floating-note {
-    top: 20px;
-    left: 16px;
-    min-width: 205px;
+  .hero-live-panel {
+    width: 100%;
+    max-width: none;
+    padding: 18px;
   }
-  .hero-visual figcaption {
-    right: 20px;
-    bottom: 19px;
-    left: 20px;
+  .hero-top-actions {
+    gap: 8px;
   }
-  .hero-visual figcaption strong {
-    font-size: 18px;
+  .hero-controls {
+    gap: 5px;
+  }
+  .hero-controls button {
+    width: 24px;
+    height: 24px;
+  }
+  .hero-live-panel h2 {
+    margin-top: 30px;
+    font-size: 25px;
+  }
+  .hero-live-panel p {
+    margin-bottom: 24px;
+    font-size: 13px;
   }
   .ticker {
     min-height: 70px;
@@ -1527,7 +1629,7 @@ fieldset {
   .section-heading h2,
   .quality-copy h2,
   .b2b-inner h2 {
-    font-size: clamp(43px, 12.5vw, 59px);
+    font-size: 42px;
   }
   .split-heading > p {
     margin: 0;
@@ -1643,7 +1745,7 @@ fieldset {
   .inner-hero h1,
   .inner-title h1,
   .business-hero h1 {
-    font-size: clamp(49px, 14vw, 68px);
+    font-size: 46px;
   }
   .inner-hero > div > p:not(.eyebrow),
   .inner-title > p:not(.eyebrow) {
@@ -1721,8 +1823,9 @@ fieldset {
     font-size: 10px;
   }
   .mobile-order-bar b {
-    font-family: Georgia, serif;
+    font-family: inherit;
     font-size: 21px;
+    font-weight: 820;
   }
   .mobile-order-bar .button {
     min-width: 150px;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { siteUrl } from "@/lib/site";
+import HeroShowcase from "./components/HeroShowcase";
 import OrderCalculator from "./components/OrderCalculator";
 
 const services = [
@@ -118,54 +119,7 @@ export default function Home() {
         </details>
       </header>
 
-      <section className="hero shell">
-        <div className="hero-copy">
-          <p className="eyebrow">
-            <span /> Порядок начинается здесь
-          </p>
-          <h1>
-            Уборка, которую удобно <em>заказывать</em>
-          </h1>
-          <p className="hero-lead">
-            Цена, свободное время и состав работ — сразу на экране. Без звонков,
-            скрытых доплат и ожидания ответа менеджера.
-          </p>
-          <div className="hero-actions">
-            <Link className="button" href="#calculator">
-              Узнать точную цену <span aria-hidden="true">↘</span>
-            </Link>
-            <span className="micro-proof">
-              <b>24/7</b> расчёт доступен
-              <br />
-              без звонка менеджеру
-            </span>
-          </div>
-        </div>
-        <figure className="hero-visual">
-          <Image
-            src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=86"
-            alt="Профессиональный клинер убирает светлую кухню"
-            width="1400"
-            height="1050"
-            fetchPriority="high"
-          />
-          <figcaption>
-            <span>01 / 04</span>
-            <strong>
-              Чисто по чек-листу,
-              <br />
-              не на глаз
-            </strong>
-          </figcaption>
-          <div className="floating-note">
-            <span className="status-dot" />
-            <div>
-              <b>Онлайн-расчёт работает</b>
-              <small>Цена меняется сразу</small>
-            </div>
-          </div>
-        </figure>
-      </section>
+      <HeroShowcase />
 
       <section className="ticker" aria-label="Преимущества">
         <span>Фиксируем стоимость до начала</span>

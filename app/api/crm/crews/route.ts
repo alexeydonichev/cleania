@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   );
   if (!name)
     return NextResponse.json(
-      { error: "Укажите название бригады" },
+      { error: "Укажите имя сотрудника или название смены" },
       { status: 400 },
     );
   const id = crypto.randomUUID();

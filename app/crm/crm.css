@@ -39,16 +39,16 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 8px;
   background: #173d2e;
   color: #fff;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 20px;
-  font-style: italic;
+  font-style: normal;
 }
 .crm-brand > b {
   font-size: 18px;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
 }
 .crm-brand > small {
   margin-left: auto;
@@ -172,10 +172,10 @@
 }
 .crm-topbar h1 {
   margin-top: 3px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 29px;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .crm-top-actions {
   display: flex;
@@ -269,10 +269,10 @@
 }
 .crm-kpis article > strong {
   margin: 15px 0 8px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 32px;
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .crm-kpis article > small {
   color: #8d9691;
@@ -416,9 +416,9 @@
   display: block;
 }
 .target-ring strong {
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 31px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .target-ring small {
   color: var(--crm-muted);
@@ -585,10 +585,10 @@
   margin: 0;
 }
 .crm-section-head h2 {
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 27px;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .crm-section-head p {
   max-width: 620px;
@@ -666,9 +666,9 @@
   text-transform: uppercase;
 }
 .schedule-grid header b {
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 20px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .schedule-grid article > button {
   display: block;
@@ -739,9 +739,9 @@
 }
 .crew-grid h3 {
   margin: 25px 0 3px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 19px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .crew-grid p {
   margin: 0;
@@ -836,9 +836,9 @@
 }
 .analytics-strip b {
   margin-top: 14px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 25px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .analytics-strip > i {
   color: #abb3ae;
@@ -881,10 +881,10 @@
 .big-number {
   display: block;
   margin: 38px 0 15px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 48px;
-  font-weight: 400;
-  letter-spacing: -0.04em;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 .muted-copy {
   max-width: 330px;
@@ -901,8 +901,9 @@
 .pricing-grid article > span {
   display: block;
   margin-bottom: 19px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 17px;
+  font-weight: 820;
 }
 .pricing-grid label {
   display: grid;
@@ -1013,9 +1014,9 @@
 }
 .crm-drawer header h2 {
   margin: 5px 0 3px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 29px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .crm-drawer header p {
   margin: 0;
@@ -1069,9 +1070,9 @@
 }
 .drawer-profit b {
   margin: 8px 0 3px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 26px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .drawer-profit small {
   color: #819089;
@@ -1102,9 +1103,9 @@
 }
 .crm-access h1 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 42px;
-  font-weight: 400;
+  font-weight: 820;
 }
 .crm-access p {
   color: #66716b;
