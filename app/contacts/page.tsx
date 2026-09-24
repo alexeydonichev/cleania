@@ -5,7 +5,7 @@ import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
 export const metadata: Metadata = {
   title: "Контакты и зона работы",
   description:
-    "Cleania в Новосибирске: онлайн-заказ уборки, зона обслуживания и способы связи.",
+    "Cleania в Новосибирске и Бердске: онлайн-заказ уборки, зона обслуживания и способы связи.",
   alternates: { canonical: "/contacts" },
 };
 
@@ -23,9 +23,8 @@ export default function ContactsPage() {
           <em>Cleania</em>
         </h1>
         <p>
-          На этапе настройки основной канал — заявка на сайте. Телефон,
-          юридические реквизиты и публичные мессенджеры добавляются владельцем
-          перед рекламным запуском.
+          Работаем в Новосибирске и Бердске. Оставьте заявку с вашим номером —
+          свяжемся, чтобы обсудить уборку, адрес и удобное время.
         </p>
       </section>
       <section className="section shell contacts-grid">
@@ -33,7 +32,7 @@ export default function ContactsPage() {
           <span>01</span>
           <h2>Заказать уборку</h2>
           <p>
-            Получите расчёт и оставьте телефон. Заявка сразу появится в CRM.
+            Рассчитайте стоимость без звонка, выберите задачи и оставьте телефон для подтверждения.
           </p>
           <Link className="button" href="/#calculator">
             Открыть калькулятор
@@ -51,10 +50,9 @@ export default function ContactsPage() {
           <span>03</span>
           <h2>Зона работы</h2>
           <p>
-            Новосибирск. Конкретный адрес и выезд за границы города
-            подтверждаются менеджером.
+            Новосибирск, Академгородок и Бердск. Конкретный адрес, время и выезд за границы городов подтверждаем до заказа.
           </p>
-          <span className="zone-tag">Новосибирск</span>
+          <span className="zone-tag">Новосибирск · Бердск</span>
         </div>
       </section>
       <PublicFooter />

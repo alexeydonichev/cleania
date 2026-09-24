@@ -10,7 +10,8 @@ export default function BusinessBrief() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setState("sending");
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const payload = Object.fromEntries(form.entries());
     try {
       const response = await fetch("/api/business-leads", {
@@ -25,7 +26,7 @@ export default function BusinessBrief() {
       setMessage(
         "Бриф отправлен. Менеджер подготовит вопросы для точной сметы.",
       );
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setState("error");
       setMessage(

@@ -3,72 +3,7 @@ import { ensureDatabase, rawDb } from "@/db/runtime";
 import { dispatchOrderNotifications } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-type ServiceKey = "regular" | "deep" | "renovation" | "office";
-type ConditionKey = "normal" | "dirty" | "very_dirty";
-type FrequencyKey = "once" | "weekly" | "biweekly";
-
-const serviceRules: Record<ServiceKey, { rate: number; minimum: number }> = {
-  regular: { rate: 95, minimum: 2490 },
-  deep: { rate: 160, minimum: 4490 },
-  renovation: { rate: 230, minimum: 6990 },
-  office: { rate: 110, minimum: 5990 },
-};
-
-const extraPrices: Record<string, number> = {
-  windows: 1200,
-  oven: 650,
-  fridge: 650,
-  balcony: 900,
-  cabinets: 950,
-  ironing: 700,
-};
-
-function calculate(
-  input: {
-    service: ServiceKey;
-    area: number;
-    bathrooms: number;
-    extras: string[];
-    condition: ConditionKey;
-    frequency: FrequencyKey;
-  },
-  rule: { rate: number; minimum: number },
-) {
-  const base = Math.max(rule.minimum, input.area * rule.rate);
-  const bathrooms = Math.max(0, input.bathrooms - 1) * 550;
-  const extras = input.extras.reduce(
-    (sum, key) => sum + (extraPrices[key] || 0),
-    0,
-  );
-  const condition =
-    input.condition === "very_dirty"
-      ? 1.35
-      : input.condition === "dirty"
-        ? 1.18
-        : 1;
-  const frequency =
-    input.frequency === "weekly"
-      ? 0.85
-      : input.frequency === "biweekly"
-        ? 0.9
-        : 1;
-  const total =
-    Math.round((((base + bathrooms) * condition + extras) * frequency) / 50) *
-    50;
-  const duration = Math.max(
-    2,
-    Math.round(
-      (input.area / (input.service === "renovation" ? 12 : 18) +
-        input.extras.length * 0.35) *
-        2,
-    ) / 2,
-  );
-  return {
-    total,
-    duration,
-    crew: input.area >= 80 || input.service === "renovation" ? 2 : 1,
-  };
-}
+import { calculateQuote, defaultPricing, extrasCatalog, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey } from "@/lib/quote";
 
 export async function POST(request: Request) {
   try {
@@ -85,22 +20,30 @@ export async function POST(request: Request) {
     const frequency = String(body.frequency || "") as FrequencyKey;
     const area = Number(body.area);
     const bathrooms = Number(body.bathrooms);
-    const extras = Array.isArray(body.extras)
-      ? body.extras.map(String).filter((item) => item in extraPrices)
-      : [];
+    const extras = Array.isArray(body.extras) ? body.extras.map(String) as ExtraKey[] : [];
+    const city = body.city === undefined ? "Новосибирск" : String(body.city);
+    const address = String(body.address || "").trim().slice(0, 300);
+    const comment = String(body.comment || "").trim().slice(0, 1000);
+    const preferredSlot = body.preferredSlot ? String(body.preferredSlot) : null;
+    if (!["Новосибирск", "Бердск"].includes(city) ||
+      extras.some(key => !Object.hasOwn(extrasCatalog, key)) ||
+      (Object.keys(extrasCatalog) as ExtraKey[]).some(key => extras.filter(item => item === key).length > extrasCatalog[key].max) ||
+      (preferredSlot && !["09:00–12:00", "12:00–15:00", "15:00–18:00"].includes(preferredSlot))) {
+      return NextResponse.json({ error: "Проверьте город, время и дополнительные услуги" }, { status: 400 });
+    }
     const name = String(body.name || "")
       .trim()
       .slice(0, 100);
     const phone = String(body.phone || "")
       .trim()
       .slice(0, 40);
-    const phoneDigits = phone.replace(/\D/g, "");
+
     const preferredDate = body.preferredDate
       ? String(body.preferredDate).slice(0, 10)
       : null;
 
     if (
-      !(service in serviceRules) ||
+      !serviceKeys.includes(service) ||
       !["normal", "dirty", "very_dirty"].includes(condition) ||
       !["once", "weekly", "biweekly"].includes(frequency)
     ) {
@@ -110,7 +53,7 @@ export async function POST(request: Request) {
       );
     }
     if (
-      !Number.isFinite(area) ||
+      !Number.isInteger(area) ||
       area < 20 ||
       area > 300 ||
       !Number.isInteger(bathrooms) ||
@@ -122,13 +65,19 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!name || phoneDigits.length < 10 || body.consent !== true) {
+    if (!name || !validPhone(phone) || body.consent !== true) {
       return NextResponse.json(
         { error: "Укажите имя, телефон и согласие на обработку данных" },
         { status: 400 },
       );
     }
 
+    if (preferredDate && (!/^\d{4}-\d{2}-\d{2}$/.test(preferredDate) || Number.isNaN(Date.parse(preferredDate)) || new Date(preferredDate).toISOString().slice(0, 10) !== preferredDate || preferredDate < todayInNovosibirsk())) {
+      return NextResponse.json({ error: "Выберите сегодняшнюю или будущую дату" }, { status: 400 });
+    }
+    if (service !== "regular" && frequency !== "once") {
+      return NextResponse.json({ error: "Регулярность доступна для поддерживающей уборки" }, { status: 400 });
+    }
     const db = rawDb();
     const now = new Date().toISOString();
     const leadId = crypto.randomUUID();
@@ -141,20 +90,23 @@ export async function POST(request: Request) {
       )
       .bind(service)
       .first<{ rate: number; minimum: number }>();
-    const estimate = calculate(
+    const estimate = calculateQuote(
       { service, area, bathrooms, extras, condition, frequency },
-      storedRule || serviceRules[service],
+      storedRule || defaultPricing[service],
     );
 
+    if (body.expectedEstimate !== undefined && Number(body.expectedEstimate) !== estimate.total) {
+      return NextResponse.json({ error: "Тариф обновился. Проверьте новую сумму и отправьте заявку повторно." }, { status: 409 });
+    }
     await db.batch([
       db
         .prepare(
-          `INSERT INTO leads (id, name, phone, source, city, status, consent_at, created_at, updated_at) VALUES (?, ?, ?, 'website', 'Новосибирск', 'new', ?, ?, ?)`,
+          `INSERT INTO leads (id, name, phone, source, city, notes, status, consent_at, created_at, updated_at) VALUES (?, ?, ?, 'website', ?, ?, 'new', ?, ?, ?)`,
         )
-        .bind(leadId, name, phone, now, now, now),
+        .bind(leadId, name, phone, city, comment || null, now, now, now),
       db
         .prepare(
-          `INSERT INTO orders (id, order_number, lead_id, service_type, area, bathrooms, condition, frequency, extras_json, preferred_date, estimate_total, duration_hours, crew_size, status, payment_status, upload_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'unpaid', ?, ?, ?)`,
+          `INSERT INTO orders (id, order_number, lead_id, service_type, area, bathrooms, condition, frequency, extras_json, preferred_date, preferred_slot, address, estimate_total, duration_hours, crew_size, status, payment_status, upload_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'unpaid', ?, ?, ?)`,
         )
         .bind(
           orderId,
@@ -167,6 +119,8 @@ export async function POST(request: Request) {
           frequency,
           JSON.stringify(extras),
           preferredDate,
+          preferredSlot,
+          address || null,
           estimate.total,
           estimate.duration,
           estimate.crew,
@@ -203,6 +157,9 @@ export async function POST(request: Request) {
       area,
       estimate: estimate.total,
       preferredDate,
+      city,
+      address,
+      preferredSlot,
     });
 
     return NextResponse.json(

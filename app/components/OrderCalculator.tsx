@@ -1,473 +1,149 @@
 "use client";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useBooking } from "./BookingProvider";
+import { extrasCatalog, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey } from "@/lib/quote";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-
-type ServiceKey = "regular" | "deep" | "renovation" | "office";
-type ExtraKey =
-  | "windows"
-  | "oven"
-  | "fridge"
-  | "balcony"
-  | "cabinets"
-  | "ironing";
-
-const services: Record<
-  ServiceKey,
-  { label: string; rate: number; minimum: number }
-> = {
-  regular: { label: "Поддерживающая", rate: 95, minimum: 2490 },
-  deep: { label: "Генеральная", rate: 160, minimum: 4490 },
-  renovation: { label: "После ремонта", rate: 230, minimum: 6990 },
-  office: { label: "Офис", rate: 110, minimum: 5990 },
-};
-
-const extras: Record<ExtraKey, { label: string; price: number }> = {
-  windows: { label: "Окна", price: 1200 },
-  oven: { label: "Духовка", price: 650 },
-  fridge: { label: "Холодильник", price: 650 },
-  balcony: { label: "Балкон", price: 900 },
-  cabinets: { label: "Внутри шкафов", price: 950 },
-  ironing: { label: "Глажка, 1 час", price: 700 },
-};
-
-const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+const stepNames = ["Ваша уборка", "Дополнительно", "Дата и контакты"];
+const serviceDescriptions = { regular: "Для привычного порядка", deep: "Детально, до каждого угла", renovation: "После строительных работ", office: "Рабочее пространство" };
+const fileTypes = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 export default function OrderCalculator() {
-  const [service, setService] = useState<ServiceKey>("regular");
-  const [pricing, setPricing] = useState(services);
-  const [area, setArea] = useState(48);
-  const [bathrooms, setBathrooms] = useState(1);
-  const [selectedExtras, setSelectedExtras] = useState<ExtraKey[]>([]);
-  const [condition, setCondition] = useState<"normal" | "dirty" | "very_dirty">(
-    "normal",
-  );
-  const [frequency, setFrequency] = useState<"once" | "weekly" | "biweekly">(
-    "once",
-  );
-  const [date, setDate] = useState("");
+  const { input, update, city, setCity, pricing, pricingStatus, refreshPricing, quote } = useBooking();
+  const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [date, setDate] = useState("");
+  const [slot, setSlot] = useState("");
+  const [address, setAddress] = useState("");
+  const [comment, setComment] = useState("");
+  const [consent, setConsent] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
-  const [consent, setConsent] = useState(true);
+  const [fileError, setFileError] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(
-    null,
-  );
+  const [calculatorVisible, setCalculatorVisible] = useState(false);
+  useEffect(() => {
+    const section = document.getElementById("calculator");
+    if (!section || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(entries => setCalculatorVisible(entries[0].isIntersecting), { threshold: 0 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+  const [success, setSuccess] = useState<{ order: string; total: number; warning: string } | null>(null);
+  const sendingRef = useRef(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const readyTimer = window.setTimeout(() => setIsReady(true), 0);
-    return () => window.clearTimeout(readyTimer);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/pricing")
-      .then((response) => (response.ok ? response.json() : null))
-      .then(
-        (
-          data: {
-            rules?: Array<{
-              key: ServiceKey;
-              label: string;
-              rate: number;
-              minimum: number;
-            }>;
-          } | null,
-        ) => {
-          if (!data?.rules?.length) return;
-          setPricing((current) => ({
-            ...current,
-            ...Object.fromEntries(
-              data.rules.map((rule) => [
-                rule.key,
-                {
-                  label: rule.label,
-                  rate: Number(rule.rate),
-                  minimum: Number(rule.minimum),
-                },
-              ]),
-            ),
-          }));
-        },
-      )
-      .catch(() => undefined);
-  }, []);
-
-  const estimate = useMemo(() => {
-    const item = pricing[service];
-    const areaPrice = Math.max(item.minimum, area * item.rate);
-    const bathroomsPrice = Math.max(0, bathrooms - 1) * 550;
-    const extrasPrice = selectedExtras.reduce(
-      (sum, key) => sum + extras[key].price,
-      0,
-    );
-    const conditionMultiplier =
-      condition === "very_dirty" ? 1.35 : condition === "dirty" ? 1.18 : 1;
-    const frequencyDiscount =
-      frequency === "weekly" ? 0.85 : frequency === "biweekly" ? 0.9 : 1;
-    const total =
-      Math.round(
-        (((areaPrice + bathroomsPrice) * conditionMultiplier + extrasPrice) *
-          frequencyDiscount) /
-          50,
-      ) * 50;
-    const hours = Math.max(
-      2,
-      Math.round(
-        (area / (service === "renovation" ? 12 : 18) +
-          selectedExtras.length * 0.35) *
-          2,
-      ) / 2,
-    );
-    const crew = area >= 80 || service === "renovation" ? 2 : 1;
-    return { total, hours, crew };
-  }, [area, bathrooms, condition, frequency, selectedExtras, service, pricing]);
-
-  function toggleExtra(key: ExtraKey) {
-    setSelectedExtras((current) =>
-      current.includes(key)
-        ? current.filter((item) => item !== key)
-        : [...current, key],
-    );
-  }
-
-  async function submitOrder(event: FormEvent<HTMLFormElement>) {
+  const consentRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [areaDraft, setAreaDraft] = useState(String(input.area));
+  const [lastArea, setLastArea] = useState(input.area);
+  if (lastArea !== input.area) { setLastArea(input.area); setAreaDraft(String(input.area)); }
+  const extraKeys = Object.keys(extrasCatalog) as ExtraKey[];
+  const counts = Object.fromEntries(extraKeys.map(key => [key, input.extras.filter(item => item === key).length])) as Record<ExtraKey, number>;
+  function setCount(key: ExtraKey, count: number) { update({ extras: [...input.extras.filter(item => item !== key), ...Array<ExtraKey>(Math.max(0, Math.min(extrasCatalog[key].max, count))).fill(key)] }); }
+  function moveTo(next: number) { setStep(next); setError(""); window.requestAnimationFrame(() => { formRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" }); formRef.current?.querySelector<HTMLElement>(".booking-step-heading h3")?.focus({ preventScroll: true }); }); }
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setResult(null);
-    const phoneIsValid = phone.replace(/\D/g, "").length >= 10;
-    if (!name.trim() || !phoneIsValid || !consent) {
-      setResult({
-        ok: false,
-        message: "Укажите имя, корректный телефон и подтвердите согласие.",
-      });
-      window.requestAnimationFrame(() => {
-        if (!name.trim()) nameRef.current?.focus();
-        else if (!phoneIsValid) phoneRef.current?.focus();
-      });
-      return;
-    }
-    setIsSubmitting(true);
+    if (sendingRef.current || success) return;
+    if (step < 2) { moveTo(step + 1); return; }
+    setError("");
+    if (!name.trim()) { setError("Пожалуйста, укажите ваше имя."); nameRef.current?.focus(); return; }
+    if (!validPhone(phone)) { setError("Укажите номер из 11 цифр, начиная с +7 или 8."); phoneRef.current?.focus(); return; }
+    if (date && date < todayInNovosibirsk()) { setError("Выберите сегодняшнюю или будущую дату."); dateRef.current?.focus(); return; }
+    if (!consent) { setError("Подтвердите согласие на обработку данных для заявки."); consentRef.current?.focus(); return; }
+    if (fileError) { setError("Проверьте выбранные фотографии."); return; }
+    if (pricingStatus !== "ready") { setError("Не удалось проверить тарифы. Обновите их перед отправкой."); return; }
+    sendingRef.current = true; setIsSubmitting(true);
     try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          service,
-          area,
-          bathrooms,
-          extras: selectedExtras,
-          condition,
-          frequency,
-          preferredDate: date || null,
-          name: name.trim(),
-          phone: phone.trim(),
-          consent,
-        }),
-      });
-      const data = (await response.json()) as {
-        orderNumber?: string;
-        uploadToken?: string;
-        error?: string;
-      };
-      if (!response.ok)
-        throw new Error(data.error || "Не удалось отправить заявку");
-      if (files.length && data.orderNumber && data.uploadToken) {
-        const upload = new FormData();
-        files.forEach((file) => upload.append("files", file));
-        const uploadResponse = await fetch(
-          `/api/orders/${data.orderNumber}/files`,
-          {
-            method: "POST",
-            headers: { "x-upload-token": data.uploadToken },
-            body: upload,
-          },
-        );
-        if (!uploadResponse.ok)
-          throw new Error(
-            "Заявка создана, но фотографии не загрузились. Мы уточним детали при подтверждении.",
-          );
+      const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total }) });
+      const data = await response.json() as { error?: string; orderNumber?: string; estimate?: number; uploadToken?: string };
+      if (!response.ok) { if (response.status === 409) refreshPricing(); throw new Error(data.error || "Не удалось отправить заявку. Попробуйте ещё раз."); }
+      if (!data.orderNumber || data.estimate === undefined) throw new Error("Не получили номер заявки. Свяжитесь с нами через страницу контактов.");
+      let warning = "";
+      if (files.length && data.uploadToken) {
+        try {
+          const upload = new FormData(); files.forEach(file => upload.append("files", file));
+          const result = await fetch(`/api/orders/${data.orderNumber}/files`, { method: "POST", headers: { "x-upload-token": data.uploadToken }, body: upload });
+          if (!result.ok) throw new Error("upload");
+        } catch { warning = "Заявка сохранена, но фото не загрузились. Передайте их менеджеру при подтверждении — новую заявку создавать не нужно."; }
       }
-      setResult({
-        ok: true,
-        message: `Заявка ${data.orderNumber} создана. Мы подтвердим детали в мессенджере или по телефону.`,
-      });
-    } catch (error) {
-      setResult({
-        ok: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Не удалось отправить заявку",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+      setSuccess({ order: data.orderNumber, total: data.estimate, warning });
+      window.requestAnimationFrame(() => document.getElementById("order-success")?.focus());
+    } catch (err) { setError(err instanceof Error ? err.message : "Не удалось отправить заявку. Ваши данные остались в форме."); }
+    finally { sendingRef.current = false; setIsSubmitting(false); }
   }
-
-  return (
-    <div className="calculator-card">
-      <form
-        className="calculator-form"
-        id="order-form"
-        noValidate={isReady}
-        onSubmit={submitOrder}
-      >
-        <fieldset className="calculator-group">
-          <legend>
-            <span>01</span> Что нужно убрать?
-          </legend>
-          <div className="choice-grid service-choices">
-            {(Object.keys(services) as ServiceKey[]).map((key) => (
-              <label
-                className={
-                  service === key ? "choice-card active" : "choice-card"
-                }
-                key={key}
-              >
-                <input
-                  type="radio"
-                  name="service"
-                  value={key}
-                  checked={service === key}
-                  onChange={() => setService(key)}
-                />
-                <span>{pricing[key].label}</span>
-                <small>от {money.format(pricing[key].minimum)} ₽</small>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="calculator-group two-column-group">
-          <legend>
-            <span>02</span> Объём и состояние
-          </legend>
-          <label className="range-field">
-            <span>
-              Площадь <b>{area} м²</b>
-            </span>
-            <input
-              type="range"
-              min="20"
-              max="300"
-              step="1"
-              value={area}
-              onChange={(event) => setArea(Number(event.target.value))}
-            />
-            <small>
-              <span>20 м²</span>
-              <span>300 м²</span>
-            </small>
-          </label>
-          <label className="select-field">
-            <span>Санузлы</span>
-            <select
-              value={bathrooms}
-              onChange={(event) => setBathrooms(Number(event.target.value))}
-            >
-              <option value="1">1 санузел</option>
-              <option value="2">2 санузла</option>
-              <option value="3">3 санузла</option>
-              <option value="4">4+ санузла</option>
-            </select>
-          </label>
-          <label className="select-field">
-            <span>Состояние</span>
-            <select
-              value={condition}
-              onChange={(event) =>
-                setCondition(event.target.value as typeof condition)
-              }
-            >
-              <option value="normal">Обычное</option>
-              <option value="dirty">Давно не убирали</option>
-              <option value="very_dirty">Сильные загрязнения</option>
-            </select>
-          </label>
-          <label className="select-field">
-            <span>Регулярность</span>
-            <select
-              value={frequency}
-              onChange={(event) =>
-                setFrequency(event.target.value as typeof frequency)
-              }
-            >
-              <option value="once">Один раз</option>
-              <option value="weekly">Каждую неделю — скидка 15%</option>
-              <option value="biweekly">Раз в 2 недели — скидка 10%</option>
-            </select>
-          </label>
-        </fieldset>
-
-        <fieldset className="calculator-group">
-          <legend>
-            <span>03</span> Добавить задачи
-          </legend>
-          <div className="extras-grid">
-            {(Object.keys(extras) as ExtraKey[]).map((key) => (
-              <label
-                className={
-                  selectedExtras.includes(key)
-                    ? "extra-choice active"
-                    : "extra-choice"
-                }
-                key={key}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedExtras.includes(key)}
-                  onChange={() => toggleExtra(key)}
-                />
-                <span>{extras[key].label}</span>
-                <b>+{money.format(extras[key].price)} ₽</b>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="calculator-group contact-group">
-          <legend>
-            <span>04</span> Куда прислать подтверждение?
-          </legend>
-          <div className="contact-grid">
-            <label>
-              <span>Ваше имя</span>
-              <input
-                ref={nameRef}
-                autoComplete="name"
-                name="customerName"
-                required
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Алексей"
-              />
-            </label>
-            <label>
-              <span>Телефон</span>
-              <input
-                ref={phoneRef}
-                autoComplete="tel"
-                inputMode="tel"
-                name="customerPhone"
-                required
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                placeholder="+7 999 000-00-00"
-                title="Укажите номер телефона минимум из 10 цифр"
-              />
-            </label>
-            <label>
-              <span>Желаемая дата</span>
-              <input
-                type="date"
-                value={date}
-                onChange={(event) => setDate(event.target.value)}
-              />
-            </label>
-          </div>
-          <label className="file-field">
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic"
-              multiple
-              onChange={(event) =>
-                setFiles(Array.from(event.target.files || []).slice(0, 5))
-              }
-            />
-            <span>
-              <b>
-                {files.length
-                  ? `Выбрано фото: ${files.length}`
-                  : "Добавить фото объекта"}
-              </b>
-              <small>До 5 файлов · JPG, PNG, WEBP или HEIC</small>
-            </span>
-          </label>
-          <label className="consent">
-            <input
-              type="checkbox"
-              required
-              checked={consent}
-              onChange={(event) => setConsent(event.target.checked)}
-            />
-            <span>Согласен на обработку данных для оформления заказа</span>
-          </label>
-          {result && (
-            <p
-              className={
-                result.ok ? "form-message success" : "form-message error"
-              }
-              role="status"
-            >
-              {result.message}
-            </p>
-          )}
-        </fieldset>
-      </form>
-
-      <aside className="estimate-panel" aria-live="polite">
-        <div className="estimate-sticky">
-          <p className="estimate-label">Предварительная стоимость</p>
-          <strong className="estimate-price">
-            {money.format(estimate.total)} <small>₽</small>
-          </strong>
-          <p className="estimate-caption">
-            Цена фиксируется после подтверждения деталей. Для сложных объектов
-            уточним диапазон по фото.
-          </p>
-          <dl className="estimate-list">
-            <div>
-              <dt>
-                {pricing[service].label}, {area} м²
-              </dt>
-              <dd>включено</dd>
-            </div>
-            <div>
-              <dt>Санузлы</dt>
-              <dd>{bathrooms}</dd>
-            </div>
-            <div>
-              <dt>Дополнительные задачи</dt>
-              <dd>{selectedExtras.length || "—"}</dd>
-            </div>
-            <div>
-              <dt>Исполнители</dt>
-              <dd>{estimate.crew}</dd>
-            </div>
-            <div>
-              <dt>Ориентир по времени</dt>
-              <dd>{estimate.hours} ч</dd>
-            </div>
-          </dl>
-          <button
-            className="button estimate-button"
-            type="submit"
-            form="order-form"
-            disabled={!isReady || isSubmitting}
-          >
-            {!isReady
-              ? "Подключаем форму…"
-              : isSubmitting
-                ? "Создаём заявку…"
-                : "Оформить за 2 минуты"}{" "}
-            <span aria-hidden="true">→</span>
-          </button>
-          {result && (
-            <p
-              className={`form-message estimate-result ${
-                result.ok ? "success" : "error"
-              }`}
-            >
-              {result.message}
-            </p>
-          )}
-          <p className="estimate-safe">
-            <span>✓</span> Оплата после уборки · чек на почту
-          </p>
+  if (success) return <div className="order-success" id="order-success" tabIndex={-1} role="status">
+    <span className="success-icon" aria-hidden="true">✓</span><p className="eyebrow">Заявка {success.order}</p><h3>Ещё один шаг<br />к чистому дому.</h3><p>Мы получили заявку и свяжемся с вами по номеру <b>{phone}</b>, чтобы подтвердить время и стоимость.</p>
+    <div className="success-receipt"><span>{city} · {input.area} м²</span><strong>{money(success.total)} ₽</strong><small>Предварительная стоимость · время ещё не забронировано</small></div>
+    {success.warning && <p className="form-message error">{success.warning}</p>}
+    <button className="button" type="button" onClick={() => { setSuccess(null); setStep(0); setFiles([]); setConsent(false); setName(""); setPhone(""); setDate(""); setSlot(""); setAddress(""); setComment(""); }}>Рассчитать другую уборку ↗</button>
+  </div>;
+  return <div className="booking-layout">
+    <form id="order-form" className="booking-form" ref={formRef} noValidate onSubmit={submit}>
+      <nav className="booking-progress" aria-label="Шаги оформления">{stepNames.map((label, i) => <button key={label} type="button" disabled={isSubmitting} aria-current={step === i ? "step" : undefined} onClick={() => moveTo(i)}><span>{i < step ? "✓" : i + 1}</span><b>{label}</b></button>)}</nav>
+      <div className="booking-step" key={step}>
+      {step === 0 && <>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Расскажите о вашем доме</h3><span>Шаг 1 из 3</span></div>
+        <fieldset className="city-picker"><legend>Где нужна уборка?</legend>{(["Новосибирск", "Бердск"] as City[]).map(item => <label key={item} className={city === item ? "selected" : ""}><input type="radio" name="city" checked={city === item} onChange={() => setCity(item)} />{item}</label>)}</fieldset>
+        <fieldset className="service-picker"><legend>Какую уборку выбираем?</legend><div>{serviceKeys.map(key => <label className={input.service === key ? "selected" : ""} key={key}><input type="radio" name="service" checked={input.service === key} onChange={() => update({ service: key })} /><span><b>{pricing[key].label}</b><small>{serviceDescriptions[key]}</small></span><span className="radio-mark" aria-hidden="true" /></label>)}</div></fieldset>
+        <div className="area-and-bathrooms">
+          <div className="area-control"><label htmlFor="area-number">Площадь помещения</label><div className="area-number"><input id="area-number" type="number" min={20} max={300} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const n = Number(e.target.value); if (Number.isInteger(n) && n >= 20 && n <= 300) update({ area: n }); }} onBlur={() => { const value = Math.min(300, Math.max(20, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /><span>м²</span></div><input aria-label="Площадь ползунком" type="range" min={20} max={300} step={1} value={input.area} onChange={e => update({ area: Number(e.target.value) })} /><div className="range-limits"><span>20 м²</span><span>300 м²</span></div></div>
+          <div className="bathroom-control"><span>Санузлы</span><div className="counter"><button type="button" aria-label="Убрать санузел" disabled={input.bathrooms === 1} onClick={() => update({ bathrooms: input.bathrooms - 1 })}>−</button><output>{input.bathrooms}</output><button type="button" aria-label="Добавить санузел" disabled={input.bathrooms === 4} onClick={() => update({ bathrooms: input.bathrooms + 1 })}>+</button></div><small>Первый включён.<br />Следующий +550 ₽.</small></div>
         </div>
-      </aside>
-    </div>
-  );
+        <label className="booking-field"><span>Состояние помещения</span><select value={input.condition} onChange={e => update({ condition: e.target.value as ConditionKey })}><option value="normal">Обычные загрязнения — без наценки</option><option value="dirty">Давно не убирали · +18% к уборке</option><option value="very_dirty">Сильные загрязнения · +35% к уборке</option></select></label>
+        {input.service === "regular" && <fieldset className="frequency-picker"><legend>Как часто нужна уборка?</legend>{([["once", "Один раз", ""], ["biweekly", "Раз в 2 недели", "−10%"], ["weekly", "Каждую неделю", "−15%"]] as const).map(([value,label,discount]) => <label className={input.frequency === value ? "selected" : ""} key={value}><input type="radio" name="frequency" checked={input.frequency === value} onChange={() => update({ frequency: value as FrequencyKey })} /><span>{label}</span>{discount && <b>{discount}</b>}</label>)}</fieldset>}
+        <p className="booking-help">Для площади больше 300 м², сложного остекления или специальных работ <Link href="/business">заполните короткий бриф</Link>.</p>
+      </>}
+      {step === 1 && <>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Маленькие задачи.<br />Большая разница.</h3><span>Шаг 2 из 3</span></div>
+        <p className="step-intro">Добавьте только то, что нужно вам. Все цены — за указанную единицу.</p>
+        <div className="booking-extras">{extraKeys.map(key => <div key={key} className={counts[key] ? "booking-extra selected" : "booking-extra"}><div><h4>{extrasCatalog[key].label}</h4><small>{extrasCatalog[key].unit}</small><b>{money(extrasCatalog[key].price)} ₽</b></div><div className="counter"><button type="button" aria-label={`Убрать: ${extrasCatalog[key].label}`} disabled={!counts[key]} onClick={() => setCount(key, counts[key] - 1)}>−</button><output aria-label={`Количество: ${extrasCatalog[key].label}`}>{counts[key]}</output><button type="button" aria-label={`Добавить: ${extrasCatalog[key].label}`} disabled={counts[key] >= extrasCatalog[key].max} onClick={() => setCount(key, counts[key] + 1)}>+</button></div></div>)}</div>
+        <p className="booking-help">Химчистка, фасадные работы и вывоз строительного мусора не входят в расчёт. Напишите о них в пожеланиях — обсудим возможность и отдельную смету.</p>
+      </>}
+      {step === 2 && <>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3><span>Шаг 3 из 3</span></div>
+        <div className="booking-contact-grid">
+          <label className="booking-field"><span>Желаемая дата</span><input ref={dateRef} type="date" min={todayInNovosibirsk()} value={date} onChange={e => setDate(e.target.value)} /></label>
+          <label className="booking-field"><span>Желаемое время</span><select value={slot} onChange={e => setSlot(e.target.value)}><option value="">Обсудим с менеджером</option><option value="09:00–12:00">Утро · 09:00–12:00</option><option value="12:00–15:00">День · 12:00–15:00</option><option value="15:00–18:00">Вечер · 15:00–18:00</option></select></label>
+          <p className="booking-help full-width">Это ваши пожелания. Дату и начало уборки подтвердим после заявки.</p>
+          <label className="booking-field"><span>Как к вам обращаться? *</span><input ref={nameRef} name="customerName" autoComplete="name" required maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ваше имя" /></label>
+          <label className="booking-field"><span>Номер телефона *</span><input ref={phoneRef} name="customerPhone" type="tel" inputMode="tel" autoComplete="tel" required maxLength={25} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 999 123-45-67" /></label>
+          <label className="booking-field full-width"><span>Адрес в городе {city} <small>— необязательно</small></span><input autoComplete="street-address" maxLength={300} value={address} onChange={e => setAddress(e.target.value)} placeholder="Улица и дом; квартиру можно сообщить позже" /></label>
+          <label className="booking-field full-width"><span>Важные пожелания <small>— необязательно</small></span><textarea rows={3} maxLength={1000} value={comment} onChange={e => setComment(e.target.value)} placeholder="Есть питомцы, деликатные поверхности или особые задачи?" /></label>
+        </div>
+        <label className="file-field"><input type="file" accept={fileTypes.join(",")} multiple onChange={e => { const list = Array.from(e.target.files || []); if (list.length > 5 || list.some(f => !fileTypes.includes(f.type) || f.size > 8 * 1024 * 1024)) { setFileError("Выберите до 5 фото JPG, PNG, WEBP или HEIC, каждое до 8 МБ."); setFiles([]); } else { setFileError(""); setFiles(list); } }} /><span><b>{files.length ? `Выбрано фото: ${files.length}` : "Добавить фотографии"}</b><small>До 5 фото, каждое до 8 МБ · необязательно</small></span></label>
+        {fileError && <p className="form-message error" role="alert">{fileError}</p>}
+        {files.length > 0 && <button type="button" className="remove-files" onClick={() => setFiles([])}>Убрать выбранные фото</button>}
+        <label className="consent"><input ref={consentRef} type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} required /><span>Согласен на обработку данных для оформления заявки. <Link href="/privacy" target="_blank">Политика конфиденциальности</Link>.</span></label>
+      </>}
+      {step > 0 && <button className="back-step" type="button" disabled={isSubmitting} onClick={() => moveTo(step - 1)}>← Назад</button>}
+      </div>
+    </form>
+    <aside className="booking-summary">
+      <div className="summary-inner">
+        <div className="summary-heading"><span>Ваш расчёт</span><span className="summary-city">{city}</span></div>
+        <div className="summary-price" aria-live="polite" aria-atomic="true"><strong key={quote.total}>{money(quote.total)}</strong><span> ₽</span></div><p className="summary-subtitle">Предварительная стоимость</p>
+        <dl className="summary-lines">
+          <div><dt>{pricing[input.service].label} · {input.area} м²</dt><dd>{money(quote.base)} ₽</dd></div>
+          {quote.base === pricing[input.service].minimum && <div className="summary-hint"><dt>Минимум заказа для этого типа уборки</dt></div>}
+          <div><dt>Санузлы · {input.bathrooms}</dt><dd>{quote.bathrooms ? `+${money(quote.bathrooms)} ₽` : "включено"}</dd></div>
+          {quote.condition > 0 && <div><dt>Состояние · {input.condition === "dirty" ? "+18%" : "+35%"}</dt><dd>+{money(quote.condition)} ₽</dd></div>}
+          {extraKeys.filter(key => counts[key] > 0).map(key => <div key={key}><dt>{extrasCatalog[key].label} × {counts[key]}</dt><dd>+{money(extrasCatalog[key].price * counts[key])} ₽</dd></div>)}
+          {quote.discount > 0 && <div className="summary-discount"><dt>Регулярная уборка · {input.frequency === "weekly" ? "−15%" : "−10%"}</dt><dd>−{money(quote.discount)} ₽</dd></div>}
+        </dl>
+        <div className="summary-included"><span>✓ Средства и инвентарь</span><span>✓ Один санузел и кухня</span></div>
+        <p className="summary-timing">Ориентир: {quote.duration.toLocaleString("ru-RU")}–{(quote.duration + 1).toLocaleString("ru-RU")} ч · {quote.crew === 1 ? "1 сотрудник" : "2 сотрудника"}</p>
+        <p className="summary-disclaimer">Стоимость и время согласуем до выезда. Сложные загрязнения оценим по фото.</p>
+        {pricingStatus === "error" && <p className="form-message error" role="alert">Тарифы пока не загрузились. Показан базовый расчёт. <button type="button" onClick={refreshPricing}>Обновить тарифы</button></p>}
+        <div className={`booking-action ${calculatorVisible ? "mobile-docked" : ""}`}>
+          <div className="mobile-price"><small>Предварительно</small><b>{money(quote.total)} ₽</b></div>
+          <button type="submit" form="order-form" className="button" disabled={isSubmitting || pricingStatus === "loading" || (step === 2 && pricingStatus !== "ready")}>{isSubmitting ? "Отправляем…" : pricingStatus === "loading" ? "Загружаем тарифы…" : step < 2 ? "Далее" : "Отправить заявку"}<span aria-hidden="true">↗</span></button>
+          {error && <p className="form-message error booking-error" role="alert">{error}</p>}
+        </div>
+        <p className="summary-safe">{step < 2 ? "Цена видна сразу. Телефон — на последнем шаге." : "Без онлайн-оплаты. Вы подтверждаете заказ после связи с менеджером."}</p>
+      </div>
+    </aside>
+  </div>;
 }

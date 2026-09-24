@@ -3,6 +3,14 @@
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { extrasCatalog, type ExtraKey } from "@/lib/quote";
+
+function describeExtras(json: string) {
+  try {
+    const items = JSON.parse(json || "[]") as string[];
+    return (Object.keys(extrasCatalog) as ExtraKey[]).filter(key => items.includes(key)).map(key => `${extrasCatalog[key].label} × ${items.filter(item => item === key).length}`).join(", ") || "Нет";
+  } catch { return "Уточнить"; }
+}
 
 type Order = {
   id: string;
@@ -26,6 +34,11 @@ type Order = {
   source: string;
   files_count: number;
   file_ids: string | null;
+  city: string;
+  address: string | null;
+  notes: string | null;
+  preferred_slot: string | null;
+  extras_json: string;
 };
 type Lead = {
   id: string;
@@ -887,6 +900,13 @@ export default function CrmDashboard({
               </button>
             </header>
             <div className="drawer-fields">
+              <div className="crm-order-details">
+                <p><b>Город:</b> {selectedOrder.city}</p>
+                <p><b>Адрес:</b> {selectedOrder.address || "Уточнить"}</p>
+                <p><b>Время:</b> {selectedOrder.preferred_slot || "Уточнить"}</p>
+                <p><b>Пожелания:</b> {selectedOrder.notes || "Нет"}</p>
+                <p><b>Дополнительно:</b> {describeExtras(selectedOrder.extras_json)}</p>
+              </div>
               <label>
                 <span>Статус</span>
                 <select name="status" defaultValue={selectedOrder.status}>

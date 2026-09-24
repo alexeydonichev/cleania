@@ -19,11 +19,11 @@ export async function generateMetadata({
   if (!service) return {};
   const path = `/services/${slug}`;
   return {
-    title: `${service.name} в Новосибирске`,
+    title: `${service.name} в Новосибирске и Бердске`,
     description: `${service.description} ${service.price}. Онлайн-расчёт и заказ в Cleania.`,
     alternates: { canonical: path },
     openGraph: {
-      title: `${service.name} в Новосибирске — Cleania`,
+      title: `${service.name} в Новосибирске и Бердске — Cleania`,
       description: service.description,
       url: path,
       images: [{ url: service.image, width: 1600, height: 1000 }],
@@ -60,7 +60,7 @@ export default async function ServicePage({
         "@type": "Service",
         name: service.name,
         description: service.description,
-        areaServed: "Новосибирск",
+        areaServed: ["Новосибирск", "Бердск"],
         provider: { "@type": "Organization", name: "Cleania", url: siteUrl },
         offers: {
           "@type": "Offer",
@@ -101,7 +101,7 @@ export default async function ServicePage({
           <h1>{service.name}</h1>
           <p>{service.description}</p>
           <div className="inner-actions">
-            <Link className="button" href="/#calculator">
+            <Link className="button" href={`/?service=${({ "regular-cleaning": "regular", "deep-cleaning": "deep", "after-renovation": "renovation", "window-cleaning": "regular" } as const)[slug as ServiceSlug]}#calculator`}>
               Рассчитать стоимость <span>↘</span>
             </Link>
             <dl>

@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
+import "./cleania.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Cleania — уборка без звонков и ожидания",
+    default: "Клининг в Новосибирске и Бердске — расчёт уборки онлайн | Cleania",
     template: "%s — Cleania",
   },
   description:
-    "Рассчитайте стоимость уборки, выберите время и оформите заказ онлайн. Квартиры, дома, офисы, окна и уборка после ремонта.",
+    "Уборка квартир и домов в Новосибирске и Бердске. Поддерживающая, генеральная и после ремонта. Калькулятор с подробной сметой, выбор даты и заявка онлайн.",
   applicationName: "Cleania",
   keywords: [
     "клининг",
@@ -18,15 +19,17 @@ export const metadata: Metadata = {
     "уборка после ремонта",
     "уборка офиса",
     "Новосибирск",
+    "Бердск",
   ],
   authors: [{ name: "Cleania" }],
   creator: "Cleania",
+  icons: { icon: "/favicon.svg" },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "ru_RU",
     siteName: "Cleania",
-    title: "Cleania — уборка без звонков и ожидания",
+    title: "Cleania — клининг в Новосибирске и Бердске",
     description:
       "Честный расчёт цены, удобное время и контроль качества в одном заказе.",
     images: [
@@ -40,7 +43,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cleania — уборка без звонков и ожидания",
+    title: "Cleania — клининг в Новосибирске и Бердске",
     description: "Рассчитайте и закажите уборку онлайн за несколько минут.",
   },
   robots: {
@@ -59,7 +62,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f4f1e8",
+  themeColor: "#fcfcfa",
   colorScheme: "light",
 };
 

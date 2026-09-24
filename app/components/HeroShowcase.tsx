@@ -1,139 +1,35 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { useEffect, useState } from "react";
-
-const slides = [
-  {
-    label: "Квартира",
-    title: "Расчёт виден до заявки",
-    text: "Площадь, санузлы, состояние, регулярность и допработы сразу собираются в понятную цену.",
-    image:
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1800&q=88",
-    stat: "2 мин",
-    statLabel: "до заявки",
-  },
-  {
-    label: "Генеральная",
-    title: "Чек-лист вместо обещаний",
-    text: "Клиент понимает состав работ заранее, а менеджер видит заказ, фото и комментарии в CRM.",
-    image:
-      "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=1800&q=88",
-    stat: "32",
-    statLabel: "точки контроля",
-  },
-  {
-    label: "После ремонта",
-    title: "Сложность считается честно",
-    text: "После ремонта, окна, техника и шкафы не прячутся в доплаты после выезда.",
-    image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=88",
-    stat: "до 5",
-    statLabel: "фото объекта",
-  },
-  {
-    label: "Офис",
-    title: "Объекты идут в CRM",
-    text: "Заявки, смены, расходы и прибыль собираются в одном рабочем контуре.",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1800&q=88",
-    stat: "SLA",
-    statLabel: "для бизнеса",
-  },
-];
+import { useState } from "react";
+import { useBooking } from "./BookingProvider";
+import { money, serviceKeys, type ServiceKey } from "@/lib/quote";
 
 export default function HeroShowcase() {
-  const [active, setActive] = useState(0);
-  const slide = slides[active];
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActive((current) => (current + 1) % slides.length);
-    }, 6500);
-    return () => window.clearInterval(timer);
-  }, []);
-
+  const { input, update, pricing, quote } = useBooking();
+  const [areaDraft, setAreaDraft] = useState(String(input.area));
+  const [lastArea, setLastArea] = useState(input.area);
+  if (lastArea !== input.area) { setLastArea(input.area); setAreaDraft(String(input.area)); }
   return (
-    <section
-      className="hero hero-showcase"
-      aria-label="Cleania: онлайн-заказ уборки"
-    >
-      <Image
-        key={slide.image}
-        className="hero-bg"
-        src={slide.image}
-        alt=""
-        width="1800"
-        height="1200"
-        priority
-      />
-      <div className="hero-scrim" />
-      <div className="hero-content shell">
-        <div className="hero-copy">
-          <p className="eyebrow">
-            <span /> Онлайн-клининг с CRM внутри
-          </p>
-          <h1>
-            Cleania: уборка, которую видно до заказа
-          </h1>
-          <p className="hero-lead">
-            Клиент считает стоимость, выбирает дату, прикрепляет фото и
-            отправляет заявку. Команда получает заказ сразу, без ручной
-            переписки и потерянных лидов.
-          </p>
-          <div className="hero-actions">
-            <Link className="button" href="#calculator">
-              Рассчитать стоимость <span aria-hidden="true">↘</span>
-            </Link>
-            <Link className="ghost-button" href="/crm">
-              Открыть CRM
-            </Link>
-          </div>
-        </div>
-
-        <div className="hero-live-panel" aria-live="polite">
-          <div className="hero-live-top">
-            <span>{slide.label}</span>
-            <div className="hero-top-actions">
-              <b>
-                {String(active + 1).padStart(2, "0")} /{" "}
-                {String(slides.length).padStart(2, "0")}
-              </b>
-              <div className="hero-controls" aria-label="Переключить слайд">
-                {slides.map((item, index) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    aria-label={`Показать слайд ${index + 1}: ${item.label}`}
-                    aria-pressed={active === index}
-                    onClick={() => setActive(index)}
-                  >
-                    <span />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <h2>{slide.title}</h2>
-          <p>{slide.text}</p>
-          <div className="hero-live-bottom">
-            <div>
-              <strong>{slide.stat}</strong>
-              <small>{slide.statLabel}</small>
-            </div>
-          </div>
-          <div
-            className="hero-progress"
-            style={
-              {
-                "--hero-progress": `${((active + 1) / slides.length) * 100}%`,
-              } as CSSProperties
-            }
-          />
-        </div>
+    <section className="home-hero shell" aria-labelledby="hero-title">
+      <div className="hero-title-row">
+        <div><p className="eyebrow">Клининг в Новосибирске и Бердске</p><h1 id="hero-title">Дома — чисто.<br /><span>А время — ваше.</span></h1></div>
+        <div className="hero-aside"><span className="hero-spark" aria-hidden="true">✳</span><p>Уборку возьмём на себя. Выберите, как провести освободившийся день.</p><Link href="#calculator" className="text-link">Рассчитать мою уборку <span aria-hidden="true">↗</span></Link></div>
       </div>
+      <div className="home-hero-photo">
+        <Image src="/images/cleania-home.webp" alt="Светлая уютная гостиная с голубым диваном" width={1672} height={941} priority sizes="(max-width: 700px) 100vw, 95vw" />
+        <span className="photo-note">Меньше быта. Больше жизни.</span>
+        <div className="quick-quote">
+          <div className="quick-quote-head"><span>Сколько стоит ваша уборка?</span><span aria-hidden="true">↘</span></div>
+          <div className="quick-quote-fields">
+            <label><span>Тип уборки</span><select aria-label="Тип уборки — быстрый расчёт" value={input.service} onChange={e => update({ service: e.target.value as ServiceKey })}>{serviceKeys.map(key => <option value={key} key={key}>{pricing[key].label}</option>)}</select></label>
+            <label><span>Площадь, м²</span><input aria-label="Площадь — быстрый расчёт" type="number" min={20} max={300} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const value = Number(e.target.value); if (Number.isInteger(value) && value >= 20 && value <= 300) update({ area: value }); }} onBlur={() => { const value = Math.max(20, Math.min(300, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /></label>
+          </div>
+          <div className="quick-quote-bottom"><div><small>Предварительно</small><strong aria-live="polite">{money(quote.total)} ₽</strong></div><Link href="#calculator" aria-label="Настроить уборку в калькуляторе">Настроить <span aria-hidden="true">↗</span></Link></div>
+        </div>
+        <span className="photo-caption">Всё для уютного возвращения домой</span>
+      </div>
+      <div className="hero-benefits"><span><b>01</b> Расчёт без номера телефона</span><span><b>02</b> Средства и инвентарь с собой</span><span><b>03</b> Состав работ до подтверждения</span></div>
     </section>
   );
 }

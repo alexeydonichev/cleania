@@ -47,7 +47,7 @@ export default async function CrmPage() {
     .first<MetricRow>();
   const orders = await db
     .prepare(
-      `SELECT o.id, o.order_number, o.service_type, o.area, o.preferred_date, o.estimate_total, o.final_total, o.duration_hours, o.crew_size, o.status, o.payment_status, o.created_at, o.cleaner_cost, o.supplies_cost, o.acquisition_cost, o.other_cost, l.name, l.phone, l.source, COUNT(f.id) AS files_count, GROUP_CONCAT(f.id) AS file_ids FROM orders o JOIN leads l ON l.id = o.lead_id LEFT JOIN uploaded_files f ON f.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 250`,
+      `SELECT o.id, o.order_number, o.service_type, o.area, o.preferred_date, o.preferred_slot, o.address, o.extras_json, l.city, l.notes, o.estimate_total, o.final_total, o.duration_hours, o.crew_size, o.status, o.payment_status, o.created_at, o.cleaner_cost, o.supplies_cost, o.acquisition_cost, o.other_cost, l.name, l.phone, l.source, COUNT(f.id) AS files_count, GROUP_CONCAT(f.id) AS file_ids FROM orders o JOIN leads l ON l.id = o.lead_id LEFT JOIN uploaded_files f ON f.order_id = o.id GROUP BY o.id ORDER BY o.created_at DESC LIMIT 250`,
     )
     .all();
   const businessLeads = await db

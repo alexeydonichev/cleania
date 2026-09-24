@@ -10,6 +10,9 @@ type OrderNotice = {
   area: number;
   estimate: number;
   preferredDate: string | null;
+  city?: string;
+  address?: string;
+  preferredSlot?: string | null;
 };
 
 type RuntimeEnv = typeof env & {
@@ -25,6 +28,7 @@ function noticeText(order: OrderNotice) {
     `Новая заявка Cleania ${order.orderNumber}`,
     `${order.name} · ${order.phone}`,
     `${order.service}, ${order.area} м²`,
+    [order.city, order.address, order.preferredSlot].filter(Boolean).join(" · "),
     `Расчёт: ${new Intl.NumberFormat("ru-RU").format(order.estimate)} ₽`,
     order.preferredDate
       ? `Желаемая дата: ${order.preferredDate}`
