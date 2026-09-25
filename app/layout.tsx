@@ -8,6 +8,7 @@ import "./motion.css";
 import "./cleaning-spark.css";
 import "./cases.css";
 import "./brand.css";
+import "./calculator-theme.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -30,8 +31,8 @@ export const metadata: Metadata = {
   authors: [{ name: brandName }],
   creator: brandName,
   icons: {
-    icon: [{ url: "/brand/favicon-32.png", sizes: "32x32", type: "image/png" }, { url: "/brand/favicon-64.png", sizes: "64x64", type: "image/png" }],
-    apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: "/brand/favicon-32-blue.png", sizes: "32x32", type: "image/png" }, { url: "/brand/favicon-64-blue.png", sizes: "64x64", type: "image/png" }],
+    apple: [{ url: "/brand/apple-touch-icon-blue.png", sizes: "180x180", type: "image/png" }],
   },
   alternates: { canonical: "/" },
   openGraph: {
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
       "Честный расчёт цены, удобное время и контроль качества в одном заказе.",
     images: [
       {
-        url: "/brand/social-preview.png",
+        url: "/brand/social-preview-blue.png",
         width: 1200,
         height: 630,
         alt: `${brandName} — работу нам, а отдых Вам`,
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${brandName} — клининг в Новосибирске и Бердске`,
     description: "Рассчитайте и закажите уборку онлайн за несколько минут.",
-    images: ["/brand/social-preview.png"],
+    images: ["/brand/social-preview-blue.png"],
   },
   robots: {
     index: !isPreviewDeployment,

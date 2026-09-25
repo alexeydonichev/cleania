@@ -279,7 +279,7 @@ export default function CrmDashboard({
       <aside className="crm-sidebar">
         <Link className="crm-brand" href="/" aria-label="БлескПРО — на главную">
           <BrandLogo />
-          <Image src="/brand/favicon-64.png" alt="" width={40} height={40} className="crm-brand-symbol" />
+          <Image src="/brand/favicon-64-blue.png" alt="" width={40} height={40} className="crm-brand-symbol" />
           <small>CRM</small>
         </Link>
         <nav>

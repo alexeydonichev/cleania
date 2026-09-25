@@ -1,0 +1,91 @@
+/* A local monochrome skin: pricing, selection and motion behavior stay shared. */
+#calculator {
+  --green: #292929;
+  --green-dark: #171717;
+  --mint: #ededed;
+  --ink: #202020;
+  --muted: #626262;
+  --line: #dedede;
+  background: #f7f7f7;
+  color: var(--ink);
+  color-scheme: light;
+}
+#calculator .home-heading h2 > span { color: #777; }
+#calculator .booking-form,
+#calculator .booking-summary {
+  background: rgb(255 255 255 / 76%);
+  border-color: #e1e1e1;
+  border-radius: 22px;
+  box-shadow: inset 0 1px 0 #fff, 0 12px 36px rgb(0 0 0 / 3%);
+}
+#calculator .booking-progress { border-color: #e4e4e4; }
+#calculator .booking-progress button { color: #666; border-radius: 10px; }
+#calculator .booking-progress button > span { background: #efefef; }
+#calculator .booking-progress button[aria-current] { color: #202020; background: #f2f2f2; }
+#calculator .booking-progress button[aria-current] > span { background: #292929; color: #fff; box-shadow: 0 0 0 4px rgb(0 0 0 / 3%); }
+#calculator :is(.city-picker, .service-picker, .frequency-picker) label,
+#calculator .booking-extra {
+  background: rgb(255 255 255 / 65%);
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgb(0 0 0 / 2%);
+  color: #252525;
+}
+#calculator :is(.city-picker, .service-picker, .frequency-picker) label.selected,
+#calculator .booking-extra.selected {
+  background: #ebebeb;
+  border-color: #919191;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%), 0 2px 5px rgb(0 0 0 / 3%);
+}
+#calculator .frequency-picker b { background: #dedede; color: #333; }
+#calculator .radio-mark { border-color: #999; }
+#calculator .selected .radio-mark { border-color: #292929; }
+#calculator :is(.city-picker, .service-picker, .frequency-picker) label:focus-within,
+#calculator :focus-visible { outline: 2px solid #333; outline-offset: 3px; }
+#calculator .booking-field :is(input, select, textarea) {
+  background: rgb(255 255 255 / 80%);
+  border-color: #d5d5d5;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 2%);
+}
+#calculator .booking-field :is(input, select, textarea):focus { border-color: #777; box-shadow: 0 0 0 4px rgb(0 0 0 / 5%); }
+#calculator .counter { border-color: #d5d5d5; border-radius: 12px; background: rgb(255 255 255 / 85%); }
+#calculator .counter button { width: 44px; height: 44px; border-radius: 9px; color: #252525; }
+#calculator .counter button:hover:not(:disabled) { color: #171717; background: #e8e8e8; }
+#calculator .counter button:disabled { opacity: .35; }
+#calculator .area-control input[type=range]::-webkit-slider-runnable-track { background: #d5d5d5; }
+#calculator .area-control input[type=range]::-moz-range-track { background: #d5d5d5; }
+#calculator .area-control input[type=range]::-webkit-slider-thumb { box-shadow: 0 0 0 1px #aaa, 0 3px 8px rgb(0 0 0 / 12%); }
+#calculator .area-control input[type=range]::-moz-range-thumb { box-shadow: 0 0 0 1px #aaa; }
+#calculator .summary-city { background: #eee; color: #626262; }
+#calculator :is(.summary-included, .summary-discount dt, .summary-discount dd) { color: #444; }
+#calculator .booking-action .button,
+#calculator .order-success .button {
+  justify-content: center;
+  border-radius: 12px;
+  border-color: #292929;
+  background: #292929;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%), 0 4px 12px rgb(0 0 0 / 10%);
+}
+#calculator .button:hover:not(:disabled) { background: #171717; border-color: #171717; }
+#calculator .button:disabled { background: #e3e3e3; border-color: #d5d5d5; color: #707070; box-shadow: none; opacity: 1; cursor: not-allowed; }
+#calculator .preview-card > p { color: #626262; }
+#calculator .preview-card .preview-caption { background: #eee; color: #444; }
+#calculator .contact-channel { background: #fff; border-color: #ccc; color: #292929; border-radius: 12px; }
+#calculator .contact-telegram { background: #292929; border-color: #292929; color: #fff; }
+#calculator .contact-channel:hover { background: #e9e9e9; color: #202020; }
+#calculator .file-field, #calculator .success-receipt { background: #f3f3f3; border-color: #aaa; }
+@media (hover: hover) {
+  #calculator :is(.city-picker, .service-picker, .frequency-picker) label:hover,
+  #calculator .booking-extra:hover { background: #f1f1f1; border-color: #aaa; box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgb(0 0 0 / 4%); }
+  #calculator :is(.city-picker, .service-picker, .frequency-picker) label.selected:hover,
+  #calculator .booking-extra.selected:hover { background: #e5e5e5; border-color: #777; }
+}
+@media (max-width: 850px) {
+  #calculator .booking-action { background: rgb(255 255 255 / 96%); border-color: #d7d7d7; box-shadow: 0 6px 24px rgb(0 0 0 / 9%); }
+}
+@media (max-width: 380px) {
+  #calculator .area-and-bathrooms { grid-template-columns: 1fr; }
+  #calculator .bathroom-control { padding-left: 0; border-left: 0; padding-top: 18px; border-top: 1px solid var(--line); }
+}

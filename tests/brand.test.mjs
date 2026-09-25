@@ -24,17 +24,30 @@ test("MAX only accepts an explicit HTTPS profile share link", () => {
 
 test("brand delivery variants have the advertised dimensions", async () => {
   const root = new URL("../public/", import.meta.url);
-  for (const [path, width, height] of [[brandLogo.src.slice(1), brandLogo.width, brandLogo.height], ["brand/favicon-32.png", 32, 32], ["brand/favicon-64.png", 64, 64], ["brand/apple-touch-icon.png", 180, 180], ["brand/social-preview.png", 1200, 630]]) {
+  for (const [path, width, height] of [[brandLogo.src.slice(1), brandLogo.width, brandLogo.height], ["brand/favicon-32-blue.png", 32, 32], ["brand/favicon-64-blue.png", 64, 64], ["brand/apple-touch-icon-blue.png", 180, 180], ["brand/social-preview-blue.png", 1200, 630]]) {
     const metadata = await sharp(new URL(path, root).pathname).metadata();
     assert.equal(metadata.width, width, path);
     assert.equal(metadata.height, height, path);
   }
 });
 
-test("the logo keeps the approved source pixels with only its outer margins removed", async () => {
-  const source = new URL("../public/brand/bleskpro-approved.png", import.meta.url).pathname;
+test("the delivered logo matches the generated blue source crop and resize", async () => {
+  const source = new URL("../public/brand/bleskpro-blue-source.png", import.meta.url).pathname;
   const output = new URL(`../public${brandLogo.src}`, import.meta.url).pathname;
-  const expected = await sharp(source).extract({ left: 168, top: 159, width: 1786, height: 406 }).raw().toBuffer();
+  const expected = await sharp(source).extract({ left: 0, top: 115, width: 2170, height: 493 }).resize(1786, 406, { fit: "contain", background: "white" }).raw().toBuffer();
   const actual = await sharp(output).raw().toBuffer();
   assert.deepEqual(actual, expected);
+});
+
+test("the ПРО accent is royal blue rather than the previous turquoise", async () => {
+  const { data, info } = await sharp(new URL(`../public${brandLogo.src}`, import.meta.url).pathname).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  let count = 0, green = 0, blue = 0;
+  for (let y = 0; y < info.height; y++) for (let x = 1280; x < info.width; x++) {
+    const i = (y * info.width + x) * info.channels;
+    if (data[i] < 160 && data[i + 2] > data[i] + 60) {
+      count++; green += data[i + 1]; blue += data[i + 2];
+    }
+  }
+  assert.ok(count > 20000, "the accent contains substantial coloured lettering");
+  assert.ok(blue > 2 * green, "blue, not cyan, dominates the accent");
 });

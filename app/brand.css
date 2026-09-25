@@ -1,4 +1,4 @@
-/* The approved logo is reused unchanged; only its white outer margins are trimmed. */
+/* Shared sizing for the blue logo; generated delivery variants keep its proportions. */
 .brand { gap: 0; }
 .brand-logo { width: 202px; height: auto; aspect-ratio: 1786 / 406; object-fit: contain; mix-blend-mode: multiply; }
 .brand-footer .brand-logo { width: 230px; }
@@ -24,6 +24,11 @@
 .crm-brand .brand-logo { width: 142px; }
 .crm-brand .crm-brand-symbol { display: none; }
 .crm-access .brand-logo { width: 260px; max-width: 100%; margin: 0 auto 28px; }
+/* Keep the full slogan on one baseline while retaining each phrase's reveal. */
+@media (min-width: 701px) {
+  .hero-title-row h1 { display: flex; flex-wrap: nowrap; gap: .22em; font-size: clamp(36px, 4.35vw, 78px); }
+  .hero-title-row h1 > .hero-line { flex: none; white-space: nowrap; }
+}
 @media (max-width: 1100px) {
   .crm-brand .brand-logo { display: none; }
   .crm-brand .crm-brand-symbol { display: block; width: 40px; height: 40px; mix-blend-mode: multiply; }

@@ -7,7 +7,7 @@ for (const path of paths) {
   assert.equal(response.status, 200, path);
   const html = await response.text();
   assert.match(html, /<title>[^<]*БлескПРО/, `${path}: page title`);
-  assert.match(html, /src="\/brand\/bleskpro-logo.webp"/, `${path}: approved logo`);
+  assert.match(html, /src="\/brand\/bleskpro-logo-blue.webp"/, `${path}: blue logo`);
   const visibleText = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ");
   assert.doesNotMatch(visibleText, /cleania/i, `${path}: old visible brand`);
   assert.match(html, /name="robots" content="noindex/, `${path}: preview guard`);
@@ -19,7 +19,7 @@ for (const path of paths) {
   }
   console.log(`Verified ${path}: brand, metadata, preview guard${path === "/crm" ? "" : ", contact links"}`);
 }
-for (const path of ["/brand/bleskpro-logo.webp", "/brand/favicon-32.png", "/brand/favicon-64.png", "/brand/apple-touch-icon.png", "/brand/social-preview.png"]) {
+for (const path of ["/brand/bleskpro-logo-blue.webp", "/brand/favicon-32-blue.png", "/brand/favicon-64-blue.png", "/brand/apple-touch-icon-blue.png", "/brand/social-preview-blue.png"]) {
   const response = await fetch(new URL(path, base));
   assert.equal(response.status, 200, path);
   assert.match(response.headers.get("content-type") || "", /^image\//, path);
