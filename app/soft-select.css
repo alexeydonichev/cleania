@@ -42,6 +42,20 @@
 .soft-select-check { position: absolute; right: 12px; display: flex; }
 .soft-select-scroll { display: flex; justify-content: center; align-items: center; height: 25px; color: #5a5a66; }
 .booking-field .soft-select-trigger { background: rgb(255 255 255 / 80%); border-radius: 12px; min-height: 48px; }
+.quick-property { display: grid; gap: 7px; margin-bottom: 12px; }
+.quick-property > span { font-size: 12px; color: var(--muted); }
+.property-picker { margin-block: 20px; }
+@media (max-width: 420px) {
+  .quick-quote { padding: 16px; }
+  .quick-quote-fields { grid-template-columns: 1fr; gap: 10px; }
+  .quick-quote-fields label:last-child { display: grid; grid-template-columns: 1fr 96px; align-items: center; }
+  .quick-quote .soft-select-trigger { gap: 6px; padding-inline: 8px; }
+}
+@media (max-width: 360px) {
+  .quick-quote-bottom { gap: 8px; }
+  .quick-quote-bottom strong { font-size: 24px; }
+  .quick-quote-bottom a { padding-inline: 12px; font-size: 13px; }
+}
 @keyframes soft-select-in { from { opacity: 0; transform: translateY(-4px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes soft-select-out { to { opacity: 0; transform: scale(.98); } }
 @media (prefers-reduced-motion: reduce) { .soft-select-menu, .soft-select-menu[data-state=closed] { animation: none; } .soft-select-trigger, .soft-select-chevron, .soft-select-item { transition: none; } }

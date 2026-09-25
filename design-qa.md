@@ -1,4 +1,44 @@
-# Design QA — custom menus and compact typography
+# Design QA — customer flow update, 25 September 2026
+
+## Latest comparison: mobile quote and process photos
+
+Source truth: saved production screenshot
+`/Users/donichevalexey/Documents/Codex/2026-08-24/crm/outputs/audit-mobile-before-2026-09-25.png`.
+Implementation: local production build at http://127.0.0.1:3001/,
+`/Users/donichevalexey/Documents/Codex/2026-08-24/crm/outputs/audit-mobile-after-2026-09-25.png`.
+Both exports are 360 × 816 pixels from the same requested 375 × 850 CSS viewport.
+The equally sized browser exports were compared without further rescaling. Both images were
+opened together in one comparison input after the entrance animation completed.
+The quote controls are readable at this size, so no additional crop was necessary.
+
+History: P2 selected service truncation → mobile full-width service row. P2 newly
+exposed four-digit area clipping → 96px area input on phones. A subsequent 320px
+capture showed 4000 fully, a complete 440000 ₽ total and no horizontal overflow.
+The narrow CTA horizontal padding was then reduced for more separation from price,
+verified in `../outputs/audit-320-area-final-2026-09-25.png` (relative to repo root).
+New object choice and the increased card height are requested functional changes,
+not drift from the previous two-field reference.
+
+Five surfaces: Manrope, dark readable text and existing optical hierarchy retained;
+field spacing/radii consistent with the monochrome select system; blue hero CTA
+and messenger palettes retained; original room/process/brand assets unchanged;
+new text accurately describes preliminary estimates and customer-confirmed sending.
+No full-page design replacement, new imagery or invented case studies.
+
+Process result screenshot:
+`/Users/donichevalexey/Documents/Codex/2026-08-24/crm/outputs/audit-process-after-2026-09-25.png`
+(1425 × 990 exported pixels, requested CSS viewport 1440 × 1000). All three photos
+are unobstructed and no longer carry the visible AI badges. Section headings stay
+on one line at desktop size.
+
+Runtime: all four limits exercised in browser; changing 4000 industrial to apartment
+clamps to 482; both encoded messenger texts equal the copied receipt; mobile menu
+open/close names verified; console errors empty. No message sent. Native messenger
+clients, full assistive-technology testing and clipboard-denial UI remain untested.
+35 automated checks, lint, production build and public route/asset checks succeeded.
+Full evidence and caveats: `docs/customer-flow-audit-2026-09-25.md`.
+
+## Earlier custom-menu comparison (retained audit trail)
 
 final result: passed
 

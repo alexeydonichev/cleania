@@ -10,7 +10,7 @@ export default function CleaningProcess() {
   return <section className="process-section shell section" id="quality" aria-labelledby="process-title">
     <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Спокойно на каждом шаге</p><h2 id="process-title">Хорошая уборка. <span>Простой процесс.</span></h2></div><p>Вы знаете, что будет происходить: от первого сообщения до проверки результата.</p></div>
     <ol className="process-grid">{stages.map((stage) => <li className="process-card" key={stage.image}>
-      <div className="process-photo"><Image src={`/images/process/${stage.image}.webp`} alt={stage.alt} width={1448} height={1086} sizes="(max-width: 700px) 93vw, 31vw" /><span>Иллюстрация · ИИ</span></div>
+      <div className="process-photo"><Image src={`/images/process/${stage.image}.webp`} alt={stage.alt} width={1448} height={1086} sizes="(max-width: 700px) 93vw, 31vw" /></div>
       <div className="process-card-copy"><h3>{stage.title}</h3><p>{stage.description}</p><small>{stage.detail}</small></div>
     </li>)}</ol>
   </section>;

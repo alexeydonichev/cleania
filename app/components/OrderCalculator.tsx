@@ -8,14 +8,17 @@ import { isPreviewDeployment } from "@/lib/deployment";
 import ContactLinks from "./ContactLinks";
 import SoftSelect from "./SoftSelect";
 import { focusVisible, scrollToContent } from "@/lib/motion";
-import { extrasCatalog, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey } from "@/lib/quote";
+import { extrasCatalog, formatQuoteForMessage, maxQuoteArea, needsSiteSurvey, propertyFor, propertyTypes, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey, type PropertyType } from "@/lib/quote";
 
-const stepNames = ["Ваша уборка", "Дополнительно", isPreviewDeployment ? "Ваш расчёт" : "Дата и контакты"];
 const serviceDescriptions = { regular: "Для привычного порядка", deep: "Детально, до каждого угла", renovation: "После строительных работ", office: "Рабочее пространство" };
 const fileTypes = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 export default function OrderCalculator() {
   const { input, update, city, setCity, pricing, pricingStatus, refreshPricing, quote } = useBooking();
+  const maxArea = maxQuoteArea(input);
+  const requiresSurvey = needsSiteSurvey(input);
+  const messageOnly = isPreviewDeployment || requiresSurvey;
+  const stepNames = ["Ваша уборка", "Дополнительно", messageOnly ? "Ваш расчёт" : "Дата и контакты"];
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
@@ -30,6 +33,20 @@ export default function OrderCalculator() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [copiedText, setCopiedText] = useState("");
+  const [copyError, setCopyError] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const quoteText = formatQuoteForMessage(input, city, pricing[input.service]);
+  const copied = copiedText === quoteText;
+  async function copyQuote() {
+    if (copying || pricingStatus !== "ready") return;
+    setCopying(true); setCopyError(false);
+    try {
+      await navigator.clipboard.writeText(quoteText);
+      setCopiedText(quoteText);
+    } catch { setCopyError(true); }
+    finally { setCopying(false); }
+  }
   useEffect(() => {
     const section = document.getElementById("calculator");
     if (!section || !("IntersectionObserver" in window)) return;
@@ -64,6 +81,7 @@ export default function OrderCalculator() {
     if (sendingRef.current || success) return;
     if (step < 2) { moveTo(step + 1); return; }
     if (isPreviewDeployment) return;
+    if (requiresSurvey) return;
     setError("");
     if (!name.trim()) { setError("Пожалуйста, укажите ваше имя."); focusVisible(nameRef.current); return; }
     if (!validPhone(phone)) { setError("Укажите номер из 11 цифр, начиная с +7 или 8."); focusVisible(phoneRef.current); return; }
@@ -101,11 +119,12 @@ export default function OrderCalculator() {
       <nav className="booking-progress" aria-label="Шаги оформления" style={{ "--active-step": step } as CSSProperties}>{stepNames.map((label, i) => <button key={label} type="button" disabled={isSubmitting} aria-current={step === i ? "step" : undefined} onClick={() => moveTo(i)}><b>{label}</b></button>)}</nav>
       <fieldset disabled={isSubmitting} aria-label="Параметры заявки"><MotionPanel transitionKey={step} direction={direction}><div className="booking-step">
       {step === 0 && <>
-        <div className="booking-step-heading"><h3 tabIndex={-1}>Расскажите о вашем доме</h3></div>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Расскажите о вашем объекте</h3></div>
         <fieldset className="city-picker"><legend>Где нужна уборка?</legend>{(["Новосибирск", "Бердск"] as City[]).map(item => <label key={item} className={city === item ? "selected" : ""}><input type="radio" name="city" checked={city === item} onChange={() => setCity(item)} />{item}</label>)}</fieldset>
+        <label className="booking-field property-picker"><span>Что убираем?</span><SoftSelect label="Тип объекта" value={propertyFor(input)} onValueChange={value => update({ propertyType: value as PropertyType })} options={Object.entries(propertyTypes).map(([value, item]) => ({ value, label: item.label, description: `До ${item.maxArea.toLocaleString("ru-RU")} м²` }))} /></label>
         <fieldset className="service-picker"><legend>Какую уборку выбираем?</legend><div>{serviceKeys.map(key => <label className={input.service === key ? "selected" : ""} key={key}><input type="radio" name="service" checked={input.service === key} onChange={() => update({ service: key })} /><span><b>{pricing[key].label}</b><small>{serviceDescriptions[key]}</small></span><span className="radio-mark" aria-hidden="true" /></label>)}</div></fieldset>
         <div className="area-and-bathrooms">
-          <div className="area-control"><label htmlFor="area-number">Площадь помещения</label><div className="area-number"><input id="area-number" type="number" min={20} max={300} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const n = Number(e.target.value); if (Number.isInteger(n) && n >= 20 && n <= 300) update({ area: n }); }} onBlur={() => { const value = Math.min(300, Math.max(20, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /><span>м²</span></div><input aria-label="Площадь ползунком" style={{ "--range-progress": `${(input.area - 20) / 280 * 100}%` } as CSSProperties} type="range" min={20} max={300} step={1} value={input.area} onChange={e => update({ area: Number(e.target.value) })} /><div className="range-limits"><span>20 м²</span><span>300 м²</span></div></div>
+          <div className="area-control"><label htmlFor="area-number">Площадь помещения</label><div className="area-number"><input id="area-number" type="number" min={20} max={maxArea} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const n = Number(e.target.value); if (Number.isInteger(n) && n >= 20 && n <= maxArea) update({ area: n }); }} onBlur={() => { const value = Math.min(maxArea, Math.max(20, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /><span>м²</span></div><input aria-label="Площадь ползунком" style={{ "--range-progress": `${(input.area - 20) / (maxArea - 20) * 100}%` } as CSSProperties} type="range" min={20} max={maxArea} step={1} value={input.area} onChange={e => update({ area: Number(e.target.value) })} /><div className="range-limits"><span>20 м²</span><span>{money(maxArea)} м²</span></div></div>
           <div className="bathroom-control"><span>Санузлы</span><div className="counter"><button type="button" aria-label="Убрать санузел" disabled={input.bathrooms === 1} onClick={() => update({ bathrooms: input.bathrooms - 1 })}>−</button><output><span key={input.bathrooms}>{input.bathrooms}</span></output><button type="button" aria-label="Добавить санузел" disabled={input.bathrooms === 4} onClick={() => update({ bathrooms: input.bathrooms + 1 })}>+</button></div><small>Первый включён.<br />Следующий +550 ₽.</small></div>
         </div>
         <label className="booking-field"><span>Состояние помещения</span><SoftSelect label="Состояние помещения" value={input.condition} disabled={isSubmitting} onValueChange={value => { update({ condition: value as ConditionKey }); setError(""); }} options={[
@@ -114,7 +133,7 @@ export default function OrderCalculator() {
           { value: "very_dirty", label: "Сильные загрязнения", description: "+35% к уборке" },
         ]} /></label>
         {input.service === "regular" && <fieldset className="frequency-picker"><legend>Как часто нужна уборка?</legend>{([["once", "Один раз", ""], ["biweekly", "Раз в 2 недели", "−10%"], ["weekly", "Каждую неделю", "−15%"]] as const).map(([value,label,discount]) => <label className={input.frequency === value ? "selected" : ""} key={value}><input type="radio" name="frequency" checked={input.frequency === value} onChange={() => update({ frequency: value as FrequencyKey })} /><span>{label}</span>{discount && <b>{discount}</b>}</label>)}</fieldset>}
-        <p className="booking-help">Для площади больше 300 м², сложного остекления или специальных работ <Link href="/business">заполните короткий бриф</Link>.</p>
+        <p className="booking-help">{propertyTypes[propertyFor(input)].label}: до {money(maxArea)} м². Для сложного остекления, оборудования и специальных работ <Link href="/business">обсудим отдельную смету</Link>.</p>
       </>}
       {step === 1 && <>
         <div className="booking-step-heading"><h3 tabIndex={-1}>Маленькие задачи.<br />Большая разница.</h3></div>
@@ -122,16 +141,18 @@ export default function OrderCalculator() {
         <div className="booking-extras">{extraKeys.map(key => <div key={key} className={counts[key] ? "booking-extra selected" : "booking-extra"}><div><h4>{extrasCatalog[key].label}</h4><small>{extrasCatalog[key].unit}</small><b>{money(extrasCatalog[key].price)} ₽</b></div><div className="counter"><button type="button" aria-label={`Убрать: ${extrasCatalog[key].label}`} disabled={!counts[key]} onClick={() => setCount(key, counts[key] - 1)}>−</button><output aria-label={`Количество: ${extrasCatalog[key].label}`}><span key={counts[key]}>{counts[key]}</span></output><button type="button" aria-label={`Добавить: ${extrasCatalog[key].label}`} disabled={counts[key] >= extrasCatalog[key].max} onClick={() => setCount(key, counts[key] + 1)}>+</button></div></div>)}</div>
         <p className="booking-help">Химчистка, фасадные работы и вывоз строительного мусора не входят в расчёт. Напишите о них в пожеланиях — обсудим возможность и отдельную смету.</p>
       </>}
-      {step === 2 && isPreviewDeployment && <div className="preview-card">
+      {step === 2 && messageOnly && <div className="preview-card">
         <div className="booking-step-heading"><h3 tabIndex={-1}>Ваш расчёт готов</h3></div>
-        <p>{city} · {pricing[input.service].label} · {input.area} м²</p>
+        <p>{city} · {propertyTypes[propertyFor(input)].label} · {money(input.area)} м²</p>
         <strong className="preview-total">{money(quote.total)} ₽</strong>
-        <p>Это демонстрация калькулятора. Все выбранные работы учтены в подробной смете. После подключения базы здесь появится выбор даты и отправка заявки.</p>
-        <p className="preview-caption">Сейчас мы не запрашиваем телефон, адрес и фотографии. Заказ не создан.</p>
-        <p>Обсудить расчёт и согласовать уборку можно напрямую:</p>
-        <ContactLinks />
+        <p>Выберите мессенджер — подробная смета уже будет в сообщении. Площадь, выбранные работы, доплаты и итог перенесутся автоматически.</p>
+        <p className="preview-caption">Заказ не создан, время не забронировано. Итоговую стоимость согласуем до выезда.{requiresSurvey && " Для этого объекта нужен осмотр или фото: показан ориентир базовой уборки, без оборудования, опасных загрязнений и высотных работ."}</p>
+        <p className="quote-copy-status" role="status" aria-live="polite">{copied ? "Смета также скопирована — её можно вставить в любой чат." : "Передать готовый расчёт:"}</p>
+        {pricingStatus === "ready" ? <ContactLinks message={quoteText} /> : <p>Дождитесь загрузки тарифов или обновите их, чтобы передать актуальный расчёт.</p>}
+        <details className="quote-message-preview"><summary>Посмотреть текст сообщения</summary><pre>{quoteText}</pre></details>
+        {copyError && <div className="quote-copy-fallback"><p role="alert">Браузер не разрешил копирование. Выделите текст ниже и скопируйте его вручную.</p><label htmlFor="quote-message">Смета для сообщения</label><textarea id="quote-message" readOnly rows={9} value={quoteText} onFocus={event => event.currentTarget.select()} /></div>}
       </div>}
-      {step === 2 && !isPreviewDeployment && <>
+      {step === 2 && !messageOnly && <>
         <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3></div>
         <div className="booking-contact-grid">
           <label className="booking-field"><span>Желаемая дата</span><input ref={dateRef} type="date" min={todayInNovosibirsk()} value={date} onChange={e => setDate(e.target.value)} /></label>
@@ -168,12 +189,15 @@ export default function OrderCalculator() {
           {quote.discount > 0 && <div className="summary-discount"><dt>Регулярная уборка · {input.frequency === "weekly" ? "−15%" : "−10%"}</dt><dd>−{money(quote.discount)} ₽</dd></div>}
         </dl></MotionPanel>
         <div className="summary-included"><span>✓ Средства и инвентарь</span><span>✓ Один санузел и кухня</span></div>
-        <p className="summary-timing">Ориентир: {quote.duration.toLocaleString("ru-RU")}–{(quote.duration + 1).toLocaleString("ru-RU")} ч · {quote.crew === 1 ? "1 сотрудник" : "2 сотрудника"}</p>
+        <p className="summary-timing">{requiresSurvey ? "Состав бригады и сроки — после оценки объекта" : <>Ориентир: {quote.duration.toLocaleString("ru-RU")}–{(quote.duration + 1).toLocaleString("ru-RU")} ч · {quote.crew === 1 ? "1 сотрудник" : "2 сотрудника"}</>}</p>
+        {requiresSurvey && <p className="summary-disclaimer">Ориентир базовой уборки по выбранному тарифу. Оборудование, опасные загрязнения и высотные работы оцениваются отдельно.</p>}
         <p className="summary-disclaimer">Стоимость и время согласуем до выезда. Сложные загрязнения оценим по фото.</p>
         {pricingStatus === "error" && <p className="form-message error" role="alert">Тарифы пока не загрузились. Показан базовый расчёт. <button type="button" onClick={refreshPricing}>Обновить тарифы</button></p>}
         <div className={`booking-action ${calculatorVisible ? "mobile-docked" : ""}`}>
           <div className="mobile-price"><small>Предварительно</small><b><PriceAmount amount={quote.total} /></b></div>
-          <button type="submit" form="order-form" className="button" disabled={isSubmitting || pricingStatus === "loading" || (step === 2 && (isPreviewDeployment || pricingStatus !== "ready"))}>{isSubmitting ? "Отправляем…" : pricingStatus === "loading" ? "Загружаем тарифы…" : step < 2 ? "Далее" : isPreviewDeployment ? "Демо · без отправки" : "Отправить заявку"}{isSubmitting && <span className="button-spinner" aria-hidden="true" />}</button>
+          {step === 2 && messageOnly
+            ? <button type="button" className="button" disabled={copying || pricingStatus !== "ready"} onClick={copyQuote}>{copying ? "Копируем…" : copied ? "Расчёт скопирован" : "Скопировать расчёт"}</button>
+            : <button type="submit" form="order-form" className="button" disabled={isSubmitting || pricingStatus === "loading" || (step === 2 && pricingStatus !== "ready")}>{isSubmitting ? "Отправляем…" : pricingStatus === "loading" ? "Загружаем тарифы…" : step < 2 ? "Далее" : "Отправить заявку"}{isSubmitting && <span className="button-spinner" aria-hidden="true" />}</button>}
           {error && <p className="form-message error booking-error" role="alert">{error}</p>}
         </div>
         <p className="summary-safe">{isPreviewDeployment ? "Демонстрация: можно рассчитать стоимость, но не отправить заявку." : step < 2 ? "Цена видна сразу. Телефон — на последнем шаге." : "Без онлайн-оплаты. Вы подтверждаете заказ после связи с менеджером."}</p>

@@ -72,6 +72,16 @@
 #calculator .button:disabled { background: #e3e3e3; border-color: #d5d5d5; color: #707070; box-shadow: none; opacity: 1; cursor: not-allowed; }
 #calculator .preview-card > p { color: #626262; }
 #calculator .preview-card .preview-caption { background: #eee; color: #444; }
+#calculator .preview-card .contact-phone { flex-basis: 100%; margin-bottom: 4px; }
+.quote-copy-fallback { margin-top: 18px; }
+.quote-copy-fallback p, .quote-copy-fallback label { font-size: 14px; line-height: 1.5; }
+.quote-copy-fallback label { display: block; margin-bottom: 8px; font-weight: 600; }
+.quote-copy-fallback textarea { width: 100%; max-width: 100%; padding: 12px; border: 1px solid #aaa; border-radius: 12px; background: #fff; color: #292929; font: inherit; font-size: 16px; line-height: 1.5; resize: vertical; }
+.preview-card .messenger-draft-hint { font-size: 13px; line-height: 1.6; margin: 14px 0; }
+.messenger-draft-hint a { text-decoration: underline; text-underline-offset: 3px; }
+.quote-message-preview { margin-block: 18px; border-top: 1px solid #ddd; }
+.quote-message-preview summary { padding: 14px 0; font-size: 14px; cursor: pointer; font-weight: 600; }
+.quote-message-preview pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 14px; line-height: 1.65; padding: 14px; background: #f2f2f2; border-radius: 12px; }
 #calculator .contact-channel { background: #fff; border-color: #ccc; color: #292929; border-radius: 12px; }
 #calculator .contact-channel:hover { background: #e9e9e9; color: #202020; }
 #calculator .contact-telegram { background: #229ed9; border-color: #229ed9; color: #062a3d; }

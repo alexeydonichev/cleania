@@ -49,3 +49,21 @@ test('messenger colors are retained inside the monochrome calculator', () => {
     assert.match(read(file), /\.contact-max \{ background: #471aff;/);
   }
 });
+
+test('process photographs have no overlaid AI badges', () => {
+  assert.doesNotMatch(read('app/components/CleaningProcess.tsx'), /<span>Иллюстрация|Иллюстрация · ИИ/);
+  assert.doesNotMatch(read('app/cases.css'), /\.process-photo > span/);
+});
+
+test('demo quote can be copied without enabling order submission', () => {
+  const source = read('app/components/OrderCalculator.tsx');
+  assert.match(source, /if \(isPreviewDeployment\) return;/);
+  assert.match(source, /navigator.clipboard.writeText\(quoteText\)/);
+  assert.match(source, /Скопировать расчёт/);
+  assert.match(source, /textarea id="quote-message" readOnly/);
+  assert.match(source, /pricingStatus !== "ready"/);
+});
+
+test('mobile navigation announces the available open or close action', () => {
+  assert.match(read('app/components/MotionDesign.tsx'), /open \? "Закрыть меню" : "Открыть меню"/);
+});

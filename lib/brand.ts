@@ -6,6 +6,9 @@ export const brandLogo = { src: "/brand/bleskpro-logo-blue.webp", width: 1786, h
 export const contactPhone = "+79833216224";
 export const contactPhoneDisplay = "+7 (983) 321-62-24";
 export const telegramUrl = `https://t.me/${contactPhone}`;
+// Official draft/share links. They prepare text; the customer confirms sending.
+export const telegramDraftUrl = (message: string) => `${telegramUrl}?text=${encodeURIComponent(message)}`;
+export const maxDraftUrl = (message: string) => `https://max.ru/:share?text=${encodeURIComponent(message)}`;
 
 // MAX profiles use a share link from the account, not a guessed phone-number URL.
 export function validMaxProfileUrl(value: string | undefined): string | null {

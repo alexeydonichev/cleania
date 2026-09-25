@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import sharp from "sharp";
-import { brandName, brandDomain, brandUrl, brandLogo, contactPhone, telegramUrl, validMaxProfileUrl, maxProfileUrl } from "../lib/brand.ts";
+import { brandName, brandDomain, brandUrl, brandLogo, contactPhone, telegramUrl, telegramDraftUrl, maxDraftUrl, validMaxProfileUrl, maxProfileUrl } from "../lib/brand.ts";
 
 test("the public brand and IDN canonical refer to БлескПРО", () => {
   assert.equal(brandName, "БлескПРО");
@@ -20,6 +20,18 @@ test("MAX only accepts an explicit HTTPS profile share link", () => {
   assert.equal(validMaxProfileUrl("https://max.ru/u/example"), "https://max.ru/u/example");
   assert.equal(validMaxProfileUrl("https://max.me/example"), "https://max.me/example");
   for (const input of [undefined, "", "+79833216224", "https://max.ru", "javascript:alert(1)", "http://max.ru/u/example", "https://max.ru.evil.test/u/example", "https://user:secret@max.ru/u/example", "https://max.ru:8443/u/example"]) assert.equal(validMaxProfileUrl(input), null);
+});
+
+test("messenger draft links encode the entire receipt without losing Cyrillic or newlines", () => {
+  const receipt = 'БлескПРО · Дом · 1150 м²\nДоплаты +18% & окна × 2\nИтого: 129 500 ₽';
+  const telegram = new URL(telegramDraftUrl(receipt));
+  const max = new URL(maxDraftUrl(receipt));
+  assert.equal(telegram.origin + telegram.pathname, telegramUrl);
+  assert.equal(max.origin + max.pathname, 'https://max.ru/:share');
+  for (const url of [telegram,max]) {
+    assert.equal(url.searchParams.get('text'), receipt);
+    assert.equal([...url.searchParams.keys()].length, 1);
+  }
 });
 
 test("brand delivery variants have the advertised dimensions", async () => {

@@ -3,6 +3,18 @@ export type ServiceKey = (typeof serviceKeys)[number];
 export type ConditionKey = "normal" | "dirty" | "very_dirty";
 export type FrequencyKey = "once" | "weekly" | "biweekly";
 export type City = "Новосибирск" | "Бердск";
+export const propertyTypes = {
+  apartment: { label: "Квартира", maxArea: 482 },
+  house: { label: "Дом", maxArea: 1150 },
+  commercial: { label: "Офис / коммерция", maxArea: 2500 },
+  industrial: { label: "Промышленный объект", maxArea: 4000 },
+} as const;
+export type PropertyType = keyof typeof propertyTypes;
+export function propertyFor(input: Pick<QuoteInput, "service" | "propertyType">): PropertyType {
+  return input.propertyType || (input.service === "office" ? "commercial" : "apartment");
+}
+export function maxQuoteArea(input: Pick<QuoteInput, "service" | "propertyType">) { return propertyTypes[propertyFor(input)].maxArea; }
+export function needsSiteSurvey(input: QuoteInput) { return input.area > 300 || propertyFor(input) === "industrial"; }
 export type PricingRule = { label: string; rate: number; minimum: number };
 export const defaultPricing: Record<ServiceKey, PricingRule> = {
   regular: { label: "Поддерживающая", rate: 95, minimum: 2490 },
@@ -19,7 +31,7 @@ export const extrasCatalog = {
   ironing: { label: "Глажка вещей", unit: "1 час", price: 700, max: 5 },
 } as const;
 export type ExtraKey = keyof typeof extrasCatalog;
-export type QuoteInput = { service: ServiceKey; area: number; bathrooms: number; condition: ConditionKey; frequency: FrequencyKey; extras: ExtraKey[] };
+export type QuoteInput = { propertyType?: PropertyType; service: ServiceKey; area: number; bathrooms: number; condition: ConditionKey; frequency: FrequencyKey; extras: ExtraKey[] };
 export const money = (value: number) => new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(value);
 export function calculateQuote(input: QuoteInput, rule: PricingRule | { rate: number; minimum: number }) {
   const base = Math.max(rule.minimum, input.area * rule.rate);
@@ -36,5 +48,25 @@ export function calculateQuote(input: QuoteInput, rule: PricingRule | { rate: nu
 }
 export function todayInNovosibirsk() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Novosibirsk", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+/** A customer-owned text receipt: no contacts, booking or automatic transmission. */
+export function formatQuoteForMessage(input: QuoteInput, city: City, rule: PricingRule) {
+  const quote = calculateQuote(input, rule);
+  const lines = [
+    "БлескПРО · предварительный расчёт",
+    `${city} · ${rule.label} · ${input.area} м²`,
+    `Объект: ${propertyTypes[propertyFor(input)].label}`,
+    `Уборка: ${money(quote.base)} ₽`,
+    `Санузлы: ${input.bathrooms}${quote.bathrooms ? ` (+${money(quote.bathrooms)} ₽)` : " (включено)"}`,
+  ];
+  if (quote.condition) lines.push(`Загрязнения: ${input.condition === "dirty" ? "+18%" : "+35%"} (+${money(quote.condition)} ₽)`);
+  for (const key of Object.keys(extrasCatalog) as ExtraKey[]) {
+    const count = input.extras.filter(extra => extra === key).length;
+    if (count) lines.push(`${extrasCatalog[key].label} × ${count}: +${money(count * extrasCatalog[key].price)} ₽`);
+  }
+  if (quote.discount) lines.push(`${input.frequency === "weekly" ? "Каждую неделю · −15%" : "Раз в 2 недели · −10%"}: −${money(quote.discount)} ₽`);
+  if (needsSiteSurvey(input)) lines.push("Ориентир базовой уборки по выбранному тарифу. Состав бригады, сроки и специальные работы — после оценки объекта. Промышленное оборудование, опасные загрязнения и высотные работы не включены.");
+  lines.push(`Итого за уборку: ${money(quote.total)} ₽`, "Средства и инвентарь включены.", "Хочу согласовать состав работ, окончательную стоимость и свободное время. Это расчёт, не оформленный заказ.");
+  return lines.join("\n");
 }
 export function validPhone(phone: string) { return /^(?:7|8)\d{10}$/.test(phone.replace(/\D/g, "")); }

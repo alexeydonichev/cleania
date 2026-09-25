@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { calculateQuote, defaultPricing, money, serviceKeys, type City, type QuoteInput, type ServiceKey } from "@/lib/quote";
+import { calculateQuote, defaultPricing, maxQuoteArea, money, serviceKeys, type City, type QuoteInput, type ServiceKey } from "@/lib/quote";
 function useBookingState(initialService: ServiceKey) {
   const [input, setInput] = useState<QuoteInput>({ service: initialService, area: 50, bathrooms: 1, condition: "normal", frequency: "once", extras: [] });
   const [city, setCity] = useState<City>("Новосибирск");
@@ -19,7 +19,16 @@ function useBookingState(initialService: ServiceKey) {
     }).catch(error => { if (error.name !== "AbortError") setPricingStatus("error"); });
     return () => controller.abort();
   }, [pricingRevision]);
-  function update(patch: Partial<QuoteInput>) { setInput(current => ({ ...current, ...patch, ...(patch.service && patch.service !== "regular" ? { frequency: "once" as const } : {}) })); }
+  function update(patch: Partial<QuoteInput>) {
+    setInput(current => {
+      const next = { ...current, ...patch, ...(patch.service && patch.service !== "regular" ? { frequency: "once" as const } : {}) };
+      if (patch.propertyType === "commercial" || patch.propertyType === "industrial") { next.service = "office"; next.frequency = "once"; }
+      if ((patch.propertyType === "apartment" || patch.propertyType === "house") && next.service === "office") next.service = "regular";
+      if (patch.service === "office" && next.propertyType !== "industrial") next.propertyType = "commercial";
+      next.area = Math.max(20, Math.min(maxQuoteArea(next), next.area));
+      return next;
+    });
+  }
   return { input, update, city, setCity, pricing, pricingStatus, refreshPricing: () => { setPricingStatus("loading"); setPricingRevision(value => value + 1); }, quote: calculateQuote(input, pricing[input.service]) };
 }
 const BookingContext = createContext<ReturnType<typeof useBookingState> | null>(null);

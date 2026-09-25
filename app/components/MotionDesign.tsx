@@ -92,6 +92,7 @@ export default function MotionDesign() {
       menuAnimation?.cancel();
       menuAnimation = undefined;
       menu.dataset.expanded = String(open);
+      summary?.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
       if (!animate || reducedMotion() || typeof menuNav.animate !== "function") { menu.open = open; return; }
       menu.open = true;
       const next = menuNav.animate([start, open ? openFrame : closedFrame], { duration: open ? 380 : 200, easing: motionEase });
@@ -143,6 +144,7 @@ export default function MotionDesign() {
       document.removeEventListener("keydown", escape); document.removeEventListener("pointerdown", outside);
       summary?.removeEventListener("click", toggleMenu); menu?.removeEventListener("click", menuLink);
       menuAnimation?.cancel(); if (menu) { menu.open = false; delete menu.dataset.expanded; }
+      summary?.setAttribute("aria-label", "Открыть меню");
       cleanups.forEach(cleanup => cleanup());
       targets.forEach(element => { element.removeAttribute("data-reveal"); element.style.removeProperty("--reveal-delay"); });
       if (header) delete header.dataset.scrolled;

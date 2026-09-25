@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculateQuote, defaultPricing, serviceKeys, validPhone, todayInNovosibirsk } from "../lib/quote.ts";
+import { calculateQuote, formatQuoteForMessage, maxQuoteArea, needsSiteSurvey, propertyTypes, defaultPricing, serviceKeys, validPhone, todayInNovosibirsk } from "../lib/quote.ts";
 
 const base = { service: "regular", area: 50, bathrooms: 1, extras: [], condition: "normal", frequency: "once" };
 test("minimum is exact: the advertised 2490 does not silently become 2500", () => {
@@ -30,4 +30,42 @@ test("accept only complete Russian phone numbers", () => {
 });
 test("local date uses the Novosibirsk calendar", () => {
   assert.match(todayInNovosibirsk(), /^\d{4}-\d{2}-\d{2}$/);
+});
+
+test("message receipt itemises repeated extras, conditions, discounts and the exact total", () => {
+  const input = { ...base, bathrooms: 2, condition: "dirty", frequency: "weekly", extras: ["windows", "oven", "windows"] };
+  const original = structuredClone(input);
+  const receipt = formatQuoteForMessage(input, "Бердск", defaultPricing.regular).replaceAll('\u00a0', ' ');
+  assert.match(receipt, /Бердск · Поддерживающая · 50 м²/);
+  assert.match(receipt, /Санузлы: 2 \(\+550 ₽\)/);
+  assert.match(receipt, /Загрязнения: \+18% \(\+954 ₽\)/);
+  assert.match(receipt, /Мойка окна × 2: \+2 400 ₽/);
+  assert.equal(receipt.match(/Мойка окна/g).length, 1);
+  assert.match(receipt, /Духовка внутри × 1: \+650 ₽/);
+  assert.match(receipt, /Каждую неделю · −15%: −1 396 ₽/);
+  assert.match(receipt, /Итого за уборку: 7 908 ₽/);
+  assert.match(receipt, /не оформленный заказ/);
+  assert.deepEqual(input, original);
+});
+
+test("message receipt follows live pricing and excludes unselected charges", () => {
+  const receipt = formatQuoteForMessage(base, "Новосибирск", { ...defaultPricing.regular, rate: 120 }).replaceAll('\u00a0', ' ');
+  assert.match(receipt, /Итого за уборку: 6 000 ₽/);
+  assert.match(receipt, /Санузлы: 1 \(включено\)/);
+  assert.doesNotMatch(receipt, /Загрязнения:|Мойка окна|Каждую неделю|Раз в 2 недели/);
+});
+
+test("property limits match the requested area ranges", () => {
+  for (const [propertyType, max] of [['apartment',482], ['house',1150], ['commercial',2500], ['industrial',4000]]) {
+    assert.equal(propertyTypes[propertyType].maxArea, max);
+    assert.equal(maxQuoteArea({ ...base, propertyType }), max);
+    const input = { ...base, propertyType, area: max };
+    assert.ok(Number.isFinite(calculateQuote(input, defaultPricing.regular).total));
+    assert.equal(needsSiteSurvey(input), true);
+    assert.match(formatQuoteForMessage(input, 'Бердск', defaultPricing.regular), /после оценки объекта/);
+  }
+  assert.equal(maxQuoteArea(base), 482);
+  assert.equal(maxQuoteArea({ ...base, service: 'office' }), 2500);
+  assert.equal(needsSiteSurvey(base), false);
+  assert.equal(needsSiteSurvey({ ...base, propertyType: 'industrial' }), true);
 });
