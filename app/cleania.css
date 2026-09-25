@@ -46,7 +46,7 @@
 .home-service:hover { transform: translateY(-8px); box-shadow: 0 20px 40px #2537730d; }
 .service-card-top { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
 .service-card-top > span:first-child { color: var(--green); }
-.home-service h3 { font-size: clamp(25px,2.6vw,41px); letter-spacing: -.05em; line-height: 1.16; font-weight: 600; margin: 37px 0 16px; }
+.home-service h3 { font-size: clamp(25px,2.6vw,41px); letter-spacing: -.05em; line-height: 1.16; font-weight: 600; margin: 22px 0 16px; }
 .home-service > p { font-size: 15px; color: var(--muted); min-height: 48px; }
 .home-service ul { padding: 20px 0 27px; list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
 .home-service li { display: flex; align-items: baseline; gap: 10px; margin-top: 12px; font-size: 14px; }
@@ -62,7 +62,7 @@
 .home-service.featured .service-card-top > span:first-child,.home-service.featured li > span { color: #e4f179; }
 .home-service.featured ul { border-color: #ffffff40; }
 .home-service.featured .service-links > a:first-child { background: #e4f179; color: #18224b; }
-.calculator-section { background: #eef2fb; padding-block: clamp(60px,6vw,100px); scroll-margin-top: 0; }
+.calculator-section { background: #eef2fb; padding-block: clamp(36px,4vw,64px); scroll-margin-top: 0; }
 .booking-layout { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(325px,1fr); gap: 22px; align-items: start; }
 .booking-form { min-width: 0; border-radius: 18px; border: 1px solid #e0e5ee; background: white; scroll-margin-top: 105px; }
 .booking-progress { display: flex; gap: 4px; padding: 22px clamp(16px,2.6vw,40px); border-bottom: 1px solid #e9ebf2; }

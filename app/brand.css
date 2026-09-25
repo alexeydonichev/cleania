@@ -24,14 +24,35 @@
 .crm-brand .brand-logo { width: 142px; }
 .crm-brand .crm-brand-symbol { display: none; }
 .crm-access .brand-logo { width: 260px; max-width: 100%; margin: 0 auto 28px; }
+/* The compact hero aligns the star with the slogan, not above it. */
+.home-hero { padding-top: clamp(24px, 2.2vw, 36px); }
+.hero-title-row { align-items: center; gap: 24px; padding-bottom: 28px; }
+.hero-title-row > div:first-child { min-width: 0; }
+.hero-aside { display: flex; align-items: center; flex: 0 0 336px; gap: 16px; padding: 0; min-height: 0; }
+.hero-aside .cleaning-spark { position: static; width: 96px; height: 96px; margin: 0; }
+.hero-aside-copy { min-width: 0; }
+.hero-aside p { margin: 0 0 8px; font-size: 14px; line-height: 1.6; }
+.hero-aside .text-link { font-size: 14px; }
 /* Keep the full slogan on one baseline while retaining each phrase's reveal. */
 @media (min-width: 701px) {
   .hero-title-row h1 { display: flex; flex-wrap: nowrap; gap: .22em; font-size: clamp(36px, 4.35vw, 78px); }
   .hero-title-row h1 > .hero-line { flex: none; white-space: nowrap; }
 }
 @media (max-width: 1100px) {
+  .hero-title-row { display: block; }
+  .hero-aside { margin-top: 16px; max-width: 620px; }
+  .hero-aside-copy { display: flex; align-items: center; gap: 20px; }
+  .hero-aside p { margin: 0; }
+  .hero-aside .text-link { flex-shrink: 0; }
   .crm-brand .brand-logo { display: none; }
   .crm-brand .crm-brand-symbol { display: block; width: 40px; height: 40px; mix-blend-mode: multiply; }
+}
+@media (max-width: 700px) {
+  .hero-aside { gap: 12px; margin-top: 12px; }
+  .hero-aside .cleaning-spark { width: 76px; height: 76px; }
+  .hero-aside-copy { display: block; }
+  .home-service h3 { margin-top: 22px; }
+  .site-footer { margin-top: 36px; padding-top: 32px; }
 }
 @media (max-width: 1000px) and (min-width: 801px) {
   .site-header { gap: 16px; }

@@ -13,7 +13,7 @@ const services: { key: ServiceKey; title: string; text: string; points: string[]
 export function ServiceOverview() {
   const { pricing, update } = useBooking();
   return <div className="home-services">{services.map((s,i) => <article className={i === 1 ? "home-service featured" : "home-service"} key={s.key}>
-    <div className="service-card-top"><span>0{i + 1}</span><span>{i === 1 ? "Генеральная" : pricing[s.key].label}</span></div>
+    <div className="service-card-top"><span>{i === 1 ? "Генеральная" : pricing[s.key].label}</span></div>
     <h3>{s.title.split("\n").map((line,j) => <span key={line}>{j > 0 && <br />}{line}</span>)}</h3><p>{s.text}</p>
     <ul>{s.points.map(point => <li key={point}><span aria-hidden="true">✓</span>{point}</li>)}</ul>
     <div className="service-price"><span>от <strong>{money(pricing[s.key].minimum)} ₽</strong></span><small>{pricing[s.key].rate} ₽/м² · минимум заказа</small></div>

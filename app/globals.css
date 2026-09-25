@@ -43,8 +43,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .eyebrow { display: flex; gap: 10px; align-items: center; margin: 0 0 22px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .eyebrow-light { color: #c4d1ff; }
 .text-link { display: inline-flex; align-items: center; gap: 24px; border-bottom: 1px solid currentColor; padding-block: 9px; font-size: 15px; font-weight: 700; }
-.section { padding-block: clamp(64px, 7.4vw, 126px); }
-.section-heading { margin-bottom: 42px; }
+.section { padding-block: clamp(36px, 4vw, 64px); }
+.section-heading { margin-bottom: 28px; }
 .section-heading h2 { margin: 0; font-size: clamp(34px,4vw,66px); line-height: 1.13; letter-spacing: -.05em; font-weight: 600; }
 .section-heading h2 em { color: var(--green); font-style: normal; }
 .split-heading { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: end; }
@@ -63,7 +63,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .file-field b,.file-field small { display: block; }
 .file-field b { font-size: 15px; }
 .file-field small { color: var(--muted); font-size: 12px; margin-top: 4px; }
-.site-footer { background: #eff2fb; padding-top: 70px; margin-top: 80px; color: var(--ink); }
+.site-footer { background: #eff2fb; padding-top: 44px; margin-top: 48px; color: var(--ink); }
 .footer-top { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1.1fr; gap: 32px; }
 .footer-top > div > p { font-size: 14px; color: var(--muted); margin: 20px 0 0; }
 .footer-links { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; font-size: 14px; }
@@ -80,8 +80,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
   grid-template-columns: 1fr 1fr;
   gap: clamp(40px, 7vw, 110px);
   align-items: center;
-  min-height: 680px;
-  padding-block: clamp(70px, 8vw, 120px);
+  min-height: 0;
+  padding-block: clamp(36px, 4vw, 64px);
 }
 .inner-hero h1,
 .inner-title h1,
@@ -228,7 +228,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   line-height: 1.7;
 }
 .business-hero {
-  padding-block: clamp(80px, 9vw, 140px);
+  padding-block: clamp(36px, 4vw, 64px);
   background: var(--green-dark);
   color: white;
 }
@@ -304,7 +304,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   gap: 0;
 }
 .business-proof > div {
-  min-height: 250px;
+  min-height: 0;
   padding: 32px;
   border: 1px solid var(--line);
 }
@@ -317,7 +317,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   font-weight: 820;
 }
 .business-proof h3 {
-  margin: 40px 0 12px;
+  margin: 0 0 12px;
   font-size: 25px;
   font-weight: 820;
 }
@@ -333,14 +333,14 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .business-process ol {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  margin: 50px 0 0;
+  margin: 28px 0 0;
   padding: 0;
   border-top: 1px solid #c9c8bf;
   border-left: 1px solid #c9c8bf;
   list-style: none;
 }
 .business-process li {
-  min-height: 240px;
+  min-height: 0;
   padding: 27px;
   border-right: 1px solid #c9c8bf;
   border-bottom: 1px solid #c9c8bf;
@@ -355,7 +355,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   font-weight: 820;
 }
 .business-process li > b {
-  margin-top: 55px;
+  margin-top: 0;
   font-size: 15px;
 }
 .business-process li > p {
@@ -364,7 +364,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   line-height: 1.6;
 }
 .inner-title {
-  padding-block: clamp(80px, 9vw, 140px);
+  padding-block: clamp(36px, 4vw, 64px);
 }
 .contacts-grid {
   display: grid;
@@ -374,7 +374,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 }
 .contact-card {
   display: flex;
-  min-height: 360px;
+  min-height: 0;
   flex-direction: column;
   align-items: flex-start;
   padding: 31px;
@@ -387,7 +387,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   font-weight: 820;
 }
 .contact-card h2 {
-  margin-top: 45px;
+  margin-top: 0;
   font-size: 31px;
 }
 .contact-card p {
@@ -416,7 +416,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
 }
 .legal-page {
   max-width: 960px;
-  padding-block: clamp(70px, 8vw, 120px);
+  padding-block: clamp(36px, 4vw, 64px);
 }
 .legal-page h1 {
   margin: 0;
@@ -427,7 +427,7 @@ button, a, input, select, textarea { touch-action: manipulation; }
   line-height: 1;
 }
 .legal-date {
-  margin: 20px 0 70px;
+  margin: 20px 0 36px;
   color: var(--muted);
   font-size: 12px;
 }

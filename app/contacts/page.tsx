@@ -30,7 +30,6 @@ export default function ContactsPage() {
       </section>
       <section className="section shell contacts-grid">
         <div className="contact-card">
-          <span>01</span>
           <h2>Заказать уборку</h2>
           <p>
             Рассчитайте стоимость и напишите нам для согласования деталей. Сообщение отправляете вы — чат не создаёт заказ автоматически.
@@ -41,7 +40,6 @@ export default function ContactsPage() {
           </Link>
         </div>
         <div className="contact-card">
-          <span>02</span>
           <h2>Для бизнеса</h2>
           <p>Опишите объект и график — подготовим вопросы для точной сметы.</p>
           <Link className="text-link" href="/business">
@@ -49,7 +47,6 @@ export default function ContactsPage() {
           </Link>
         </div>
         <div className="contact-card">
-          <span>03</span>
           <h2>Зона работы</h2>
           <p>
             Новосибирск, Академгородок и Бердск. Конкретный адрес, время и выезд за границы городов подтверждаем до заказа.

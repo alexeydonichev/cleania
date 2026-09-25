@@ -97,10 +97,10 @@ export default function OrderCalculator() {
   </div>;
   return <div className="booking-layout">
     <form id="order-form" className="booking-form" ref={formRef} noValidate aria-busy={isSubmitting} onChange={() => setError("")} onSubmit={submit}>
-      <nav className="booking-progress" aria-label="Шаги оформления" style={{ "--active-step": step } as CSSProperties}>{stepNames.map((label, i) => <button key={label} type="button" disabled={isSubmitting} aria-current={step === i ? "step" : undefined} onClick={() => moveTo(i)}><span>{i < step ? "✓" : i + 1}</span><b>{label}</b></button>)}</nav>
+      <nav className="booking-progress" aria-label="Шаги оформления" style={{ "--active-step": step } as CSSProperties}>{stepNames.map((label, i) => <button key={label} type="button" disabled={isSubmitting} aria-current={step === i ? "step" : undefined} onClick={() => moveTo(i)}><b>{label}</b></button>)}</nav>
       <fieldset disabled={isSubmitting} aria-label="Параметры заявки"><MotionPanel transitionKey={step} direction={direction}><div className="booking-step">
       {step === 0 && <>
-        <div className="booking-step-heading"><h3 tabIndex={-1}>Расскажите о вашем доме</h3><span>Шаг 1 из 3</span></div>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Расскажите о вашем доме</h3></div>
         <fieldset className="city-picker"><legend>Где нужна уборка?</legend>{(["Новосибирск", "Бердск"] as City[]).map(item => <label key={item} className={city === item ? "selected" : ""}><input type="radio" name="city" checked={city === item} onChange={() => setCity(item)} />{item}</label>)}</fieldset>
         <fieldset className="service-picker"><legend>Какую уборку выбираем?</legend><div>{serviceKeys.map(key => <label className={input.service === key ? "selected" : ""} key={key}><input type="radio" name="service" checked={input.service === key} onChange={() => update({ service: key })} /><span><b>{pricing[key].label}</b><small>{serviceDescriptions[key]}</small></span><span className="radio-mark" aria-hidden="true" /></label>)}</div></fieldset>
         <div className="area-and-bathrooms">
@@ -112,13 +112,13 @@ export default function OrderCalculator() {
         <p className="booking-help">Для площади больше 300 м², сложного остекления или специальных работ <Link href="/business">заполните короткий бриф</Link>.</p>
       </>}
       {step === 1 && <>
-        <div className="booking-step-heading"><h3 tabIndex={-1}>Маленькие задачи.<br />Большая разница.</h3><span>Шаг 2 из 3</span></div>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Маленькие задачи.<br />Большая разница.</h3></div>
         <p className="step-intro">Добавьте только то, что нужно вам. Все цены — за указанную единицу.</p>
         <div className="booking-extras">{extraKeys.map(key => <div key={key} className={counts[key] ? "booking-extra selected" : "booking-extra"}><div><h4>{extrasCatalog[key].label}</h4><small>{extrasCatalog[key].unit}</small><b>{money(extrasCatalog[key].price)} ₽</b></div><div className="counter"><button type="button" aria-label={`Убрать: ${extrasCatalog[key].label}`} disabled={!counts[key]} onClick={() => setCount(key, counts[key] - 1)}>−</button><output aria-label={`Количество: ${extrasCatalog[key].label}`}><span key={counts[key]}>{counts[key]}</span></output><button type="button" aria-label={`Добавить: ${extrasCatalog[key].label}`} disabled={counts[key] >= extrasCatalog[key].max} onClick={() => setCount(key, counts[key] + 1)}>+</button></div></div>)}</div>
         <p className="booking-help">Химчистка, фасадные работы и вывоз строительного мусора не входят в расчёт. Напишите о них в пожеланиях — обсудим возможность и отдельную смету.</p>
       </>}
       {step === 2 && isPreviewDeployment && <div className="preview-card">
-        <div className="booking-step-heading"><h3 tabIndex={-1}>Ваш расчёт готов</h3><span>Шаг 3 из 3</span></div>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Ваш расчёт готов</h3></div>
         <p>{city} · {pricing[input.service].label} · {input.area} м²</p>
         <strong className="preview-total">{money(quote.total)} ₽</strong>
         <p>Это демонстрация калькулятора. Все выбранные работы учтены в подробной смете. После подключения базы здесь появится выбор даты и отправка заявки.</p>
@@ -127,7 +127,7 @@ export default function OrderCalculator() {
         <ContactLinks />
       </div>}
       {step === 2 && !isPreviewDeployment && <>
-        <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3><span>Шаг 3 из 3</span></div>
+        <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3></div>
         <div className="booking-contact-grid">
           <label className="booking-field"><span>Желаемая дата</span><input ref={dateRef} type="date" min={todayInNovosibirsk()} value={date} onChange={e => setDate(e.target.value)} /></label>
           <label className="booking-field"><span>Желаемое время</span><select value={slot} onChange={e => setSlot(e.target.value)}><option value="">Обсудим с менеджером</option><option value="09:00–12:00">Утро · 09:00–12:00</option><option value="12:00–15:00">День · 12:00–15:00</option><option value="15:00–18:00">Вечер · 15:00–18:00</option></select></label>

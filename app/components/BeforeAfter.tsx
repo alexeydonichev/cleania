@@ -48,7 +48,7 @@ export default function BeforeAfter() {
 
   return <section className="case-section shell section" id="work" aria-labelledby="cases-title">
     <div className="section-heading home-heading">
-      <div><p className="eyebrow">05 / Разница в деталях</p><h2 id="cases-title">До уборки.<br /><span>И после.</span></h2></div>
+      <div><p className="eyebrow">Разница в деталях</p><h2 id="cases-title">До уборки.<br /><span>И после.</span></h2></div>
       <p>Передвиньте разделитель и сравните поверхности. Один ракурс помогает увидеть, что именно изменилось.</p>
     </div>
     <div className="case-tabs" role="tablist" aria-label="Примеры помещений">

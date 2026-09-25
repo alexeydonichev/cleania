@@ -36,7 +36,6 @@ export default function BusinessPage() {
       </section>
       <section className="section shell business-proof">
         <div>
-          <span>01</span>
           <h3>SLA вместо обещаний</h3>
           <p>
             В договоре фиксируются время реакции, состав работ и порядок
@@ -44,7 +43,6 @@ export default function BusinessPage() {
           </p>
         </div>
         <div>
-          <span>02</span>
           <h3>Замены без простоя</h3>
           <p>
             Бригада и резерв планируются в CRM, поэтому объект не остаётся без
@@ -52,7 +50,6 @@ export default function BusinessPage() {
           </p>
         </div>
         <div>
-          <span>03</span>
           <h3>Отчёт по каждому объекту</h3>
           <p>
             Смены, фото, расходники, оценка и себестоимость доступны в
@@ -80,22 +77,18 @@ export default function BusinessPage() {
           </div>
           <ol>
             <li>
-              <span>01</span>
               <b>Бриф и звонок</b>
               <p>Фиксируем объект, режим доступа и ожидания.</p>
             </li>
             <li>
-              <span>02</span>
               <b>Осмотр</b>
               <p>Считаем площади и точки повышенного внимания.</p>
             </li>
             <li>
-              <span>03</span>
               <b>Карта работ</b>
               <p>Согласуем зоны, периодичность, SLA и цену.</p>
             </li>
             <li>
-              <span>04</span>
               <b>Контроль запуска</b>
               <p>Супервайзер принимает первые смены по чек-листу.</p>
             </li>
