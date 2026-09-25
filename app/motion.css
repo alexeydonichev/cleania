@@ -203,7 +203,6 @@
   .hero-spark { display: none; }
   .hero-line > span { animation-duration: 800ms; }
   .quick-quote-fields input, .quick-quote-fields select { font-size: 16px; }
-  .quick-quote-fields { grid-template-columns: minmax(0, 1fr) 74px; }
   .booking-progress button { min-height: 44px; }
   .room-tabs button { padding-inline: 4px; }
   .faq-section summary { padding-block: 18px; }
