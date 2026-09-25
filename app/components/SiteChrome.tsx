@@ -21,7 +21,6 @@ export function PublicFooter() {
       <div className="footer-links"><b>На связи</b><ContactLinks /><Link href="/contacts">Новосибирск и Бердск</Link><Link href="/business">Для бизнеса</Link><Link href="/crm">Вход для сотрудников</Link></div>
       <div className="footer-cta"><span>Освободите свой выходной</span><Link href="/#calculator">Рассчитать уборку</Link></div>
     </div>
-    <div className="shell footer-wordmark" aria-hidden="true"><BrandLogo decorative /></div>
     <div className="shell footer-bottom"><span>© {new Date().getFullYear()} {brandName}</span><Link href="/privacy">Политика конфиденциальности</Link><MotionPreference /><span>Новосибирск · Бердск</span></div>
   </footer>;
 }

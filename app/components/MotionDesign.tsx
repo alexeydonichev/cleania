@@ -7,7 +7,7 @@ export default function MotionDesign() {
     const preferenceListeners = new Set<() => void>();
     const unsubscribe = subscribeMotionPreference(() => preferenceListeners.forEach(listener => listener()));
     const targets = Array.from(document.querySelectorAll<HTMLElement>(
-      ".home-heading, .home-service, .checklist-layout, .process-card, .case-panel, .location-section, .faq-section > div:first-child, .faq-section details, .business-strip, .footer-top > div, .footer-wordmark",
+      ".home-heading, .home-service, .checklist-layout, .process-card, .case-panel, .location-section, .faq-section > div:first-child, .faq-section details, .business-strip, .footer-top > div",
     ));
     let revealObserver: IntersectionObserver | undefined;
     const reveal = (element: HTMLElement) => {

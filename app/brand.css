@@ -3,9 +3,7 @@
 .brand-logo { width: 202px; height: auto; aspect-ratio: 1786 / 406; object-fit: contain; mix-blend-mode: multiply; }
 .brand-footer .brand-logo { width: 230px; }
 /* Reveal transforms isolate image blending; blend the complete logo layer too. */
-.footer-top > div:first-child, .footer-wordmark { mix-blend-mode: multiply; }
-.footer-wordmark { padding-block: clamp(35px, 5vw, 80px); }
-.footer-wordmark .brand-logo { width: 100%; max-width: 1350px; margin-inline: auto; }
+.footer-top > div:first-child { mix-blend-mode: multiply; }
 .contact-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .contact-phone { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .contact-channel { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 10px 18px; border-radius: 999px; border: 1px solid #cbd9e2; background: white; color: #074a74; font-size: 14px; font-weight: 700; line-height: 1.4; cursor: pointer; }
