@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
-import { dispatchLeadNotifications } from "@/lib/notifications";
+import { dispatchLeadNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
+    if (!hasConfiguredNotificationChannel())
+      return NextResponse.json(
+        { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — обсудим задачу напрямую." },
+        { status: 503, headers: { "retry-after": "300" } },
+      );
     const rateLimit = await checkRateLimit(request, "business-leads", 4);
     if (!rateLimit.allowed)
       return NextResponse.json(
@@ -36,6 +41,7 @@ export async function POST(request: Request) {
       !schedule ||
       !Number.isFinite(area) ||
       area < 20 ||
+      area > 4000 ||
       body.consent !== "on"
     )
       return NextResponse.json(

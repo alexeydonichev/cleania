@@ -71,7 +71,7 @@ export default function BusinessBrief() {
             name="area"
             type="number"
             min="20"
-            max="50000"
+            max="4000"
             required
             placeholder="450"
           />
@@ -113,8 +113,8 @@ export default function BusinessBrief() {
         </label>
       </div>
       <label className="consent">
-        <input type="checkbox" name="consent" defaultChecked required />
-        <span>Согласен на обработку данных для подготовки предложения</span>
+        <input type="checkbox" name="consent" required />
+        <span>Согласен на обработку данных для подготовки предложения. <Link href="/privacy" target="_blank">Политика конфиденциальности</Link>.</span>
       </label>
       {message && (
         <p

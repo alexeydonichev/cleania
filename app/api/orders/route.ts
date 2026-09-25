@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
-import { dispatchOrderNotifications } from "@/lib/notifications";
+import { dispatchOrderNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 import { calculateQuote, defaultPricing, extrasCatalog, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey } from "@/lib/quote";
@@ -8,6 +8,11 @@ import { calculateQuote, defaultPricing, extrasCatalog, serviceKeys, todayInNovo
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
+    if (!hasConfiguredNotificationChannel())
+      return NextResponse.json(
+        { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — расчёт уже готов." },
+        { status: 503, headers: { "retry-after": "300" } },
+      );
     const rateLimit = await checkRateLimit(request, "orders", 6);
     if (!rateLimit.allowed)
       return NextResponse.json(

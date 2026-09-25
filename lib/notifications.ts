@@ -23,6 +23,19 @@ type RuntimeEnv = typeof env & {
   EMAIL_WEBHOOK_URL?: string;
 };
 
+/**
+ * A customer-facing form must not report success when there is no operational
+ * route to a manager. Keeping this check next to the delivery code makes the
+ * production gate consistent for both retail orders and B2B briefs.
+ */
+export function hasConfiguredNotificationChannel(runtime: RuntimeEnv = env as RuntimeEnv) {
+  return Boolean(
+    (runtime.TELEGRAM_BOT_TOKEN && runtime.TELEGRAM_CHAT_ID) ||
+    (runtime.MAX_BOT_TOKEN && runtime.MAX_CHAT_ID) ||
+    runtime.EMAIL_WEBHOOK_URL,
+  );
+}
+
 function noticeText(order: OrderNotice) {
   return [
     `Новая заявка БлескПРО ${order.orderNumber}`,
