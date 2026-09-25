@@ -25,7 +25,7 @@ type RuntimeEnv = typeof env & {
 
 function noticeText(order: OrderNotice) {
   return [
-    `Новая заявка Cleania ${order.orderNumber}`,
+    `Новая заявка БлескПРО ${order.orderNumber}`,
     `${order.name} · ${order.phone}`,
     `${order.service}, ${order.area} м²`,
     [order.city, order.address, order.preferredSlot].filter(Boolean).join(" · "),

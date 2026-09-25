@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { siteUrl } from "@/lib/site";
+import { brandName, brandLogo, contactPhone } from "@/lib/brand";
 import HeroShowcase from "./components/HeroShowcase";
 import OrderCalculator from "./components/OrderCalculator";
 import { BookingProvider } from "./components/BookingProvider";
@@ -23,8 +24,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "Cleania", url: siteUrl, areaServed: [{ "@type": "City", name: "Новосибирск" }, { "@type": "City", name: "Бердск" }] },
-      { "@type": "WebSite", url: siteUrl, name: "Cleania", inLanguage: "ru-RU" },
+      { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: brandName, url: siteUrl, logo: `${siteUrl}${brandLogo.src}`, telephone: contactPhone, areaServed: [{ "@type": "City", name: "Новосибирск" }, { "@type": "City", name: "Бердск" }] },
+      { "@type": "WebSite", url: siteUrl, name: brandName, inLanguage: "ru-RU" },
       { "@type": "Service", name: "Уборка квартир и домов", areaServed: ["Новосибирск", "Бердск"], provider: { "@id": `${siteUrl}/#organization` } },
       { "@type": "FAQPage", mainEntity: faqs.map(([q,a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
     ],

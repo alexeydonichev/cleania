@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
+import ContactLinks from "@/app/components/ContactLinks";
 
 export const metadata: Metadata = {
   title: "Контакты и зона работы",
   description:
-    "Cleania в Новосибирске и Бердске: онлайн-заказ уборки, зона обслуживания и способы связи.",
+    "БлескПРО в Новосибирске и Бердске: расчёт уборки, телефон, Telegram, MAX и зона обслуживания.",
   alternates: { canonical: "/contacts" },
 };
 
@@ -20,11 +21,11 @@ export default function ContactsPage() {
         <h1>
           Контакты
           <br />
-          <em>Cleania</em>
+          <em>БлескПРО</em>
         </h1>
         <p>
-          Работаем в Новосибирске и Бердске. Оставьте заявку с вашим номером —
-          свяжемся, чтобы обсудить уборку, адрес и удобное время.
+          Работаем в Новосибирске и Бердске. Позвоните или напишите нам —
+          обсудим уборку, адрес и удобное время.
         </p>
       </section>
       <section className="section shell contacts-grid">
@@ -32,8 +33,9 @@ export default function ContactsPage() {
           <span>01</span>
           <h2>Заказать уборку</h2>
           <p>
-            Рассчитайте стоимость без звонка, выберите задачи и оставьте телефон для подтверждения.
+            Рассчитайте стоимость и напишите нам для согласования деталей. Сообщение отправляете вы — чат не создаёт заказ автоматически.
           </p>
+          <ContactLinks />
           <Link className="button" href="/#calculator">
             Открыть калькулятор
           </Link>

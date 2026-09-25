@@ -17,7 +17,7 @@ export default function BusinessPage() {
         <div className="shell business-hero-grid">
           <div>
             <p className="eyebrow eyebrow-light">
-              <span /> Cleania для бизнеса
+              <span /> БлескПРО для бизнеса
             </p>
             <h1>
               Чистота —<br />

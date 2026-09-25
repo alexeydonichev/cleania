@@ -59,8 +59,8 @@ export async function POST(request: Request) {
         .bind(crypto.randomUUID(), leadId, `B2B-заявка: ${notes}`, now),
     ]);
     await dispatchLeadNotifications(
-      "Новая B2B-заявка Cleania",
-      `Новая B2B-заявка Cleania\n${name} · ${phone}\n${notes}`,
+      "Новая B2B-заявка БлескПРО",
+      `Новая B2B-заявка БлескПРО\n${name} · ${phone}\n${notes}`,
     );
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

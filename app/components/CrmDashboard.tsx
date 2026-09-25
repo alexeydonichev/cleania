@@ -2,6 +2,8 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import BrandLogo from "./BrandLogo";
 import { useRouter } from "next/navigation";
 import { extrasCatalog, type ExtraKey } from "@/lib/quote";
 
@@ -275,9 +277,9 @@ export default function CrmDashboard({
   return (
     <div className="crm-shell">
       <aside className="crm-sidebar">
-        <Link className="crm-brand" href="/">
-          <span>C</span>
-          <b>Cleania</b>
+        <Link className="crm-brand" href="/" aria-label="БлескПРО — на главную">
+          <BrandLogo />
+          <Image src="/brand/favicon-64.png" alt="" width={40} height={40} className="crm-brand-symbol" />
           <small>CRM</small>
         </Link>
         <nav>
@@ -309,7 +311,7 @@ export default function CrmDashboard({
       <main className="crm-main">
         <header className="crm-topbar">
           <div>
-            <p>Cleania · Новосибирск</p>
+            <p>БлескПРО · Новосибирск</p>
             <h1>{nav.find(([key]) => key === view)?.[1]}</h1>
           </div>
           <div className="crm-top-actions">

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { isPreviewDeployment } from "@/lib/deployment";
+import ContactLinks from "./ContactLinks";
 
 export default function BusinessBrief() {
   const [state, setState] = useState<"idle" | "sending" | "success" | "error">(
@@ -41,6 +42,7 @@ export default function BusinessBrief() {
     <p className="eyebrow">Демонстрационная версия</p><h2>Начните с расчёта</h2>
     <p>В калькуляторе можно выбрать офис, площадь и дополнительные работы. Отправку брифа подключим вместе с базой заявок. Сейчас личные данные не запрашиваем.</p>
     <Link className="button" href="/?service=office#calculator">Рассчитать уборку офиса</Link>
+    <ContactLinks />
   </div>;
   return (
     <form className="business-form" onSubmit={submit}>

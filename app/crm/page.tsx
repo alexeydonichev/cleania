@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import CrmDashboard from "@/app/components/CrmDashboard";
+import BrandLogo from "@/app/components/BrandLogo";
 import { rawDb } from "@/db/runtime";
 import { requireCrmUser } from "@/lib/crm-auth";
 import "./crm.css";
@@ -26,7 +27,7 @@ type MetricRow = {
 
 export default async function CrmPage() {
   if (isPreviewDeployment) return <main className="crm-access"><div>
-    <span className="crm-logo">C</span><h1>CRM подключается отдельно</h1>
+    <BrandLogo /><h1>CRM подключается отдельно</h1>
     <p>На Vercel сейчас опубликована демонстрация сайта и калькулятора. База заявок, загрузка файлов и защищённый вход ещё не перенесены. Данные сотрудников и клиентов здесь не отображаются.</p>
     <Link href="/">Вернуться к сайту</Link>
   </div></main>;
@@ -35,10 +36,10 @@ export default async function CrmPage() {
     return (
       <main className="crm-access">
         <div>
-          <span className="crm-logo">C</span>
+          <BrandLogo />
           <h1>Доступ к CRM ограничен</h1>
           <p>
-            Этот аккаунт не добавлен владельцем Cleania. Войдите под разрешённой
+            Этот аккаунт не добавлен владельцем БлескПРО. Войдите под разрешённой
             учётной записью.
           </p>
           <Link href="/">Вернуться на сайт</Link>

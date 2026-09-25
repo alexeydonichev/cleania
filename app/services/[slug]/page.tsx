@@ -20,10 +20,10 @@ export async function generateMetadata({
   const path = `/services/${slug}`;
   return {
     title: `${service.name} в Новосибирске и Бердске`,
-    description: `${service.description} ${service.price}. Онлайн-расчёт и заказ в Cleania.`,
+    description: `${service.description} ${service.price}. Онлайн-расчёт и заказ в БлескПРО.`,
     alternates: { canonical: path },
     openGraph: {
-      title: `${service.name} в Новосибирске и Бердске — Cleania`,
+      title: `${service.name} в Новосибирске и Бердске — БлескПРО`,
       description: service.description,
       url: path,
       images: [{ url: service.image, width: 1600, height: 1000 }],
@@ -61,7 +61,7 @@ export default async function ServicePage({
         name: service.name,
         description: service.description,
         areaServed: ["Новосибирск", "Бердск"],
-        provider: { "@type": "Organization", name: "Cleania", url: siteUrl },
+        provider: { "@type": "Organization", name: "БлескПРО", url: siteUrl },
         offers: {
           "@type": "Offer",
           priceCurrency: "RUB",

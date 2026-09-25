@@ -5,6 +5,7 @@ import { useBooking } from "./BookingProvider";
 import MotionPanel from "./MotionPanel";
 import PriceAmount from "./PriceAmount";
 import { isPreviewDeployment } from "@/lib/deployment";
+import ContactLinks from "./ContactLinks";
 import { focusVisible, scrollToContent } from "@/lib/motion";
 import { extrasCatalog, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey } from "@/lib/quote";
 
@@ -122,6 +123,8 @@ export default function OrderCalculator() {
         <strong className="preview-total">{money(quote.total)} ₽</strong>
         <p>Это демонстрация калькулятора. Все выбранные работы учтены в подробной смете. После подключения базы здесь появится выбор даты и отправка заявки.</p>
         <p className="preview-caption">Сейчас мы не запрашиваем телефон, адрес и фотографии. Заказ не создан.</p>
+        <p>Обсудить расчёт и согласовать уборку можно напрямую:</p>
+        <ContactLinks />
       </div>}
       {step === 2 && !isPreviewDeployment && <>
         <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3><span>Шаг 3 из 3</span></div>

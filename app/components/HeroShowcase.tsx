@@ -6,6 +6,7 @@ import { useBooking } from "./BookingProvider";
 import { serviceKeys, type ServiceKey } from "@/lib/quote";
 import PriceAmount from "./PriceAmount";
 import CleaningSpark from "./CleaningSpark";
+import ContactLinks from "./ContactLinks";
 
 export default function HeroShowcase() {
   const { input, update, pricing, quote } = useBooking();
@@ -15,7 +16,7 @@ export default function HeroShowcase() {
   return (
     <section className="home-hero shell" aria-labelledby="hero-title">
       <div className="hero-title-row">
-        <div><p className="eyebrow">Клининг в Новосибирске и Бердске</p><h1 id="hero-title"><span className="hero-line"><span>Дома — чисто.</span></span><span className="hero-line hero-line-accent"><span>А время — ваше.</span></span></h1></div>
+        <div><p className="eyebrow">Клининг в Новосибирске и Бердске</p><h1 id="hero-title"><span className="hero-line"><span>Работу — нам,</span></span><span className="hero-line hero-line-accent"><span>а отдых — Вам</span></span></h1></div>
         <div className="hero-aside"><CleaningSpark /><p>Уборку возьмём на себя. Выберите, как провести освободившийся день.</p><Link href="#calculator" className="text-link">Рассчитать мою уборку</Link></div>
       </div>
       <div className="home-hero-photo">
@@ -32,6 +33,7 @@ export default function HeroShowcase() {
         <span className="photo-caption">Всё для уютного возвращения домой</span>
       </div>
       <div className="hero-benefits"><span><b>01</b> Расчёт без номера телефона</span><span><b>02</b> Средства и инвентарь с собой</span><span><b>03</b> Состав работ до подтверждения</span></div>
+      <div className="quick-contact"><p>Есть вопросы? Обсудим уборку напрямую.</p><ContactLinks /></div>
     </section>
   );
 }
