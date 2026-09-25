@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
+    "build:vercel": "CLEANIA_RUNTIME=vercel next build --webpack",
+    "dev:vercel": "CLEANIA_RUNTIME=vercel next dev --webpack",
     "start": "vinext start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"

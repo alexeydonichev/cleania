@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { siteUrl } from "@/lib/site";
+import { isPreviewDeployment } from "@/lib/deployment";
 import "./globals.css";
 import "./cleania.css";
+import "./motion.css";
+import "./cleaning-spark.css";
+import "./cases.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -34,10 +38,10 @@ export const metadata: Metadata = {
       "Честный расчёт цены, удобное время и контроль качества в одном заказе.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1600&q=85",
-        width: 1600,
-        height: 900,
-        alt: "Профессиональная уборка Cleania",
+        url: "/images/cleania-home-retouched.webp",
+        width: 1672,
+        height: 941,
+        alt: "Cleania — больше времени для жизни",
       },
     ],
   },
@@ -47,11 +51,11 @@ export const metadata: Metadata = {
     description: "Рассчитайте и закажите уборку онлайн за несколько минут.",
   },
   robots: {
-    index: true,
-    follow: true,
+    index: !isPreviewDeployment,
+    follow: !isPreviewDeployment,
     googleBot: {
-      index: true,
-      follow: true,
+      index: !isPreviewDeployment,
+      follow: !isPreviewDeployment,
       "max-image-preview": "large",
       "max-snippet": -1,
       "max-video-preview": -1,
@@ -72,8 +76,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
-      <body>{children}</body>
+    <html lang="ru" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('cleania-reduced-motion')==='true')document.documentElement.dataset.motion='reduced'}catch(e){}" }} /></head>
+      <body>{isPreviewDeployment && <div className="deployment-note"><span>Демонстрация Cleania</span><p>Калькулятор работает · приём заявок ещё не подключён</p></div>}{children}</body>
     </html>
   );
 }

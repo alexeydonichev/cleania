@@ -102,7 +102,7 @@ export default async function ServicePage({
           <p>{service.description}</p>
           <div className="inner-actions">
             <Link className="button" href={`/?service=${({ "regular-cleaning": "regular", "deep-cleaning": "deep", "after-renovation": "renovation", "window-cleaning": "regular" } as const)[slug as ServiceSlug]}#calculator`}>
-              Рассчитать стоимость <span>↘</span>
+              Рассчитать стоимость
             </Link>
             <dl>
               <div>

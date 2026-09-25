@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
+import { isPreviewDeployment } from "@/lib/deployment";
+import { defaultPricing, serviceKeys } from "@/lib/quote";
 
 export async function GET() {
+  if (isPreviewDeployment) return NextResponse.json({
+    mode: "preview",
+    rules: serviceKeys.map(key => ({ key, ...defaultPricing[key] })),
+  }, { headers: { "Cache-Control": "no-store" } });
   try {
     await ensureDatabase();
     const rows = await rawDb()

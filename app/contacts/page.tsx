@@ -43,7 +43,7 @@ export default function ContactsPage() {
           <h2>Для бизнеса</h2>
           <p>Опишите объект и график — подготовим вопросы для точной сметы.</p>
           <Link className="text-link" href="/business">
-            Заполнить бриф ↗
+            Заполнить бриф
           </Link>
         </div>
         <div className="contact-card">

@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { isPreviewDeployment } from "@/lib/deployment";
 
 export default function BusinessBrief() {
   const [state, setState] = useState<"idle" | "sending" | "success" | "error">(
@@ -9,6 +11,7 @@ export default function BusinessBrief() {
   const [message, setMessage] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isPreviewDeployment) return;
     setState("sending");
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
@@ -34,6 +37,11 @@ export default function BusinessBrief() {
       );
     }
   }
+  if (isPreviewDeployment) return <div className="business-form preview-card">
+    <p className="eyebrow">Демонстрационная версия</p><h2>Начните с расчёта</h2>
+    <p>В калькуляторе можно выбрать офис, площадь и дополнительные работы. Отправку брифа подключим вместе с базой заявок. Сейчас личные данные не запрашиваем.</p>
+    <Link className="button" href="/?service=office#calculator">Рассчитать уборку офиса</Link>
+  </div>;
   return (
     <form className="business-form" onSubmit={submit}>
       <div className="business-form-head">
@@ -115,7 +123,7 @@ export default function BusinessBrief() {
         </p>
       )}
       <button className="button" disabled={state === "sending"}>
-        {state === "sending" ? "Отправляем…" : "Получить расчёт"} <span>→</span>
+        {state === "sending" ? "Отправляем…" : "Получить расчёт"}
       </button>
     </form>
   );

@@ -1,0 +1,99 @@
+/* The story stays inside eight clipped wedges, with one finite cycle per intent. */
+.cleaning-spark {
+  display: inline-grid; position: relative; width: 126px; height: 126px; padding: 0;
+  margin: -12px 0 -7px -13px; border: 0; border-radius: 50%; color: var(--green);
+  background: transparent; vertical-align: middle; flex-shrink: 0; touch-action: manipulation;
+}
+.cleaning-spark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cleaning-spark:focus-visible { outline-offset: 0; }
+.spark-rotor { transform-origin: 100px 100px; }
+.spark-sector > g, .spark-wash { opacity: 0; }
+.spark-sector-0 { --sector-delay: 0ms; }
+.spark-sector-1 { --sector-delay: 70ms; }
+.spark-sector-2 { --sector-delay: 140ms; }
+.spark-sector-3 { --sector-delay: 210ms; }
+.spark-sector-4 { --sector-delay: 280ms; }
+.spark-sector-5 { --sector-delay: 350ms; }
+.spark-sector-6 { --sector-delay: 420ms; }
+.spark-sector-7 { --sector-delay: 490ms; }
+.spark-touch-hint { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cleaning-spark[data-playing=true] .spark-rotor { animation: spark-turn 4500ms var(--ease-out) both; }
+  .cleaning-spark[data-playing=true] .spark-sector > g,
+  .cleaning-spark[data-playing=true] .spark-wash { animation-duration: 3800ms; animation-delay: var(--sector-delay); animation-timing-function: var(--ease-out); animation-fill-mode: both; }
+  .cleaning-spark[data-playing=true] .spark-wash { animation-name: spark-water; }
+  .cleaning-spark[data-playing=true] .spark-dust { animation-name: spark-dust-away; }
+  .cleaning-spark[data-playing=true] .spark-spray { animation-name: spark-spritz; transform-origin: 95px 56px; }
+  .cleaning-spark[data-playing=true] .spark-mist { animation-name: spark-mist-out; transform-origin: 109px 40px; }
+  .cleaning-spark[data-playing=true] .spark-brush { animation-name: spark-brushing; transform-origin: 95px 56px; }
+  .cleaning-spark[data-playing=true] .spark-cloth { animation-name: spark-wiping; transform-origin: 98px 55px; }
+  .cleaning-spark[data-playing=true] .spark-glint { animation-name: spark-clean; transform-origin: 100px 54px; }
+}
+@keyframes spark-turn {
+  0%, 20% { transform: rotate(0); }
+  38%, 77% { transform: rotate(45deg); }
+  100% { transform: rotate(90deg); }
+}
+@keyframes spark-water {
+  0% { opacity: 0; }
+  7%, 32% { opacity: 1; }
+  64% { opacity: .75; }
+  90%, 100% { opacity: 0; }
+}
+@keyframes spark-dust-away {
+  0% { opacity: 0; }
+  7%, 39% { opacity: .9; }
+  58%, 100% { opacity: 0; }
+}
+@keyframes spark-spritz {
+  0% { opacity: 0; transform: translateY(8px) rotate(-10deg); }
+  7%, 12% { opacity: 1; transform: translateY(0) rotate(0); }
+  16% { opacity: 1; transform: translateY(1px) rotate(-7deg); }
+  21% { opacity: 1; transform: translateY(0) rotate(0); }
+  29%, 100% { opacity: 0; transform: translateY(-7px); }
+}
+@keyframes spark-mist-out {
+  0%, 12% { opacity: 0; transform: scale(.3); }
+  16% { opacity: 1; transform: scale(.8); }
+  24% { opacity: 0; transform: scale(1.35); }
+  100% { opacity: 0; }
+}
+@keyframes spark-brushing {
+  0%, 30% { opacity: 0; transform: translate(-6px,-9px) rotate(-15deg); }
+  36% { opacity: 1; transform: translate(2px,0) rotate(10deg); }
+  43% { opacity: 1; transform: translate(-5px,7px) rotate(-12deg); }
+  50% { opacity: 1; transform: translate(4px,12px) rotate(8deg); }
+  58%, 100% { opacity: 0; transform: translate(0,20px) rotate(-5deg); }
+}
+@keyframes spark-wiping {
+  0%, 50% { opacity: 0; transform: translate(6px,-6px) rotate(-10deg); }
+  56% { opacity: 1; transform: translate(-5px,0) rotate(8deg); }
+  63% { opacity: 1; transform: translate(4px,8px) rotate(-7deg); }
+  70% { opacity: 1; transform: translate(-2px,16px) rotate(7deg); }
+  77%, 100% { opacity: 0; transform: translate(0,23px); }
+}
+@keyframes spark-clean {
+  0%, 73% { opacity: 0; transform: scale(.6); }
+  82% { opacity: 1; transform: scale(1.06); }
+  90% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.92); }
+}
+@media (max-width: 900px) {
+  .hero-aside { position: relative; display: block; padding-right: 108px; min-height: 100px; }
+  .hero-aside .cleaning-spark { position: absolute; top: -13px; right: -11px; width: 112px; height: 112px; margin: 0; }
+  .hero-aside p { max-width: 420px; }
+}
+@media (max-width: 420px) {
+  .hero-aside { padding-right: 90px; }
+  .hero-aside .cleaning-spark { width: 97px; height: 97px; right: -9px; top: 0; }
+}
+@media (hover: none) {
+  .spark-touch-hint { display: block; position: absolute; bottom: -1px; width: 100%; font-size: 9px; line-height: 1.2; color: var(--muted); letter-spacing: .02em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cleaning-spark { cursor: default; }
+  .spark-touch-hint { display: none; }
+}
+html[data-motion=reduced] .cleaning-spark { cursor: default; }
+html[data-motion=reduced] .spark-touch-hint { display: none; }

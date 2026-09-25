@@ -1,6 +1,6 @@
 "use client";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { calculateQuote, defaultPricing, serviceKeys, type City, type QuoteInput, type ServiceKey } from "@/lib/quote";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { calculateQuote, defaultPricing, money, serviceKeys, type City, type QuoteInput, type ServiceKey } from "@/lib/quote";
 function useBookingState(initialService: ServiceKey) {
   const [input, setInput] = useState<QuoteInput>({ service: initialService, area: 50, bathrooms: 1, condition: "normal", frequency: "once", extras: [] });
   const [city, setCity] = useState<City>("Новосибирск");
@@ -23,5 +23,16 @@ function useBookingState(initialService: ServiceKey) {
   return { input, update, city, setCity, pricing, pricingStatus, refreshPricing: () => { setPricingStatus("loading"); setPricingRevision(value => value + 1); }, quote: calculateQuote(input, pricing[input.service]) };
 }
 const BookingContext = createContext<ReturnType<typeof useBookingState> | null>(null);
-export function BookingProvider({ children, initialService = "regular" }: { children: ReactNode; initialService?: ServiceKey }) { const value = useBookingState(initialService); return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>; }
+export function BookingProvider({ children, initialService = "regular" }: { children: ReactNode; initialService?: ServiceKey }) {
+  const value = useBookingState(initialService);
+  const lastAmount = useRef(value.quote.total);
+  const [announcement, setAnnouncement] = useState("");
+  useEffect(() => {
+    if (lastAmount.current === value.quote.total) return;
+    // One announcement after a sequence of edits, instead of three competing prices.
+    const timer = window.setTimeout(() => { lastAmount.current = value.quote.total; setAnnouncement(`Предварительная стоимость ${money(value.quote.total)} рублей.`); }, 350);
+    return () => window.clearTimeout(timer);
+  }, [value.quote.total]);
+  return <BookingContext.Provider value={value}>{children}<span className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">{announcement}</span></BookingContext.Provider>;
+}
 export function useBooking() { const value = useContext(BookingContext); if (!value) throw new Error("BookingProvider is required"); return value; }

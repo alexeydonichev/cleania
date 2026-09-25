@@ -1,4 +1,5 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/runtime-env";
+import { isPreviewDeployment } from "@/lib/deployment";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
@@ -24,6 +25,11 @@ type MetricRow = {
 };
 
 export default async function CrmPage() {
+  if (isPreviewDeployment) return <main className="crm-access"><div>
+    <span className="crm-logo">C</span><h1>CRM подключается отдельно</h1>
+    <p>На Vercel сейчас опубликована демонстрация сайта и калькулятора. База заявок, загрузка файлов и защищённый вход ещё не перенесены. Данные сотрудников и клиентов здесь не отображаются.</p>
+    <Link href="/">Вернуться к сайту</Link>
+  </div></main>;
   const auth = await requireCrmUser("/crm");
   if (!auth.allowed || !auth.user)
     return (

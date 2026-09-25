@@ -1,0 +1,10 @@
+.git
+.wrangler
+.vinext
+dist
+outputs
+work
+node_modules
+.env*
+docs
+tests

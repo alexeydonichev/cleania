@@ -29,6 +29,10 @@ npm run db:generate
 npm run build
 ```
 
+## Vercel presentation deployment
+
+`npm run build:vercel` builds the same frontend with Next.js for Vercel. This is currently a clearly marked **demonstration**: the calculator works, but bookings, uploads and CRM access are disabled until a durable backend and standalone authentication are connected. No personal data is collected in this mode. The existing Sites/Cloudflare deployment remains separate and unchanged. See [release evidence](docs/release-2026-09-25.md).
+
 ## Environment
 
 Copy `.env.example` to `.env.local` and fill only the integrations you need. Never commit real tokens.

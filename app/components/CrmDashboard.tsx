@@ -265,10 +265,10 @@ export default function CrmDashboard({
 
   const nav = [
     ["overview", "Обзор", "⌂"],
-    ["orders", "Заявки", "↳"],
+    ["orders", "Заявки", "≡"],
     ["schedule", "Расписание", "□"],
     ["crews", "Сотрудники", "◇"],
-    ["analytics", "Аналитика", "↗"],
+    ["analytics", "Аналитика", "▥"],
     ["settings", "Настройки", "⚙"],
   ] as const;
 
@@ -302,7 +302,7 @@ export default function CrmDashboard({
             <small>{user.role}</small>
           </div>
           <a href={user.signOut} title="Выйти">
-            ↗
+            Выйти
           </a>
         </div>
       </aside>
@@ -430,7 +430,7 @@ export default function CrmDashboard({
                     </b>
                   </div>
                   <button onClick={() => setView("orders")}>
-                    Все заявки →
+                    Все заявки
                   </button>
                 </div>
                 <OrderTable
@@ -991,7 +991,7 @@ export default function CrmDashboard({
                       rel="noreferrer"
                       key={fileId}
                     >
-                      Фото {index + 1} ↗
+                      Фото {index + 1}
                     </a>
                   ))}
                 </div>

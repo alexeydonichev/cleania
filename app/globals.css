@@ -37,8 +37,6 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 22px; min-height: 54px; padding: 0 26px; border: 1px solid var(--green); border-radius: 99px; background: var(--green); color: white; font-weight: 700; font-size: 15px; transition: background .2s, transform .25s; }
 .button:hover { background: #1536d5; transform: translateY(-2px); }
 .button:active { transform: scale(.98); }
-.button span { transition: transform .25s; }
-.button:hover span { transform: translate(2px,-2px); }
 .button-small { min-height: 46px; padding-inline: 20px; }
 .button-light { background: #fff; color: var(--ink); border-color: #fff; }
 .button-light:hover { background: #e4f179; color: var(--ink); border-color: #e4f179; }

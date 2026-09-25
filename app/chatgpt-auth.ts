@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { isVercelRuntime } from "@/lib/deployment";
 
 export type ChatGPTUser = {
   userId: string;
@@ -19,6 +20,9 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
+  // These identity headers are trustworthy only behind the Sites auth gateway.
+  // A direct Vercel visitor can supply them, so never use them for Vercel login.
+  if (isVercelRuntime) return null;
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);

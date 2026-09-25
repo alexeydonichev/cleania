@@ -1,6 +1,22 @@
 import type { NextConfig } from 'next';
+import path from 'node:path';
+
+const vercelRuntime = process.env.CLEANIA_RUNTIME === 'vercel' || process.env.VERCEL === '1';
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_RUNTIME: vercelRuntime ? 'vercel' : 'sites',
+    NEXT_PUBLIC_DEPLOYMENT_MODE: vercelRuntime ? 'preview' : 'live',
+  },
+  webpack(config, { webpack }) {
+    if (vercelRuntime) {
+      config.plugins.push(new webpack.NormalModuleReplacementPlugin(
+        /^@\/lib\/runtime-env$/,
+        path.resolve(process.cwd(), 'lib/vercel-runtime.ts'),
+      ));
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       {
