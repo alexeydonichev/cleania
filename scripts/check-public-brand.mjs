@@ -9,7 +9,7 @@ for (const path of paths) {
   assert.equal(response.status, 200, path);
   const html = await response.text();
   assert.match(html, /<title>[^<]*БлескПРО/, `${path}: page title`);
-  assert.match(html, /src="\/brand\/bleskpro-logo-blue-640.webp"/, `${path}: compact blue logo`);
+  assert.match(html, /src="\/brand\/bleskpro-logo-blue-640.png"/, `${path}: compact blue logo`);
   const visibleText = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ");
   assert.doesNotMatch(visibleText, /cleania/i, `${path}: old visible brand`);
   const shouldNoindex = expectPreview || alwaysNoindex.has(path);
@@ -26,7 +26,7 @@ for (const path of paths) {
   }
   console.log(`Verified ${path}: brand, metadata, ${shouldNoindex ? "noindex" : "live indexing"}${path === "/crm" ? "" : ", contact links"}`);
 }
-for (const path of ["/brand/bleskpro-logo-blue-640.webp", "/brand/bleskpro-logo-blue.webp", "/brand/favicon-32-blue.png", "/brand/favicon-64-blue.png", "/brand/apple-touch-icon-blue.png", "/brand/social-preview-blue.png"]) {
+for (const path of ["/brand/bleskpro-logo-blue-640.png", "/brand/bleskpro-logo-blue.png", "/brand/favicon-32-blue.png", "/brand/favicon-64-blue.png", "/brand/apple-touch-icon-blue.png", "/brand/social-preview-blue.png"]) {
   const response = await fetch(new URL(path, base));
   assert.equal(response.status, 200, path);
   assert.match(response.headers.get("content-type") || "", /^image\//, path);

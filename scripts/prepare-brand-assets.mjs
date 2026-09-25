@@ -7,6 +7,8 @@ await mkdir(root, { recursive: true });
 const input = new URL("bleskpro-blue-source.png", root).pathname;
 const logo = await sharp(input).extract({ left: 0, top: 115, width: 2170, height: 493 }).resize(1786, 406, { fit: "contain", background: "white" }).toBuffer();
 await sharp(logo).webp({ lossless: true }).toFile(new URL("bleskpro-logo-blue.webp", root).pathname);
+await sharp(logo).png().toFile(new URL("bleskpro-logo-blue.png", root).pathname);
+await sharp(logo).resize(640, 145, { fit: "contain", background: "white" }).png().toFile(new URL("bleskpro-logo-blue-640.png", root).pathname);
 const mark = await sharp(input).extract({ left: 0, top: 115, width: 482, height: 493 }).toBuffer();
 for (const size of [32, 64, 180]) {
   await sharp(mark).resize(size, size, { fit: "contain", background: "white" }).png().toFile(new URL(size === 180 ? "apple-touch-icon-blue.png" : `favicon-${size}-blue.png`, root).pathname);

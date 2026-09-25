@@ -56,6 +56,7 @@ test("the compact navigation asset is used for the visible brand", () => {
   const component = readFileSync(new URL("../app/components/BrandLogo.tsx", import.meta.url), "utf8");
   assert.match(component, /brandHeaderLogo/);
   assert.doesNotMatch(component, /brandLogo\.src/);
+  assert.match(brandHeaderLogo.src, /\.png$/);
 });
 
 test("the ПРО accent is royal blue rather than the previous turquoise", async () => {
