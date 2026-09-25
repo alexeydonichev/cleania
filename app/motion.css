@@ -200,6 +200,8 @@
   .booking-extra .counter output { min-width: 18px; }
 }
 @media (max-width: 700px) {
+  /* Content must be readable on the first mobile paint; motion belongs to the details, not the promise. */
+  .hero-title-row .eyebrow, .hero-line > span, .hero-aside { animation: none !important; opacity: 1; transform: none; }
   .hero-spark { display: none; }
   .hero-line > span { animation-duration: 800ms; }
   .quick-quote-fields input, .quick-quote-fields select { font-size: 16px; }

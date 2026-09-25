@@ -13,6 +13,11 @@ export type PropertyType = keyof typeof propertyTypes;
 export function propertyFor(input: Pick<QuoteInput, "service" | "propertyType">): PropertyType {
   return input.propertyType || (input.service === "office" ? "commercial" : "apartment");
 }
+export function isServiceCompatibleWithProperty(input: Pick<QuoteInput, "service" | "propertyType">) {
+  const propertyType = propertyFor(input);
+  const businessObject = propertyType === "commercial" || propertyType === "industrial";
+  return businessObject ? input.service === "office" : input.service !== "office";
+}
 export function maxQuoteArea(input: Pick<QuoteInput, "service" | "propertyType">) { return propertyTypes[propertyFor(input)].maxArea; }
 export function needsSiteSurvey(input: QuoteInput) { return input.area > 300 || propertyFor(input) === "industrial"; }
 export type PricingRule = { label: string; rate: number; minimum: number };
@@ -52,10 +57,12 @@ export function todayInNovosibirsk() {
 /** A customer-owned text receipt: no contacts, booking or automatic transmission. */
 export function formatQuoteForMessage(input: QuoteInput, city: City, rule: PricingRule) {
   const quote = calculateQuote(input, rule);
+  const surveyRequired = needsSiteSurvey(input);
+  const objectLabel = propertyTypes[propertyFor(input)].label;
   const lines = [
     "БлескПРО · предварительный расчёт",
-    `${city} · ${rule.label} · ${input.area} м²`,
-    `Объект: ${propertyTypes[propertyFor(input)].label}`,
+    `${city} · ${objectLabel} · ${input.area} м²`,
+    `Тариф для расчёта: ${rule.label}`,
     `Уборка: ${money(quote.base)} ₽`,
     `Санузлы: ${input.bathrooms}${quote.bathrooms ? ` (+${money(quote.bathrooms)} ₽)` : " (включено)"}`,
   ];
@@ -65,8 +72,8 @@ export function formatQuoteForMessage(input: QuoteInput, city: City, rule: Prici
     if (count) lines.push(`${extrasCatalog[key].label} × ${count}: +${money(count * extrasCatalog[key].price)} ₽`);
   }
   if (quote.discount) lines.push(`${input.frequency === "weekly" ? "Каждую неделю · −15%" : "Раз в 2 недели · −10%"}: −${money(quote.discount)} ₽`);
-  if (needsSiteSurvey(input)) lines.push("Ориентир базовой уборки по выбранному тарифу. Состав бригады, сроки и специальные работы — после оценки объекта. Промышленное оборудование, опасные загрязнения и высотные работы не включены.");
-  lines.push(`Итого за уборку: ${money(quote.total)} ₽`, "Средства и инвентарь включены.", "Хочу согласовать состав работ, окончательную стоимость и свободное время. Это расчёт, не оформленный заказ.");
+  if (surveyRequired) lines.push("Предварительный ориентир рассчитан по выбранному тарифу и комплектации. Состав бригады, сроки и специальные работы — после оценки объекта. Промышленное оборудование, опасные загрязнения и высотные работы не включены.");
+  lines.push(`${surveyRequired ? "Предварительный ориентир по выбранной комплектации" : "Итого за уборку"}: ${money(quote.total)} ₽`, "Средства и инвентарь включены.", "Хочу согласовать состав работ, окончательную стоимость и свободное время. Это расчёт, не оформленный заказ.");
   return lines.join("\n");
 }
 export function validPhone(phone: string) { return /^(?:7|8)\d{10}$/.test(phone.replace(/\D/g, "")); }

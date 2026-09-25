@@ -1,7 +1,6 @@
 import { env } from "@/lib/runtime-env";
 import { isPreviewDeployment } from "@/lib/deployment";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 import CrmDashboard from "@/app/components/CrmDashboard";
 import BrandLogo from "@/app/components/BrandLogo";
@@ -26,10 +25,10 @@ type MetricRow = {
 };
 
 export default async function CrmPage() {
-  if (isPreviewDeployment) return <main className="crm-access"><div>
+  if (isPreviewDeployment || !env.DB) return <main className="crm-access"><div>
     <BrandLogo /><h1>CRM подключается отдельно</h1>
-    <p>На Vercel сейчас опубликована демонстрация сайта и калькулятора. База заявок, загрузка файлов и защищённый вход ещё не перенесены. Данные сотрудников и клиентов здесь не отображаются.</p>
-    <Link href="/">Вернуться к сайту</Link>
+    <p>{isPreviewDeployment ? "В демонстрационной версии доступны сайт и калькулятор. База заявок, загрузка файлов и защищённый вход подключаются отдельно." : "База заявок пока не подключена к этому окружению. Сайт и калькулятор доступны, а CRM появится после настройки защищённого хранилища."} Данные сотрудников и клиентов здесь не отображаются.</p>
+    <a href="/">Вернуться к сайту</a>
   </div></main>;
   const auth = await requireCrmUser("/crm");
   if (!auth.allowed || !auth.user)
@@ -42,7 +41,7 @@ export default async function CrmPage() {
             Этот аккаунт не добавлен владельцем БлескПРО. Войдите под разрешённой
             учётной записью.
           </p>
-          <Link href="/">Вернуться на сайт</Link>
+          <a href="/">Вернуться на сайт</a>
         </div>
       </main>
     );

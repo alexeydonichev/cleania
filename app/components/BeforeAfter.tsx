@@ -62,9 +62,9 @@ export default function BeforeAfter() {
     <div className="case-panel" role="tabpanel" id={`${instance}-panel`} aria-labelledby={`${instance}-tab-${active}`}>
       <div className="case-comparison">
         <div className="compare-stage" aria-busy={!ready && !failed}>
-          <Image key={`${example.id}-after`} src={`/images/cases/${example.id}-after.webp`} alt={`После уборки — ${example.after} ИИ-визуализация.`} fill sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "after")} onError={() => setFailed(true)} />
+          <Image key={`${example.id}-after`} src={`/images/cases/${example.id}-after.webp`} alt={`После уборки: ${example.after}`} fill priority={active === 0} sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "after")} onError={() => setFailed(true)} />
           <div className="compare-before" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-            <Image key={`${example.id}-before`} src={`/images/cases/${example.id}-before.webp`} alt={`До уборки — ${example.before} ИИ-визуализация.`} fill sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "before")} onError={() => setFailed(true)} />
+            <Image key={`${example.id}-before`} src={`/images/cases/${example.id}-before.webp`} alt={`До уборки: ${example.before}`} fill priority={active === 0} sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "before")} onError={() => setFailed(true)} />
           </div>
           {!ready && <div className="compare-loading" role="status">{failed ? "Изображения не загрузились. Обновите страницу." : "Загружаем сравнение…"}</div>}
           <span className="compare-label compare-label-before" aria-hidden="true">До</span><span className="compare-label compare-label-after" aria-hidden="true">После</span>

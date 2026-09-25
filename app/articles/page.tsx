@@ -14,6 +14,21 @@ export const metadata: Metadata = {
     description:
       "Практические ответы об уборке квартиры и дома, подготовке к заказу, окнах и переезде.",
     url: "/articles",
+    images: [
+      {
+        url: "/brand/social-preview-blue.png",
+        width: 1200,
+        height: 630,
+        alt: "БлескПРО — гид по чистоте",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Гид по чистоте — БлескПРО",
+    description:
+      "Практические ответы об уборке квартиры и дома, подготовке к заказу, окнах и переезде.",
+    images: ["/brand/social-preview-blue.png"],
   },
 };
 

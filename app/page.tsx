@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { siteUrl } from "@/lib/site";
 import { brandName, brandLogo, contactPhone } from "@/lib/brand";
 import HeroShowcase from "./components/HeroShowcase";
@@ -6,7 +5,6 @@ import OrderCalculator from "./components/OrderCalculator";
 import { BookingProvider } from "./components/BookingProvider";
 import { PublicFooter, PublicHeader } from "./components/SiteChrome";
 import { ServiceOverview, CleaningDetails } from "./components/CleaningDetails";
-import { serviceKeys, type ServiceKey } from "@/lib/quote";
 import { articles } from "@/lib/articles";
 import CleaningProcess from "./components/CleaningProcess";
 import BeforeAfter from "./components/BeforeAfter";
@@ -27,9 +25,8 @@ const faqs = [
   ["Можно ли заказать уборку дома или коттеджа?", "Да. В калькуляторе выберите дом и укажите площадь. Для дома заранее уточняем этажи, количество санузлов, окна и адрес; выезд в Академгородок и за пределы города подтверждаем до заказа."],
   ["Какие средства и инвентарь привозит команда?", "Команда привозит профессиональный инвентарь и базовый набор средств. Если в доме есть ребёнок, животные, чувствительность к запахам или особые покрытия, сообщите об этом заранее — учтём это при согласовании работ."],
 ];
-export default async function Home({ searchParams }: { searchParams: Promise<{ service?: string }> }) {
-  const params = await searchParams;
-  const service = serviceKeys.includes(params.service as ServiceKey) ? params.service as ServiceKey : "regular";
+const faqColumns = [faqs.slice(0, Math.ceil(faqs.length / 2)), faqs.slice(Math.ceil(faqs.length / 2))];
+export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -39,7 +36,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
       { "@type": "FAQPage", mainEntity: faqs.map(([q,a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
     ],
   };
-  return <BookingProvider initialService={service} key={service}><main>
+  return <BookingProvider><main>
     <a className="skip-link" href="#calculator">Перейти к расчёту уборки</a>
     <PublicHeader />
     <HeroShowcase />
@@ -60,16 +57,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
     <CleaningProcess />
     <BeforeAfter />
     <section className="section shell location-section">
-      <p className="eyebrow">Рядом с вашим домом</p><div className="location-row"><h2>Новосибирск<span> + </span>Бердск</h2><Link className="text-link" href="/contacts">Зона работы и связь</Link></div>
+      <p className="eyebrow">Рядом с вашим домом</p><div className="location-row"><h2>Новосибирск<span> + </span>Бердск</h2><a className="text-link" href="/contacts">Зона работы и связь</a></div>
       <p>Квартиры и дома в городе, Академгородке и Бердске. Для удалённого адреса заранее согласуем выезд.</p>
     </section>
     <section className="section shell knowledge-section" aria-labelledby="knowledge-title">
       <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Гид по чистоте</p><h2 id="knowledge-title">Полезное <span>об уборке.</span></h2></div><p>Понятно разбираем состав работ, цену, подготовку к приезду и частые сценарии без пустых обещаний.</p></div>
       <div className="article-grid article-grid-home">{articles.slice(0, 3).map((article) => <ArticleCard key={article.slug} article={article} />)}</div>
-      <Link className="text-link knowledge-all-link" href="/articles">Все статьи</Link>
+      <a className="text-link knowledge-all-link" href="/articles">Все статьи</a>
     </section>
-    <section className="section shell faq-section" id="faq"><div><p className="eyebrow">До встречи дома</p><h2>Остались<br />вопросы?</h2></div><div>{faqs.map(([q,a]) => <details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
-    <section className="business-strip shell"><div><p className="eyebrow">Для вашего дела</p><h2>Чистый офис.<br />Свой график.</h2></div><div><p>Регулярная уборка коммерческих помещений. Состав работ и стоимость — по вашему объекту.</p><Link href="/business" className="button button-light">Обсудить уборку офиса</Link></div></section>
+    <section className="section shell faq-section" id="faq"><div className="faq-heading"><div><p className="eyebrow">До встречи дома</p><h2>Остались <span>вопросы?</span></h2></div><p>Собрали короткие ответы о цене, выезде, составе уборки и подготовке к приезду.</p></div><div className="faq-lists">{faqColumns.map((column, index) => <div className="faq-list" key={index}>{column.map(([q,a]) => <details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div>)}</div></section>
+    <section className="business-strip shell"><div><p className="eyebrow">Для вашего дела</p><h2>Чистый офис. <span>Свой график.</span></h2></div><div><p>Регулярная уборка коммерческих помещений. Состав работ и стоимость — по вашему объекту.</p><a href="/business" className="button button-light">Обсудить уборку офиса</a></div></section>
     <PublicFooter />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
   </main></BookingProvider>;

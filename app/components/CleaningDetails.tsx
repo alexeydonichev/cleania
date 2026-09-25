@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useState, type CSSProperties } from "react";
 import MotionPanel from "./MotionPanel";
 import { useBooking } from "./BookingProvider";
@@ -17,7 +16,7 @@ export function ServiceOverview() {
     <h3>{s.title.split("\n").map((line,j) => <span key={line}>{j > 0 && <br />}{line}</span>)}</h3><p>{s.text}</p>
     <ul>{s.points.map(point => <li key={point}><span aria-hidden="true">✓</span>{point}</li>)}</ul>
     <div className="service-price"><span>от <strong>{money(pricing[s.key].minimum)} ₽</strong></span><small>{pricing[s.key].rate} ₽/м² · минимум заказа</small></div>
-    <div className="service-links"><a href="#calculator" onClick={() => update({ service: s.key })}>Рассчитать</a><Link href={s.href}>Подробнее</Link></div>
+    <div className="service-links"><a href="#calculator" onClick={() => update({ service: s.key })}>Рассчитать</a><a href={s.href}>Подробнее</a></div>
   </article>)}</div>;
 }
 const rooms = ["Комнаты", "Кухня", "Санузел"] as const;

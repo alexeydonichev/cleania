@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/app/components/ArticleCard";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
@@ -37,6 +36,20 @@ export async function generateMetadata({
       url: path,
       publishedTime: `${article.publishedAt}T00:00:00+07:00`,
       modifiedTime: `${article.modifiedAt}T00:00:00+07:00`,
+      images: [
+        {
+          url: "/brand/social-preview-blue.png",
+          width: 1200,
+          height: 630,
+          alt: `${article.title} — ${brandName}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.seoTitle,
+      description: article.description,
+      images: ["/brand/social-preview-blue.png"],
     },
   };
 }
@@ -99,9 +112,9 @@ export default async function ArticlePage({
       <PublicHeader />
       <section className="article-page-hero shell">
         <nav className="article-breadcrumbs" aria-label="Хлебные крошки">
-          <Link href="/">Главная</Link>
+          <a href="/">Главная</a>
           <span aria-hidden="true">/</span>
-          <Link href="/articles">Гид по чистоте</Link>
+          <a href="/articles">Гид по чистоте</a>
         </nav>
         <p className="eyebrow">{article.category}</p>
         <h1>{article.title}</h1>
@@ -139,18 +152,18 @@ export default async function ArticlePage({
               Укажите площадь и нужные задачи — предварительная стоимость
               изменится сразу.
             </p>
-            <Link className="button button-small" href="/#calculator">
+            <a className="button button-small" href="/#calculator">
               Открыть калькулятор
-            </Link>
+            </a>
           </div>
           <div className="article-service-links">
             <b>По теме статьи</b>
             {article.relatedServices.map((slug) => {
               const service = serviceCatalog[slug as ServiceSlug];
               return (
-                <Link key={slug} href={`/services/${slug}`}>
+                <a key={slug} href={`/services/${slug}`}>
                   {service.name}
-                </Link>
+                </a>
               );
             })}
           </div>
@@ -162,9 +175,9 @@ export default async function ArticlePage({
             <p className="eyebrow">Читайте также</p>
             <h2>Ещё полезные материалы</h2>
           </div>
-          <Link className="text-link" href="/articles">
+          <a className="text-link" href="/articles">
             Все статьи
-          </Link>
+          </a>
         </div>
         <div className="article-grid article-grid-related">
           {relatedArticles.map((related) => (

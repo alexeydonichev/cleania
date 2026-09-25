@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import BrandLogo from "./BrandLogo";
 import { useRouter } from "next/navigation";
@@ -86,6 +85,13 @@ const serviceLabels: Record<string, string> = {
   renovation: "После ремонта",
   office: "Офис",
 };
+function objectTypeLabel(order: Pick<Order, "service_type" | "notes">) {
+  const savedType = order.notes?.match(/(?:^|\n)Объект:\s*([^\r\n]+)/u)?.[1]?.trim();
+  return savedType || serviceLabels[order.service_type] || order.service_type;
+}
+function customerNotes(order: Pick<Order, "notes">) {
+  return order.notes?.replace(/(?:^|\n)Объект:\s*[^\r\n]+\s*/u, "").trim() || "Нет";
+}
 const sourceLabels: Record<string, string> = {
   website: "Сайт",
   business_page: "B2B-форма",
@@ -176,7 +182,7 @@ export default function CrmDashboard({
     const query = search.toLowerCase().trim();
     return query
       ? orders.filter((order) =>
-          `${order.order_number} ${order.name} ${order.phone} ${serviceLabels[order.service_type] || order.service_type}`
+          `${order.order_number} ${order.name} ${order.phone} ${objectTypeLabel(order)} ${serviceLabels[order.service_type] || order.service_type}`
             .toLowerCase()
             .includes(query),
         )
@@ -277,11 +283,11 @@ export default function CrmDashboard({
   return (
     <div className="crm-shell">
       <aside className="crm-sidebar">
-        <Link className="crm-brand" href="/" aria-label="БлескПРО — на главную">
+        <a className="crm-brand" href="/" aria-label="БлескПРО — на главную">
           <BrandLogo />
           <Image src="/brand/favicon-64-blue.png" alt="" width={40} height={40} className="crm-brand-symbol" />
           <small>CRM</small>
-        </Link>
+        </a>
         <nav>
           {nav.map(([key, label, icon]) => (
             <button
@@ -551,7 +557,7 @@ export default function CrmDashboard({
                         >
                           <strong>{order.name}</strong>
                           <span>
-                            {serviceLabels[order.service_type]} · {order.area}{" "}
+                            {objectTypeLabel(order)} · {serviceLabels[order.service_type]} · {order.area}{" "}
                             м²
                           </span>
                           <small>
@@ -893,7 +899,7 @@ export default function CrmDashboard({
                 <h2>{selectedOrder.name}</h2>
                 <p>
                   {selectedOrder.phone} ·{" "}
-                  {serviceLabels[selectedOrder.service_type]} ·{" "}
+                  {objectTypeLabel(selectedOrder)} · {serviceLabels[selectedOrder.service_type]} ·{" "}
                   {selectedOrder.area} м²
                 </p>
               </div>
@@ -903,10 +909,11 @@ export default function CrmDashboard({
             </header>
             <div className="drawer-fields">
               <div className="crm-order-details">
+                <p><b>Тип объекта:</b> {objectTypeLabel(selectedOrder)}</p>
                 <p><b>Город:</b> {selectedOrder.city}</p>
                 <p><b>Адрес:</b> {selectedOrder.address || "Уточнить"}</p>
                 <p><b>Время:</b> {selectedOrder.preferred_slot || "Уточнить"}</p>
-                <p><b>Пожелания:</b> {selectedOrder.notes || "Нет"}</p>
+                <p><b>Пожелания:</b> {customerNotes(selectedOrder)}</p>
                 <p><b>Дополнительно:</b> {describeExtras(selectedOrder.extras_json)}</p>
               </div>
               <label>
@@ -1044,9 +1051,9 @@ function OrderTable({
             <small>{order.phone}</small>
           </span>
           <span>
-            <b>{serviceLabels[order.service_type] || order.service_type}</b>
+            <b>{objectTypeLabel(order)}</b>
             <small>
-              {order.area} м² · {order.files_count || 0} фото
+              {serviceLabels[order.service_type] || order.service_type} · {order.area} м² · {order.files_count || 0} фото
             </small>
           </span>
           <span>

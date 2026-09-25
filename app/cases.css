@@ -31,7 +31,7 @@
 .compare-divider i { height: 15px; width: 2px; border-radius: 2px; background: var(--green); }
 .compare-slider { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; touch-action: pan-y; }
 .compare-stage:focus-within { outline: 3px solid var(--green); outline-offset: 4px; }
-.compare-loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2; background: #eef1f7; color: #4f5b71; font-size: 13px; padding: 40px; text-align: center; }
+.compare-loading { position: absolute; right: 12px; bottom: 12px; z-index: 5; padding: 7px 11px; border-radius: 99px; background: #fffffff0; color: #4f5b71; box-shadow: 0 2px 10px #18224b12; font-size: 12px; line-height: 1.35; text-align: center; pointer-events: none; }
 .compare-controls { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 12px; }
 .compare-controls button { border: 0; background: transparent; border-radius: 5px; color: #2847bf; padding: 10px 0; min-height: 44px; font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
 .compare-controls span { color: var(--muted); font-size: 12px; text-align: center; }
@@ -58,6 +58,9 @@
   .case-description { max-width: 590px; }
   .case-description h3 { font-size: 34px; }
   .compare-controls span { display: block; }
+}
+@media (min-width: 701px) and (max-width: 850px) {
+  .process-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .process-grid { grid-template-columns: 1fr; gap: 36px; margin-top: 30px; }

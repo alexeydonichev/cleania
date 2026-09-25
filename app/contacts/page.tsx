@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
 import ContactLinks from "@/app/components/ContactLinks";
 
@@ -35,16 +34,16 @@ export default function ContactsPage() {
             Рассчитайте стоимость и напишите нам для согласования деталей. Сообщение отправляете вы — чат не создаёт заказ автоматически.
           </p>
           <ContactLinks />
-          <Link className="button" href="/#calculator">
+          <a className="button" href="/#calculator">
             Открыть калькулятор
-          </Link>
+          </a>
         </div>
         <div className="contact-card">
           <h2>Для бизнеса</h2>
           <p>Опишите объект и график — подготовим вопросы для точной сметы.</p>
-          <Link className="text-link" href="/business">
+          <a className="text-link" href="/business">
             Заполнить бриф
-          </Link>
+          </a>
         </div>
         <div className="contact-card">
           <h2>Зона работы</h2>

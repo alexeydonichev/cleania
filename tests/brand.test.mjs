@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import sharp from "sharp";
-import { brandName, brandDomain, brandUrl, brandLogo, contactPhone, telegramUrl, telegramDraftUrl, maxDraftUrl, validMaxProfileUrl, maxProfileUrl } from "../lib/brand.ts";
+import { brandName, brandDomain, brandUrl, brandLogo, brandHeaderLogo, contactPhone, telegramUrl, telegramDraftUrl, maxDraftUrl, validMaxProfileUrl, maxProfileUrl } from "../lib/brand.ts";
+import { readFileSync } from "node:fs";
 
 test("the public brand and IDN canonical refer to БлескПРО", () => {
   assert.equal(brandName, "БлескПРО");
@@ -36,7 +37,7 @@ test("messenger draft links encode the entire receipt without losing Cyrillic or
 
 test("brand delivery variants have the advertised dimensions", async () => {
   const root = new URL("../public/", import.meta.url);
-  for (const [path, width, height] of [[brandLogo.src.slice(1), brandLogo.width, brandLogo.height], ["brand/favicon-32-blue.png", 32, 32], ["brand/favicon-64-blue.png", 64, 64], ["brand/apple-touch-icon-blue.png", 180, 180], ["brand/social-preview-blue.png", 1200, 630]]) {
+  for (const [path, width, height] of [[brandLogo.src.slice(1), brandLogo.width, brandLogo.height], [brandHeaderLogo.src.slice(1), brandHeaderLogo.width, brandHeaderLogo.height], ["brand/favicon-32-blue.png", 32, 32], ["brand/favicon-64-blue.png", 64, 64], ["brand/apple-touch-icon-blue.png", 180, 180], ["brand/social-preview-blue.png", 1200, 630]]) {
     const metadata = await sharp(new URL(path, root).pathname).metadata();
     assert.equal(metadata.width, width, path);
     assert.equal(metadata.height, height, path);
@@ -49,6 +50,12 @@ test("the delivered logo matches the generated blue source crop and resize", asy
   const expected = await sharp(source).extract({ left: 0, top: 115, width: 2170, height: 493 }).resize(1786, 406, { fit: "contain", background: "white" }).raw().toBuffer();
   const actual = await sharp(output).raw().toBuffer();
   assert.deepEqual(actual, expected);
+});
+
+test("the compact navigation asset is used for the visible brand", () => {
+  const component = readFileSync(new URL("../app/components/BrandLogo.tsx", import.meta.url), "utf8");
+  assert.match(component, /brandHeaderLogo/);
+  assert.doesNotMatch(component, /brandLogo\.src/);
 });
 
 test("the ПРО accent is royal blue rather than the previous turquoise", async () => {

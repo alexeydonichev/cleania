@@ -3,7 +3,7 @@ import { ensureDatabase, rawDb } from "@/db/runtime";
 import { dispatchOrderNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-import { calculateQuote, defaultPricing, extrasCatalog, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey } from "@/lib/quote";
+import { calculateQuote, extrasCatalog, isServiceCompatibleWithProperty, maxQuoteArea, needsSiteSurvey, propertyTypes, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey, type PropertyType } from "@/lib/quote";
 
 export async function POST(request: Request) {
   try {
@@ -19,12 +19,23 @@ export async function POST(request: Request) {
         { error: "Слишком много заявок. Попробуйте немного позже." },
         { status: 429, headers: { "retry-after": String(rateLimit.retryAfter) } },
       );
-    const body = (await request.json()) as Record<string, unknown>;
+    let parsedBody: unknown;
+    try {
+      parsedBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Не удалось прочитать параметры заявки" }, { status: 400 });
+    }
+    if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody))
+      return NextResponse.json({ error: "Параметры заявки переданы в неверном формате" }, { status: 400 });
+    const body = parsedBody as Record<string, unknown>;
     const service = String(body.service || "") as ServiceKey;
+    const requestedPropertyType = String(body.propertyType || "");
     const condition = String(body.condition || "") as ConditionKey;
     const frequency = String(body.frequency || "") as FrequencyKey;
     const area = Number(body.area);
     const bathrooms = Number(body.bathrooms);
+    if (body.extras !== undefined && !Array.isArray(body.extras))
+      return NextResponse.json({ error: "Дополнительные услуги переданы в неверном формате" }, { status: 400 });
     const extras = Array.isArray(body.extras) ? body.extras.map(String) as ExtraKey[] : [];
     const city = body.city === undefined ? "Новосибирск" : String(body.city);
     const address = String(body.address || "").trim().slice(0, 300);
@@ -49,6 +60,7 @@ export async function POST(request: Request) {
 
     if (
       !serviceKeys.includes(service) ||
+      (requestedPropertyType && !Object.hasOwn(propertyTypes, requestedPropertyType)) ||
       !["normal", "dirty", "very_dirty"].includes(condition) ||
       !["once", "weekly", "biweekly"].includes(frequency)
     ) {
@@ -57,10 +69,16 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    const propertyType = (requestedPropertyType || (service === "office" ? "commercial" : "apartment")) as PropertyType;
+    if (!isServiceCompatibleWithProperty({ propertyType, service })) {
+      return NextResponse.json(
+        { error: "Для квартиры и дома выберите жилую уборку, а для офиса или промышленного объекта — уборку офиса." },
+        { status: 400 },
+      );
+    }
     if (
       !Number.isInteger(area) ||
       area < 20 ||
-      area > 300 ||
       !Number.isInteger(bathrooms) ||
       bathrooms < 1 ||
       bathrooms > 4
@@ -70,6 +88,14 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    const quoteInput = { propertyType, service, area, bathrooms, extras, condition, frequency };
+    if (area > maxQuoteArea(quoteInput))
+      return NextResponse.json({ error: `Для этого типа объекта доступна площадь до ${maxQuoteArea(quoteInput)} м²` }, { status: 400 });
+    // Large and industrial objects always require a human assessment. The
+    // calculator already routes them to a prepared messenger brief; keep the
+    // same rule at the API boundary so a forged request cannot create an order.
+    if (needsSiteSurvey(quoteInput))
+      return NextResponse.json({ error: "Для этого объекта нужна предварительная оценка. Передайте готовый расчёт в мессенджер — согласуем смету и время." }, { status: 422 });
     if (!name || !validPhone(phone) || body.consent !== true) {
       return NextResponse.json(
         { error: "Укажите имя, телефон и согласие на обработку данных" },
@@ -95,10 +121,9 @@ export async function POST(request: Request) {
       )
       .bind(service)
       .first<{ rate: number; minimum: number }>();
-    const estimate = calculateQuote(
-      { service, area, bathrooms, extras, condition, frequency },
-      storedRule || defaultPricing[service],
-    );
+    if (!storedRule)
+      return NextResponse.json({ error: "Тариф для выбранной уборки временно недоступен. Обновите расчёт или напишите нам в мессенджер." }, { status: 503, headers: { "retry-after": "60" } });
+    const estimate = calculateQuote(quoteInput, storedRule);
 
     if (body.expectedEstimate !== undefined && Number(body.expectedEstimate) !== estimate.total) {
       return NextResponse.json({ error: "Тариф обновился. Проверьте новую сумму и отправьте заявку повторно." }, { status: 409 });
@@ -108,7 +133,16 @@ export async function POST(request: Request) {
         .prepare(
           `INSERT INTO leads (id, name, phone, source, city, notes, status, consent_at, created_at, updated_at) VALUES (?, ?, ?, 'website', ?, ?, 'new', ?, ?, ?)`,
         )
-        .bind(leadId, name, phone, city, comment || null, now, now, now),
+        .bind(
+          leadId,
+          name,
+          phone,
+          city,
+          [`Объект: ${propertyTypes[propertyType].label}`, comment].filter(Boolean).join("\n") || null,
+          now,
+          now,
+          now,
+        ),
       db
         .prepare(
           `INSERT INTO orders (id, order_number, lead_id, service_type, area, bathrooms, condition, frequency, extras_json, preferred_date, preferred_slot, address, estimate_total, duration_hours, crew_size, status, payment_status, upload_token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'unpaid', ?, ?, ?)`,
@@ -159,6 +193,7 @@ export async function POST(request: Request) {
       name,
       phone,
       service,
+      propertyType: propertyTypes[propertyType].label,
       area,
       estimate: estimate.total,
       preferredDate,

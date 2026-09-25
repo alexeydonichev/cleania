@@ -7,6 +7,7 @@ type OrderNotice = {
   name: string;
   phone: string;
   service: string;
+  propertyType?: string;
   area: number;
   estimate: number;
   preferredDate: string | null;
@@ -40,7 +41,7 @@ function noticeText(order: OrderNotice) {
   return [
     `Новая заявка БлескПРО ${order.orderNumber}`,
     `${order.name} · ${order.phone}`,
-    `${order.service}, ${order.area} м²`,
+    `${[order.propertyType, order.service].filter(Boolean).join(" · ")}, ${order.area} м²`,
     [order.city, order.address, order.preferredSlot].filter(Boolean).join(" · "),
     `Расчёт: ${new Intl.NumberFormat("ru-RU").format(order.estimate)} ₽`,
     order.preferredDate

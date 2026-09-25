@@ -2,7 +2,9 @@ export const brandName = "БлескПРО";
 export const brandDomain = "блескпро.рф";
 // ASCII hostname keeps canonicals, structured data and XML URLs interoperable.
 export const brandUrl = "https://xn--90aipcrfhf.xn--p1ai";
+// Keep the master asset for structured data and delivery; the navigation uses the exact smaller rendition below.
 export const brandLogo = { src: "/brand/bleskpro-logo-blue.webp", width: 1786, height: 406 } as const;
+export const brandHeaderLogo = { src: "/brand/bleskpro-logo-blue-640.webp", width: 640, height: 145 } as const;
 export const contactPhone = "+79833216224";
 export const contactPhoneDisplay = "+7 (983) 321-62-24";
 export const telegramUrl = `https://t.me/${contactPhone}`;

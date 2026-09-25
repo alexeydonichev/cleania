@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
@@ -28,6 +27,12 @@ export async function generateMetadata({
       url: path,
       images: [{ url: service.image, width: 1600, height: 1000 }],
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${service.name} в Новосибирске и Бердске — БлескПРО`,
+      description: service.description,
+      images: [service.image],
+    },
   };
 }
 
@@ -39,10 +44,14 @@ export default async function ServicePage({
   const { slug } = await params;
   const service = serviceCatalog[slug as ServiceSlug];
   if (!service) notFound();
+  const isWindowCleaning = slug === "window-cleaning";
+  const calculatorService = ({ "regular-cleaning": "regular", "deep-cleaning": "deep", "after-renovation": "renovation" } as const)[slug as Exclude<ServiceSlug, "window-cleaning">];
   const faq = [
     {
-      q: "Цена фиксируется заранее?",
-      a: "Калькулятор показывает предварительную стоимость и состав работ. Для стандартного заказа её подтверждаем до выезда. Для сложного объекта сначала проверяем фото или проводим оценку.",
+      q: isWindowCleaning ? "Как рассчитывается мойка окон?" : "Цена фиксируется заранее?",
+      a: isWindowCleaning
+        ? "Цена от 1 900 ₽ относится к доступным окнам. Пришлите фото или количество створок: до выезда согласуем стоимость, безопасный доступ и состав работ."
+        : "Калькулятор показывает предварительную стоимость и состав работ. Для стандартного заказа её подтверждаем до выезда. Для сложного объекта сначала проверяем фото или проводим оценку.",
     },
     {
       q: "Нужно покупать средства?",
@@ -62,11 +71,6 @@ export default async function ServicePage({
         description: service.description,
         areaServed: ["Новосибирск", "Бердск"],
         provider: { "@type": "Organization", name: "БлескПРО", url: siteUrl },
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "RUB",
-          description: service.price,
-        },
       },
       {
         "@type": "BreadcrumbList",
@@ -101,9 +105,9 @@ export default async function ServicePage({
           <h1>{service.name}</h1>
           <p>{service.description}</p>
           <div className="inner-actions">
-            <Link className="button" href={`/?service=${({ "regular-cleaning": "regular", "deep-cleaning": "deep", "after-renovation": "renovation", "window-cleaning": "regular" } as const)[slug as ServiceSlug]}#calculator`}>
-              Рассчитать стоимость
-            </Link>
+            <a className="button" href={isWindowCleaning ? "/contacts" : `/?service=${calculatorService}#calculator`}>
+              {isWindowCleaning ? "Согласовать мойку окон" : "Рассчитать стоимость"}
+            </a>
             <dl>
               <div>
                 <dt>Стоимость</dt>
@@ -121,6 +125,8 @@ export default async function ServicePage({
           alt={service.name}
           width="1600"
           height="1100"
+          priority
+          sizes="(max-width: 800px) 100vw, 45vw"
         />
       </section>
       <section className="section shell service-details">

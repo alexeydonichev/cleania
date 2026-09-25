@@ -43,6 +43,17 @@ test("the article detail route publishes canonical metadata and readable schema"
   assert.match(source, /"@type": "BlogPosting"/);
   assert.match(source, /"@type": "BreadcrumbList"/);
   assert.match(source, /inLanguage: "ru-RU"/);
+  assert.match(source, /social-preview-blue\.png/);
+  assert.match(source, /twitter:/);
+});
+
+test("article and service cards include a share preview without adding a misleading generic article image to schema", () => {
+  assert.match(read("app/articles/page.tsx"), /twitter:/);
+  assert.match(read("app/articles/page.tsx"), /social-preview-blue\.png/);
+  const service = read("app/services/[slug]/page.tsx");
+  assert.match(service, /twitter:/);
+  assert.match(service, /summary_large_image/);
+  assert.doesNotMatch(service, /priceCurrency/);
 });
 
 test("home FAQ has the original questions plus seven useful answers", () => {

@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import Link from "next/link";
 import { useBooking } from "./BookingProvider";
 import MotionPanel from "./MotionPanel";
 import PriceAmount from "./PriceAmount";
@@ -31,15 +30,21 @@ export default function OrderCalculator() {
   const [files, setFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState("");
   const [error, setError] = useState("");
+  const [messageFallback, setMessageFallback] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [calculatorVisible, setCalculatorVisible] = useState(false);
   const [copiedText, setCopiedText] = useState("");
   const [copyError, setCopyError] = useState(false);
   const [copying, setCopying] = useState(false);
-  const quoteText = formatQuoteForMessage(input, city, pricing[input.service]);
+  const pricingNotice = pricingStatus === "ready"
+    ? ""
+    : pricingStatus === "loading"
+      ? "\n\nВажно: тарифы ещё уточняются. Это ориентир по базовым ценам; окончательную стоимость подтвердим до выезда."
+      : "\n\nВажно: тарифы на сайте сейчас не загрузились. Это ориентир по базовым ценам; окончательную стоимость подтвердим до выезда.";
+  const quoteText = `${formatQuoteForMessage(input, city, pricing[input.service])}${pricingNotice}`;
   const copied = copiedText === quoteText;
   async function copyQuote() {
-    if (copying || pricingStatus !== "ready") return;
+    if (copying) return;
     setCopying(true); setCopyError(false);
     try {
       await navigator.clipboard.writeText(quoteText);
@@ -47,6 +52,19 @@ export default function OrderCalculator() {
     } catch { setCopyError(true); }
     finally { setCopying(false); }
   }
+  const quoteMessenger = <div className="quote-share-card" id="quote-messenger">
+    <p className="quote-share-kicker">Готовый расчёт</p>
+    <h4>Отправьте смету в удобный мессенджер</h4>
+    <p>{requiresSurvey ? "Площадь, выбранные работы и доплаты уже добавлены в текст. Финальную стоимость подтвердим после оценки объекта." : "Площадь, выбранные работы, доплаты и итог уже добавлены в текст. Сообщение отправите вы."}</p>
+    <>
+      <ContactLinks showPhone={false} message={quoteText} />
+      <div className="quote-share-actions"><button type="button" className="quote-copy-button" disabled={copying} onClick={copyQuote}>{copying ? "Копируем…" : copied ? "Расчёт скопирован" : "Скопировать текст сметы"}</button></div>
+      <details className="quote-message-preview"><summary>Посмотреть текст сообщения</summary><pre>{quoteText}</pre></details>
+      {copyError && <div className="quote-copy-fallback"><p role="alert">Браузер не разрешил копирование. Выделите текст ниже и скопируйте его вручную.</p><label htmlFor="quote-message">Смета для сообщения</label><textarea id="quote-message" readOnly rows={9} value={quoteText} onFocus={event => event.currentTarget.select()} /></div>}
+      {pricingStatus === "loading" && <p className="quote-share-note">Тарифы уточняются: в текст добавлен ориентир по базовым ценам. Финальную стоимость подтвердим до выезда.</p>}
+      {pricingStatus === "error" && <p className="quote-share-note">Тарифы сейчас не загрузились: в текст добавлен ориентир по базовым ценам. Финальную стоимость подтвердим до выезда.</p>}
+    </>
+  </div>;
   useEffect(() => {
     const section = document.getElementById("calculator");
     if (!section || !("IntersectionObserver" in window)) return;
@@ -70,7 +88,7 @@ export default function OrderCalculator() {
   function moveTo(next: number) {
     if (next === step || sendingRef.current) return;
     setDirection(next > step ? 1 : -1);
-    setStep(next); setError("");
+    setStep(next); setError(""); setMessageFallback(false);
     window.requestAnimationFrame(() => {
       scrollToContent(formRef.current);
       formRef.current?.querySelector<HTMLElement>(".booking-step-heading h3")?.focus({ preventScroll: true });
@@ -82,7 +100,7 @@ export default function OrderCalculator() {
     if (step < 2) { moveTo(step + 1); return; }
     if (isPreviewDeployment) return;
     if (requiresSurvey) return;
-    setError("");
+    setError(""); setMessageFallback(false);
     if (!name.trim()) { setError("Пожалуйста, укажите ваше имя."); focusVisible(nameRef.current); return; }
     if (!validPhone(phone)) { setError("Укажите номер из 11 цифр, начиная с +7 или 8."); focusVisible(phoneRef.current); return; }
     if (date && date < todayInNovosibirsk()) { setError("Выберите сегодняшнюю или будущую дату."); focusVisible(dateRef.current); return; }
@@ -93,7 +111,7 @@ export default function OrderCalculator() {
     try {
       const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total }) });
       const data = await response.json() as { error?: string; orderNumber?: string; estimate?: number; uploadToken?: string };
-      if (!response.ok) { if (response.status === 409) refreshPricing(); throw new Error(data.error || "Не удалось отправить заявку. Попробуйте ещё раз."); }
+      if (!response.ok) { if (response.status === 409) refreshPricing(); if (response.status === 503) setMessageFallback(true); throw new Error(data.error || "Не удалось отправить заявку. Попробуйте ещё раз."); }
       if (!data.orderNumber || data.estimate === undefined) throw new Error("Не получили номер заявки. Свяжитесь с нами через страницу контактов.");
       let warning = "";
       if (files.length && data.uploadToken) {
@@ -115,7 +133,7 @@ export default function OrderCalculator() {
     <button className="button" type="button" onClick={() => { setSuccess(null); setStep(0); setFiles([]); setFileError(""); setError(""); setConsent(false); setName(""); setPhone(""); setDate(""); setSlot(""); setAddress(""); setComment(""); window.requestAnimationFrame(() => { scrollToContent(formRef.current); formRef.current?.querySelector<HTMLElement>(".booking-step-heading h3")?.focus({ preventScroll: true }); }); }}>Рассчитать другую уборку</button>
   </div>;
   return <div className="booking-layout">
-    <form id="order-form" className="booking-form" ref={formRef} noValidate aria-busy={isSubmitting} onChange={() => setError("")} onSubmit={submit}>
+    <form id="order-form" className="booking-form" ref={formRef} noValidate aria-busy={isSubmitting} onChange={() => { setError(""); setMessageFallback(false); }} onSubmit={submit}>
       <nav className="booking-progress" aria-label="Шаги оформления" style={{ "--active-step": step } as CSSProperties}>{stepNames.map((label, i) => <button key={label} type="button" disabled={isSubmitting} aria-current={step === i ? "step" : undefined} onClick={() => moveTo(i)}><b>{label}</b></button>)}</nav>
       <fieldset disabled={isSubmitting} aria-label="Параметры заявки"><MotionPanel transitionKey={step} direction={direction}><div className="booking-step">
       {step === 0 && <>
@@ -133,7 +151,7 @@ export default function OrderCalculator() {
           { value: "very_dirty", label: "Сильные загрязнения", description: "+35% к уборке" },
         ]} /></label>
         {input.service === "regular" && <fieldset className="frequency-picker"><legend>Как часто нужна уборка?</legend>{([["once", "Один раз", ""], ["biweekly", "Раз в 2 недели", "−10%"], ["weekly", "Каждую неделю", "−15%"]] as const).map(([value,label,discount]) => <label className={input.frequency === value ? "selected" : ""} key={value}><input type="radio" name="frequency" checked={input.frequency === value} onChange={() => update({ frequency: value as FrequencyKey })} /><span>{label}</span>{discount && <b>{discount}</b>}</label>)}</fieldset>}
-        <p className="booking-help">{propertyTypes[propertyFor(input)].label}: до {money(maxArea)} м². Для сложного остекления, оборудования и специальных работ <Link href="/business">обсудим отдельную смету</Link>.</p>
+        <p className="booking-help">{propertyTypes[propertyFor(input)].label}: до {money(maxArea)} м². Для сложного остекления, оборудования и специальных работ <a href="/business">обсудим отдельную смету</a>.</p>
       </>}
       {step === 1 && <>
         <div className="booking-step-heading"><h3 tabIndex={-1}>Маленькие задачи.<br />Большая разница.</h3></div>
@@ -144,13 +162,11 @@ export default function OrderCalculator() {
       {step === 2 && messageOnly && <div className="preview-card">
         <div className="booking-step-heading"><h3 tabIndex={-1}>Ваш расчёт готов</h3></div>
         <p>{city} · {propertyTypes[propertyFor(input)].label} · {money(input.area)} м²</p>
+        {requiresSurvey && <p className="preview-total-label">Предварительный ориентир</p>}
         <strong className="preview-total">{money(quote.total)} ₽</strong>
-        <p>Выберите мессенджер — подробная смета уже будет в сообщении. Площадь, выбранные работы, доплаты и итог перенесутся автоматически.</p>
-        <p className="preview-caption">Заказ не создан, время не забронировано. Итоговую стоимость согласуем до выезда.{requiresSurvey && " Для этого объекта нужен осмотр или фото: показан ориентир базовой уборки, без оборудования, опасных загрязнений и высотных работ."}</p>
-        <p className="quote-copy-status" role="status" aria-live="polite">{copied ? "Смета также скопирована — её можно вставить в любой чат." : "Передать готовый расчёт:"}</p>
-        {pricingStatus === "ready" ? <ContactLinks message={quoteText} /> : <p>Дождитесь загрузки тарифов или обновите их, чтобы передать актуальный расчёт.</p>}
-        <details className="quote-message-preview"><summary>Посмотреть текст сообщения</summary><pre>{quoteText}</pre></details>
-        {copyError && <div className="quote-copy-fallback"><p role="alert">Браузер не разрешил копирование. Выделите текст ниже и скопируйте его вручную.</p><label htmlFor="quote-message">Смета для сообщения</label><textarea id="quote-message" readOnly rows={9} value={quoteText} onFocus={event => event.currentTarget.select()} /></div>}
+        <p>Выберите мессенджер — подробная смета уже будет в сообщении. Площадь, выбранные работы и доплаты перенесутся автоматически.</p>
+        <p className="preview-caption">Заказ не создан, время не забронировано. Итоговую стоимость согласуем до выезда.{requiresSurvey && " Для этого объекта нужен осмотр или фото: показан предварительный ориентир по выбранной комплектации, без оборудования, опасных загрязнений и высотных работ."}</p>
+        {quoteMessenger}
       </div>}
       {step === 2 && !messageOnly && <>
         <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3></div>
@@ -168,20 +184,21 @@ export default function OrderCalculator() {
           <label className="booking-field full-width"><span>Адрес в городе {city} <small>— необязательно</small></span><input autoComplete="street-address" maxLength={300} value={address} onChange={e => setAddress(e.target.value)} placeholder="Улица и дом; квартиру можно сообщить позже" /></label>
           <label className="booking-field full-width"><span>Важные пожелания <small>— необязательно</small></span><textarea rows={3} maxLength={1000} value={comment} onChange={e => setComment(e.target.value)} placeholder="Есть питомцы, деликатные поверхности или особые задачи?" /></label>
         </div>
+        {quoteMessenger}
         <label className="file-field"><input type="file" accept={fileTypes.join(",")} multiple onChange={e => { const list = Array.from(e.target.files || []); if (list.length > 5 || list.some(f => !fileTypes.includes(f.type) || f.size > 8 * 1024 * 1024)) { setFileError("Выберите до 5 фото JPG, PNG, WEBP или HEIC, каждое до 8 МБ."); setFiles([]); } else { setFileError(""); setFiles(list); } }} /><span><b>{files.length ? `Выбрано фото: ${files.length}` : "Добавить фотографии"}</b><small>До 5 фото, каждое до 8 МБ · необязательно</small></span></label>
         {fileError && <p className="form-message error" role="alert">{fileError}</p>}
         {files.length > 0 && <button type="button" className="remove-files" onClick={() => setFiles([])}>Убрать выбранные фото</button>}
-        <label className="consent"><input ref={consentRef} type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} required /><span>Согласен на обработку данных для оформления заявки. <Link href="/privacy" target="_blank">Политика конфиденциальности</Link>.</span></label>
+        <label className="consent"><input ref={consentRef} type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} required /><span>Согласен на обработку данных для оформления заявки. <a href="/privacy" target="_blank" rel="noopener noreferrer">Политика конфиденциальности</a>.</span></label>
       </>}
       {step > 0 && <button className="back-step" type="button" disabled={isSubmitting} onClick={() => moveTo(step - 1)}>Назад</button>}
       </div></MotionPanel></fieldset>
     </form>
     <aside className="booking-summary">
       <div className="summary-inner">
-        <div className="summary-heading"><span>Ваш расчёт</span><span className="summary-city">{city}</span></div>
-        <div className="summary-price"><strong><PriceAmount amount={quote.total} /></strong></div><p className="summary-subtitle">Предварительная стоимость</p>
+        <div className="summary-heading"><span>{requiresSurvey ? `Ориентир: ${propertyTypes[propertyFor(input)].label}` : "Ваш расчёт"}</span><span className="summary-city">{city}</span></div>
+        <div className="summary-price"><strong><PriceAmount amount={quote.total} /></strong></div><p className="summary-subtitle">{requiresSurvey ? "По выбранной комплектации" : "Предварительная стоимость"}</p>
         <MotionPanel transitionKey={`${input.extras.join("-")}-${input.condition}-${input.frequency}-${input.bathrooms}-${quote.base === pricing[input.service].minimum}`} animateContent={false}><dl className="summary-lines">
-          <div><dt>{pricing[input.service].label} · {input.area} м²</dt><dd>{money(quote.base)} ₽</dd></div>
+          <div><dt>{requiresSurvey ? `${propertyTypes[propertyFor(input)].label} · базовый тариф` : pricing[input.service].label} · {input.area} м²</dt><dd>{money(quote.base)} ₽</dd></div>
           {quote.base === pricing[input.service].minimum && <div className="summary-hint"><dt>Минимум заказа для этого типа уборки</dt></div>}
           <div><dt>Санузлы · {input.bathrooms}</dt><dd>{quote.bathrooms ? `+${money(quote.bathrooms)} ₽` : "включено"}</dd></div>
           {quote.condition > 0 && <div><dt>Состояние · {input.condition === "dirty" ? "+18%" : "+35%"}</dt><dd>+{money(quote.condition)} ₽</dd></div>}
@@ -190,17 +207,17 @@ export default function OrderCalculator() {
         </dl></MotionPanel>
         <div className="summary-included"><span>✓ Средства и инвентарь</span><span>✓ Один санузел и кухня</span></div>
         <p className="summary-timing">{requiresSurvey ? "Состав бригады и сроки — после оценки объекта" : <>Ориентир: {quote.duration.toLocaleString("ru-RU")}–{(quote.duration + 1).toLocaleString("ru-RU")} ч · {quote.crew === 1 ? "1 сотрудник" : "2 сотрудника"}</>}</p>
-        {requiresSurvey && <p className="summary-disclaimer">Ориентир базовой уборки по выбранному тарифу. Оборудование, опасные загрязнения и высотные работы оцениваются отдельно.</p>}
+        {requiresSurvey && <p className="summary-disclaimer">Предварительный ориентир рассчитан по выбранному тарифу и комплектации. Оборудование, опасные загрязнения и высотные работы оцениваются отдельно.</p>}
         <p className="summary-disclaimer">Стоимость и время согласуем до выезда. Сложные загрязнения оценим по фото.</p>
         {pricingStatus === "error" && <p className="form-message error" role="alert">Тарифы пока не загрузились. Показан базовый расчёт. <button type="button" onClick={refreshPricing}>Обновить тарифы</button></p>}
         <div className={`booking-action ${calculatorVisible ? "mobile-docked" : ""}`}>
-          <div className="mobile-price"><small>Предварительно</small><b><PriceAmount amount={quote.total} /></b></div>
+          <div className="mobile-price"><small>{requiresSurvey ? "Ориентир" : "Предварительно"}</small><b><PriceAmount amount={quote.total} /></b></div>
           {step === 2 && messageOnly
-            ? <button type="button" className="button" disabled={copying || pricingStatus !== "ready"} onClick={copyQuote}>{copying ? "Копируем…" : copied ? "Расчёт скопирован" : "Скопировать расчёт"}</button>
+            ? <button type="button" className="button" disabled={copying} onClick={copyQuote}>{copying ? "Копируем…" : copied ? "Расчёт скопирован" : "Скопировать расчёт"}</button>
             : <button type="submit" form="order-form" className="button" disabled={isSubmitting || pricingStatus === "loading" || (step === 2 && pricingStatus !== "ready")}>{isSubmitting ? "Отправляем…" : pricingStatus === "loading" ? "Загружаем тарифы…" : step < 2 ? "Далее" : "Отправить заявку"}{isSubmitting && <span className="button-spinner" aria-hidden="true" />}</button>}
-          {error && <p className="form-message error booking-error" role="alert">{error}</p>}
+          {error && <div className="form-message error booking-error" role="alert"><span>{error}</span>{messageFallback && <a href="#quote-messenger">Передать готовую смету в мессенджер</a>}</div>}
         </div>
-        <p className="summary-safe">{isPreviewDeployment ? "Демонстрация: можно рассчитать стоимость, но не отправить заявку." : step < 2 ? "Цена видна сразу. Телефон — на последнем шаге." : "Без онлайн-оплаты. Вы подтверждаете заказ после связи с менеджером."}</p>
+        <p className="summary-safe">{isPreviewDeployment ? "Демонстрация: можно рассчитать стоимость, но не отправить заявку." : requiresSurvey ? "Для такого объекта финальную смету и состав работ согласуем после оценки." : step < 2 ? "Цена видна сразу. Телефон — на последнем шаге." : "Без онлайн-оплаты. Вы подтверждаете заказ после связи с менеджером."}</p>
       </div>
     </aside>
   </div>;

@@ -73,6 +73,20 @@
 #calculator .preview-card > p { color: #626262; }
 #calculator .preview-card .preview-caption { background: #eee; color: #444; }
 #calculator .preview-card .contact-phone { flex-basis: 100%; margin-bottom: 4px; }
+.preview-total-label { margin: 18px 0 4px !important; color: #4f4f4f !important; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.quote-share-card { margin-top: 24px; padding: 18px; border: 1px solid #d7d7d7; border-radius: 14px; background: #f4f4f4; }
+.quote-share-card > :first-child { margin-top: 0; }
+.quote-share-kicker { margin-bottom: 8px; color: #5c5c5c !important; font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.quote-share-card h4 { margin: 0; color: #202020; font-size: 18px; letter-spacing: -.025em; line-height: 1.22; }
+.quote-share-card > p:not(.quote-share-kicker) { margin: 9px 0 0; color: #626262; font-size: 13px; line-height: 1.55; }
+.quote-share-card .contact-links { margin-top: 15px; }
+.quote-share-actions { margin-top: 12px; }
+.quote-copy-button { min-height: 42px; width: 100%; padding: 10px 14px; border: 1px solid #aaa; border-radius: 10px; background: #fff; color: #292929; font-size: 13px; font-weight: 700; }
+.quote-copy-button:hover:not(:disabled) { background: #e8e8e8; }
+.quote-share-card .quote-message-preview { margin-bottom: 0; }
+.quote-share-wait { margin-bottom: 0 !important; }
+.booking-error { display: grid; gap: 7px; }
+.booking-error a { width: fit-content; color: inherit; font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .quote-copy-fallback { margin-top: 18px; }
 .quote-copy-fallback p, .quote-copy-fallback label { font-size: 14px; line-height: 1.5; }
 .quote-copy-fallback label { display: block; margin-bottom: 8px; font-weight: 600; }
