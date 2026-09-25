@@ -9,6 +9,7 @@ import "./cleaning-spark.css";
 import "./cases.css";
 import "./brand.css";
 import "./calculator-theme.css";
+import "./soft-select.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

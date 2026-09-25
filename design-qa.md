@@ -1,58 +1,87 @@
-# Design QA — blue brand and monochrome calculator
+# Design QA — custom menus and compact typography
 
 final result: passed
 
-## Target and intentional adaptation
+## Scope and visual truth
 
-Source visual truth: `/var/folders/kc/06vqk2713mn_k0cp4kpm60680000gn/T/TemporaryItems/NSIRD_screencaptureui_eQjfPt/Снимок экрана — 2026-09-25 в 18.42.06.png` (actual filename includes nonbreaking spaces, as attached in this task), 588 × 692 pixels.
+Source menu: /var/folders/kc/06vqk2713mn_k0cp4kpm60680000gn/T/TemporaryItems/NSIRD_screencaptureui_4bz2R3/Снимок экрана — 2026-09-25 в 19.36.28.png (1222 × 1298 pixels).
+Original broken state: user attachment at 19.36.19, native OS select.
+Additional annotations: 19.36.52 messenger colors; 19.38.07, 19.38.30,
+19.39.07, 19.39.32, 19.39.50 section headings; 19.40.09 redundant
+before/after notices; 19.40.34 footer slogan.
 
-The owner requested this menu's soft translucent surfaces, thin outlines and highlighted controls **on a light background with monochrome buttons/text**, inside the existing calculator. Blue gradient background, menu commands and menu icons are intentionally not copied. Existing calculator content, responsive grid and typography are retained. This is a component-style adaptation, not a pixel-identical menu clone.
+Intentional adaptation: use the menu's translucent panel, rounded selected rows,
+fine outline icons and soft border/shadow, but in the previously requested light
+monochrome palette. Application commands are replaced with real cleaning choices.
+This is a component style adaptation, not a pixel-identical reproduction of the
+blue screenshot. No raster artwork required; icons are from Radix Icons.
 
-Implementation: `http://127.0.0.1:3001/#calculator`, compiled Next production build.
+Implementation: http://127.0.0.1:3001/ (Next production-mode build).
+Desktop screenshot: /Users/donichevalexey/Documents/Codex/2026-08-24/crm/outputs/bleskpro-menu-desktop-2026-09-25.png
+Screenshot metadata: 1440 × 1000 pixels; CSS viewport 1440 × 1000.
+Menu geometry: 290 × 235 CSS pixels, four 52px items.
+Reference and rendered open-state screenshot emitted together in the browser
+comparison call. A second paired comparison inspected the focused menu region.
+The reference is enlarged; compare panel/row proportions and visual language,
+not absolute font size against the enlarged reference pixels.
 
-Implementation screenshot evidence: inline browser captures in this task, titled “Визуальная проверка выбранных и обычных кнопок калькулятора”, “Проверить дополнительную услугу и закреплённую мобильную кнопку” and “Сравнить настольные кнопки с референсом перед публикацией”. The browser capture API returned inline images rather than filesystem paths; no nonexistent screenshot file is claimed.
+## Findings and comparison history
 
-## Comparison evidence and normalization
+- Original P1: visible menu still belonged to the operating system despite the
+  styled closed control. Fixed by shared Radix Select with a portal, collision
+  avoidance, focus management, typeahead and monochrome menu styles.
+- Original P2: forced BR tags split all five headings. Removed those breaks and
+  added compact responsive typography. At 1440px every heading measured 44.17px
+  high against 44.18px line-height: exactly one line.
+- Original P2: footer slogan was 14px. Now 36px at 1440px, weight 600, 1.2 line
+  height, tighter tracking and blue second phrase. Browser screenshot verified
+  two balanced lines under the logo.
+- Redundant image badge and long paragraph removed. The section eyebrow now
+  says “Демонстрационные примеры”; accessible image descriptions retain provenance.
 
-- Source image and implementation were emitted together in the same comparison call for mobile first-step controls and desktop first-step controls.
-- Desktop comparison: 1008 × 700 CSS viewport, displayed capture approximately 993 × 690 image pixels after tool presentation; the image is scaled uniformly. Judged control treatment and spacing, not absolute source-menu widths. The form and summary occupy separate non-overlapping columns.
-- Mobile: 320 × 1648 CSS viewport, captured through the normal in-app browser surface. A narrower presentation image is tool-scaled; geometry assertions use actual CSS coordinates. First step, selected city, selected cleaning type, counters and extra-service state were inspected.
-- An initial explicit-viewport capture was tiled/blank due to browser capture scaling and was discarded as visual evidence. Resetting the viewport and capturing again produced readable complete controls. No application change was inferred from that capture artifact.
-- Focused comparison: the readable first-step selection cards and highlighted city above; no separate crop is needed because text, radii, borders, inset highlights and selected radio marks are legible in these captures.
-- Additional hero check: 1440 × 900 CSS viewport, both phrase tops 393.30px (one baseline), with no horizontal overflow. At 375px the readable two-line mobile treatment remains, also without horizontal overflow.
+No actionable P0/P1/P2 findings remain after implementation.
 
-## Findings and required fidelity surfaces
+## Required fidelity surfaces
 
-No actionable P0/P1/P2 mismatch remains within the requested component-style adaptation.
+- Typography: existing Manrope retained; 14px menu labels, 12px secondary
+  descriptions; long closed values may ellipsize on narrow phones, while all
+  open options remain completely readable. Footer and headings checked above.
+- Rhythm: 18px outer radius, 11px inner rows, 12px icon/text gap and 8px menu
+  offset. Portal is not clipped by hero photo or animated calculator containers.
+- Colors: neutral translucent surface and dark text intentionally replace the
+  blue reference. Telegram #229ED9 uses dark navy text for readable contrast;
+  MAX #471AFF uses white text, also inside the monochrome calculator.
+- Assets: existing photos and brand logos untouched; authentic library icons
+  used instead of handmade drawings.
+- Content: four real service choices, accurate pricing, named calculator
+  controls, and existing contact URLs preserved.
 
-- **Typography:** existing Manrope, dark neutral text, smaller muted explanations and clear heading hierarchy. Cyrillic content remains live text; no screenshot text is rasterized. Mobile wrapping stays inside controls.
-- **Spacing/layout:** 12px control radii, 22px outer panels, consistent existing form spacing, 44 × 44px counter buttons. At 320px the area/sanuzel section stacks to avoid squeezing larger targets. Desktop form and summary remain separate. The mobile action stays inside the viewport (top 1568px, bottom 1639px in the 1648px-high check).
-- **Colours/tokens:** section background `rgb(247,247,247)`; selected cards light gray; primary action `rgb(41,41,41)` with white text; disabled final action `rgb(227,227,227)`. Thin gray outlines and inset white highlights adapt the source's soft surface treatment. Focus outline and radio mark distinguish selection without relying on colour alone. Header/branding outside the calculator deliberately remain blue.
-- **Image quality/assets:** supplied logo edited via built-in image generation; blue lettering and orbital symbol were inspected before integration. New delivery variants use lossless WebP and correct intrinsic dimensions. Calculator reference contains UI, not a missing photo asset; no new decorative image or invented icon was introduced. Existing semantic form controls were reused.
-- **Copy/content:** all existing service names, prices, units, explanations and truthful demo limits retained. No unrelated “Copy/Paste” menu text imported from the reference.
+Brand references: https://go.max.ru/brandbook (official MAX palette);
+https://telegram.org/tour/screenshots (official Telegram logo resources).
+These are locally styled contact links, not official embedded widgets.
 
-## Interaction and runtime proof
+## Runtime evidence
 
-- Selected Бердск; changed area from 50 to 60 m² and bathrooms from 1 to 2: total became 6250 ₽.
-- Next step opened; added one “Духовка внутри” for 650 ₽: total became 6900 ₽ and selected card/counter updated.
-- Final step showed 6900 ₽, monochrome Telegram/MAX links, no personal-data inputs, and disabled demo submission. Returned to the first step with selected parameters retained.
-- Browser warning/error log empty at inspection.
-- Production build, TypeScript, ESLint and 23 unit tests passed. HTTP brand verifier checked nine page routes, five current blue assets, contacts, canonical sitemap and preview robots policy.
-- No real order, message or notification was sent. CRM and order backend remain outside this presentation deployment.
+- Mouse: selecting Генеральная changes 50m² quote from 4750 to 8000 RUB.
+- Keyboard: ArrowDown opens; Home + Enter selects Поддерживающая and restores
+  4750 RUB. Escape closes after exit animation and returns focus to combobox.
+- Clicking outside dismisses menu.
+- Condition selection “Давно не убирали” updates regular quote to 5605 RUB,
+  matching the existing 18% multiplier.
+- 320px menu left/right bounds 18/308; 375px bounds 47/337. No viewport overflow.
+- 320, 375, 851, 1024, 1280 and 1440px layouts checked. All desktop annotated
+  headings occupy one line; mobile wraps naturally without overflow.
+- Before/after retains its comparison controls and its demonstration identity.
+- Browser console error log empty during local checks.
+- 28 automated tests passed; ESLint and production build succeeded.
+- npm audit --omit=dev reports zero production vulnerabilities. npm install
+  reported existing/development-tree advisories; no unrelated dependency upgrade.
+- No order submission or messenger message performed. Preview safety untouched.
 
-## Comparison history
+## Test limitations and follow-up
 
-1. Discarded invalid tiled browser capture; obtained readable captures after normalizing the browser surface. This was an evidence issue, not an app-design finding.
-2. Mobile and desktop source/implementation comparisons found no actionable P0/P1/P2 differences after accounting for the explicitly requested light monochrome adaptation. No visual-fix loop is claimed where none was needed.
-
-## Implementation checklist
-
-- [x] Scope monochrome styling to calculator only.
-- [x] Verify selected, focused, hover CSS, disabled and final-estimate states.
-- [x] Verify three-step calculation and preserved preview guard.
-- [x] Inspect desktop/mobile captures and browser console.
-- [x] Verify single-line desktop slogan and blue branding.
-
-## Follow-up polish / remaining test gaps
-
-No blocking polish item. Physical-device testing, real notification delivery and authenticated CRM views were not exercised. This QA does not claim literal pixel fidelity to a menu whose content and colours the owner explicitly asked to adapt.
+The real-order time selector shares the same component and compiles but is
+not reachable on the Vercel presentation deployment; no production order was
+submitted. Native mobile-device and screen-reader hardware were not available.
+No remaining blocking visual findings. Review the published dropdown and footer
+for subjective preference before expanding the same menu style to unrelated CRM.

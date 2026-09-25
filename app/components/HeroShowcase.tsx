@@ -7,6 +7,10 @@ import { serviceKeys, type ServiceKey } from "@/lib/quote";
 import PriceAmount from "./PriceAmount";
 import CleaningSpark from "./CleaningSpark";
 import ContactLinks from "./ContactLinks";
+import SoftSelect from "./SoftSelect";
+import { HomeIcon, LayersIcon, CubeIcon, DesktopIcon } from "@radix-ui/react-icons";
+
+const serviceIcons = { regular: <HomeIcon />, deep: <LayersIcon />, renovation: <CubeIcon />, office: <DesktopIcon /> };
 
 export default function HeroShowcase() {
   const { input, update, pricing, quote } = useBooking();
@@ -25,7 +29,7 @@ export default function HeroShowcase() {
         <div className="quick-quote">
           <div className="quick-quote-head">Сколько стоит ваша уборка?</div>
           <div className="quick-quote-fields">
-            <label><span>Тип уборки</span><select aria-label="Тип уборки — быстрый расчёт" value={input.service} onChange={e => update({ service: e.target.value as ServiceKey })}>{serviceKeys.map(key => <option value={key} key={key}>{pricing[key].label}</option>)}</select></label>
+            <label><span>Тип уборки</span><SoftSelect label="Тип уборки — быстрый расчёт" value={input.service} onValueChange={value => update({ service: value as ServiceKey })} options={serviceKeys.map(key => ({ value: key, label: pricing[key].label, icon: serviceIcons[key] }))} /></label>
             <label><span>Площадь, м²</span><input aria-label="Площадь — быстрый расчёт" type="number" min={20} max={300} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const value = Number(e.target.value); if (Number.isInteger(value) && value >= 20 && value <= 300) update({ area: value }); }} onBlur={() => { const value = Math.max(20, Math.min(300, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /></label>
           </div>
           <div className="quick-quote-bottom"><div><small>Предварительно</small><strong><PriceAmount amount={quote.total} /></strong></div><Link href="#calculator" aria-label="Настроить уборку в калькуляторе">Настроить</Link></div>

@@ -6,6 +6,7 @@ import MotionPanel from "./MotionPanel";
 import PriceAmount from "./PriceAmount";
 import { isPreviewDeployment } from "@/lib/deployment";
 import ContactLinks from "./ContactLinks";
+import SoftSelect from "./SoftSelect";
 import { focusVisible, scrollToContent } from "@/lib/motion";
 import { extrasCatalog, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey } from "@/lib/quote";
 
@@ -107,7 +108,11 @@ export default function OrderCalculator() {
           <div className="area-control"><label htmlFor="area-number">Площадь помещения</label><div className="area-number"><input id="area-number" type="number" min={20} max={300} step={1} value={areaDraft} onChange={e => { setAreaDraft(e.target.value); const n = Number(e.target.value); if (Number.isInteger(n) && n >= 20 && n <= 300) update({ area: n }); }} onBlur={() => { const value = Math.min(300, Math.max(20, Math.round(Number(areaDraft) || input.area))); update({ area: value }); setAreaDraft(String(value)); }} /><span>м²</span></div><input aria-label="Площадь ползунком" style={{ "--range-progress": `${(input.area - 20) / 280 * 100}%` } as CSSProperties} type="range" min={20} max={300} step={1} value={input.area} onChange={e => update({ area: Number(e.target.value) })} /><div className="range-limits"><span>20 м²</span><span>300 м²</span></div></div>
           <div className="bathroom-control"><span>Санузлы</span><div className="counter"><button type="button" aria-label="Убрать санузел" disabled={input.bathrooms === 1} onClick={() => update({ bathrooms: input.bathrooms - 1 })}>−</button><output><span key={input.bathrooms}>{input.bathrooms}</span></output><button type="button" aria-label="Добавить санузел" disabled={input.bathrooms === 4} onClick={() => update({ bathrooms: input.bathrooms + 1 })}>+</button></div><small>Первый включён.<br />Следующий +550 ₽.</small></div>
         </div>
-        <label className="booking-field"><span>Состояние помещения</span><select value={input.condition} onChange={e => update({ condition: e.target.value as ConditionKey })}><option value="normal">Обычные загрязнения — без наценки</option><option value="dirty">Давно не убирали · +18% к уборке</option><option value="very_dirty">Сильные загрязнения · +35% к уборке</option></select></label>
+        <label className="booking-field"><span>Состояние помещения</span><SoftSelect label="Состояние помещения" value={input.condition} disabled={isSubmitting} onValueChange={value => { update({ condition: value as ConditionKey }); setError(""); }} options={[
+          { value: "normal", label: "Обычные загрязнения", description: "Без наценки" },
+          { value: "dirty", label: "Давно не убирали", description: "+18% к уборке" },
+          { value: "very_dirty", label: "Сильные загрязнения", description: "+35% к уборке" },
+        ]} /></label>
         {input.service === "regular" && <fieldset className="frequency-picker"><legend>Как часто нужна уборка?</legend>{([["once", "Один раз", ""], ["biweekly", "Раз в 2 недели", "−10%"], ["weekly", "Каждую неделю", "−15%"]] as const).map(([value,label,discount]) => <label className={input.frequency === value ? "selected" : ""} key={value}><input type="radio" name="frequency" checked={input.frequency === value} onChange={() => update({ frequency: value as FrequencyKey })} /><span>{label}</span>{discount && <b>{discount}</b>}</label>)}</fieldset>}
         <p className="booking-help">Для площади больше 300 м², сложного остекления или специальных работ <Link href="/business">заполните короткий бриф</Link>.</p>
       </>}
@@ -130,7 +135,12 @@ export default function OrderCalculator() {
         <div className="booking-step-heading"><h3 tabIndex={-1}>Когда вам удобно?</h3></div>
         <div className="booking-contact-grid">
           <label className="booking-field"><span>Желаемая дата</span><input ref={dateRef} type="date" min={todayInNovosibirsk()} value={date} onChange={e => setDate(e.target.value)} /></label>
-          <label className="booking-field"><span>Желаемое время</span><select value={slot} onChange={e => setSlot(e.target.value)}><option value="">Обсудим с менеджером</option><option value="09:00–12:00">Утро · 09:00–12:00</option><option value="12:00–15:00">День · 12:00–15:00</option><option value="15:00–18:00">Вечер · 15:00–18:00</option></select></label>
+          <label className="booking-field"><span>Желаемое время</span><SoftSelect label="Желаемое время" value={slot || "discuss"} disabled={isSubmitting} onValueChange={value => { setSlot(value === "discuss" ? "" : value); setError(""); }} options={[
+            { value: "discuss", label: "Обсудим с менеджером" },
+            { value: "09:00–12:00", label: "Утро · 09:00–12:00" },
+            { value: "12:00–15:00", label: "День · 12:00–15:00" },
+            { value: "15:00–18:00", label: "Вечер · 15:00–18:00" },
+          ]} /></label>
           <p className="booking-help full-width">Это ваши пожелания. Дату и начало уборки подтвердим после заявки.</p>
           <label className="booking-field"><span>Как к вам обращаться? *</span><input ref={nameRef} name="customerName" autoComplete="name" required maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ваше имя" /></label>
           <label className="booking-field"><span>Номер телефона *</span><input ref={phoneRef} name="customerPhone" type="tel" inputMode="tel" autoComplete="tel" required maxLength={25} value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 999 123-45-67" /></label>

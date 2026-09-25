@@ -10,8 +10,29 @@
 .contact-phone { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .contact-channel { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 10px 18px; border-radius: 999px; border: 1px solid #cbd9e2; background: white; color: #074a74; font-size: 14px; font-weight: 700; line-height: 1.4; cursor: pointer; }
 .contact-channel:hover { background: #edf7fc; border-color: #87bcd2; }
-.contact-telegram { background: #074a74; color: white; border-color: #074a74; }
-.contact-telegram:hover { background: #063958; color: white; }
+.contact-telegram { background: #229ed9; color: #062a3d; border-color: #229ed9; }
+.contact-telegram:hover { background: #2aabee; color: #062a3d; border-color: #2aabee; }
+.contact-max { background: #471aff; color: white; border-color: #471aff; }
+.contact-max:hover { background: #6e1aff; color: white; border-color: #6e1aff; }
+.footer-links .contact-telegram:hover { color: #062a3d; }
+.footer-links .contact-max:hover { color: white; }
+.compact-heading { gap: 24px; }
+.compact-heading > div { min-width: 0; }
+.compact-heading h2 { font-size: clamp(30px, 2.6vw, 48px); line-height: 1.18; letter-spacing: -.05em; }
+.compact-heading > p { flex: 0 0 270px; font-size: 14px; }
+.footer-top { grid-template-columns: 1.35fr 1fr 1fr 1.1fr; }
+.footer-top .footer-tagline { font-size: clamp(26px, 2.5vw, 42px); font-weight: 600; line-height: 1.2; letter-spacing: -.05em; color: var(--ink); margin-top: 24px; }
+.footer-tagline > span { color: #284bff; }
+@media (min-width: 851px) { .compact-heading h2 { white-space: nowrap; } }
+@media (max-width: 1200px) {
+  .compact-heading { display: block; }
+  .compact-heading > p { max-width: 620px; margin: 14px 0 0; }
+}
+@media (max-width: 850px) {
+  .footer-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-brand-block { grid-column: 1 / -1; }
+  .footer-top .footer-tagline { font-size: clamp(30px, 5vw, 40px); }
+}
 .quick-contact { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px 25px; padding-top: 24px; }
 .quick-contact > p { margin: 0; color: var(--muted); font-size: 14px; }
 .quick-contact .contact-phone { margin-right: 10px; }

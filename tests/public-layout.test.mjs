@@ -20,3 +20,32 @@ test('calculator keeps named accessible steps without numeric badges', () => {
   assert.match(source, /id="area-number" type="number"/);
   assert.match(source, /success\.order/);
 });
+
+test('all five requested section headlines omit forced line breaks', () => {
+  const source = ['app/page.tsx', 'app/components/CleaningProcess.tsx', 'app/components/BeforeAfter.tsx'].map(read).join('\n');
+  for (const phrase of ['Чистота бывает разной.', 'Ваша уборка.', 'Что именно', 'Хорошая уборка.', 'До уборки.']) {
+    assert.ok(source.includes(`${phrase} <span>`), phrase);
+  }
+  assert.doesNotMatch(read('app/components/BeforeAfter.tsx'), /className="compare-demo"|className="case-disclosure"/);
+  assert.match(source, /Демонстрационные примеры/);
+});
+
+test('quote dropdowns use a shared accessible portalled select', () => {
+  for (const file of ['app/components/HeroShowcase.tsx', 'app/components/OrderCalculator.tsx']) {
+    assert.doesNotMatch(read(file), /<select[\s>]/, file);
+    assert.match(read(file), /<SoftSelect/);
+  }
+  const select = read('app/components/SoftSelect.tsx');
+  assert.match(select, /@radix-ui\/react-select/);
+  assert.match(select, /Select\.Portal/);
+  assert.match(select, /collisionPadding=\{12\}/);
+  assert.match(select, /aria-label=\{label\}/);
+  assert.match(select, /disabled=\{disabled\}/);
+});
+
+test('messenger colors are retained inside the monochrome calculator', () => {
+  for (const file of ['app/brand.css', 'app/calculator-theme.css']) {
+    assert.match(read(file), /\.contact-telegram \{ background: #229ed9;/);
+    assert.match(read(file), /\.contact-max \{ background: #471aff;/);
+  }
+});

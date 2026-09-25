@@ -16,7 +16,7 @@ export function PublicHeader() {
 export function PublicFooter() {
   return <footer className="site-footer">
     <div className="shell footer-top">
-      <div><Link className="brand brand-footer" href="/" aria-label={`${brandName} — на главную`}><BrandLogo /></Link><p>Работу — нам,<br />а отдых — Вам.</p></div>
+      <div className="footer-brand-block"><Link className="brand brand-footer" href="/" aria-label={`${brandName} — на главную`}><BrandLogo /></Link><p className="footer-tagline">Работу — нам,<br /><span>а отдых — Вам.</span></p></div>
       <div className="footer-links"><b>Услуги</b><Link href="/services/regular-cleaning">Поддерживающая уборка</Link><Link href="/services/deep-cleaning">Генеральная уборка</Link><Link href="/services/after-renovation">После ремонта</Link><Link href="/services/window-cleaning">Мойка окон</Link></div>
       <div className="footer-links"><b>На связи</b><ContactLinks /><Link href="/contacts">Новосибирск и Бердск</Link><Link href="/business">Для бизнеса</Link><Link href="/crm">Вход для сотрудников</Link></div>
       <div className="footer-cta"><span>Освободите свой выходной</span><Link href="/#calculator">Рассчитать уборку</Link></div>

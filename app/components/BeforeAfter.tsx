@@ -47,8 +47,8 @@ export default function BeforeAfter() {
   }
 
   return <section className="case-section shell section" id="work" aria-labelledby="cases-title">
-    <div className="section-heading home-heading">
-      <div><p className="eyebrow">Разница в деталях</p><h2 id="cases-title">До уборки.<br /><span>И после.</span></h2></div>
+    <div className="section-heading home-heading compact-heading">
+      <div><p className="eyebrow">Демонстрационные примеры</p><h2 id="cases-title">До уборки. <span>И после.</span></h2></div>
       <p>Передвиньте разделитель и сравните поверхности. Один ракурс помогает увидеть, что именно изменилось.</p>
     </div>
     <div className="case-tabs" role="tablist" aria-label="Примеры помещений">
@@ -68,7 +68,6 @@ export default function BeforeAfter() {
           </div>
           {!ready && <div className="compare-loading" role="status">{failed ? "Изображения не загрузились. Обновите страницу." : "Загружаем сравнение…"}</div>}
           <span className="compare-label compare-label-before" aria-hidden="true">До</span><span className="compare-label compare-label-after" aria-hidden="true">После</span>
-          <span className="compare-demo">ИИ-визуализация</span>
           <div className="compare-divider" style={{ left: `${position}%` }} aria-hidden="true"><span><i /><i /></span></div>
           <input className="compare-slider" type="range" min={0} max={100} step={1} value={position} disabled={!ready || failed} aria-label={`Сравнение до и после: ${example.label}`} aria-valuetext={`До — ${position} процентов изображения, после — ${100 - position} процентов`} onChange={event => setPosition(Number(event.target.value))} />
         </div>
@@ -81,6 +80,5 @@ export default function BeforeAfter() {
         <a className="button" href="#calculator" onClick={() => update({ service: example.service })}>Рассчитать такую уборку</a>
       </div>
     </div>
-    <p className="case-disclosure">Демонстрационные примеры: изображения созданы с помощью ИИ и не являются фотографиями выполненных заказов БлескПРО. Они показывают типовые задачи, а не гарантируют результат на конкретном объекте. Реальные кейсы добавим после съёмки и согласия клиентов.</p>
   </section>;
 }

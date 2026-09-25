@@ -73,8 +73,11 @@
 #calculator .preview-card > p { color: #626262; }
 #calculator .preview-card .preview-caption { background: #eee; color: #444; }
 #calculator .contact-channel { background: #fff; border-color: #ccc; color: #292929; border-radius: 12px; }
-#calculator .contact-telegram { background: #292929; border-color: #292929; color: #fff; }
 #calculator .contact-channel:hover { background: #e9e9e9; color: #202020; }
+#calculator .contact-telegram { background: #229ed9; border-color: #229ed9; color: #062a3d; }
+#calculator .contact-telegram:hover { background: #2aabee; border-color: #2aabee; color: #062a3d; }
+#calculator .contact-max { background: #471aff; border-color: #471aff; color: #fff; }
+#calculator .contact-max:hover { background: #6e1aff; border-color: #6e1aff; color: #fff; }
 #calculator .file-field, #calculator .success-receipt { background: #f3f3f3; border-color: #aaa; }
 @media (hover: hover) {
   #calculator :is(.city-picker, .service-picker, .frequency-picker) label:hover,

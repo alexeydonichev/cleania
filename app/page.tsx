@@ -35,17 +35,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
     <PublicHeader />
     <HeroShowcase />
     <section className="section shell" id="services">
-      <div className="section-heading home-heading"><div><p className="eyebrow">Под вашу задачу</p><h2>Чистота бывает разной.<br /><span>Выберите свою.</span></h2></div><p>Освежить квартиру к выходным, добраться до каждого уголка или убрать следы ремонта.</p></div>
+      <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Под вашу задачу</p><h2>Чистота бывает разной. <span>Выберите свою.</span></h2></div><p>Освежить квартиру к выходным, добраться до каждого уголка или убрать следы ремонта.</p></div>
       <ServiceOverview />
     </section>
     <section className="calculator-section" id="calculator">
       <div className="shell">
-        <div className="section-heading home-heading"><div><p className="eyebrow">Без звонка для расчёта</p><h2>Ваша уборка.<br /><span>Ваша понятная цена.</span></h2></div><p>Площадь, нужные задачи, удобный день. Стоимость меняется сразу — вы видите, за что платите.</p></div>
+        <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Без звонка для расчёта</p><h2>Ваша уборка. <span>Ваша понятная цена.</span></h2></div><p>Площадь, нужные задачи, удобный день. Стоимость меняется сразу — вы видите, за что платите.</p></div>
         <OrderCalculator />
       </div>
     </section>
     <section className="section shell" id="included">
-      <div className="section-heading home-heading"><div><p className="eyebrow">Всё по полочкам</p><h2>Что именно<br /><span>мы уберём?</span></h2></div><p>Посмотрите состав выбранной уборки по зонам. Окна и техника внутри добавляются отдельно.</p></div>
+      <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Всё по полочкам</p><h2>Что именно <span>мы уберём?</span></h2></div><p>Посмотрите состав выбранной уборки по зонам. Окна и техника внутри добавляются отдельно.</p></div>
       <CleaningDetails />
     </section>
     <CleaningProcess />
