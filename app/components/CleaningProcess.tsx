@@ -10,7 +10,7 @@ export default function CleaningProcess() {
   return <section className="process-section shell section" id="quality" aria-labelledby="process-title">
     <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Спокойно на каждом шаге</p><h2 id="process-title">Хорошая уборка. <span>Простой процесс.</span></h2></div><p>Вы знаете, что будет происходить: от первого сообщения до проверки результата.</p></div>
     <ol className="process-grid">{stages.map((stage) => <li className="process-card" key={stage.image}>
-      <div className="process-photo"><Image src={`/images/editorial/${({ agree: "equipment", clean: "kitchen", check: "windows" } as Record<string, string>)[stage.image]}.webp`} alt={stage.image === "agree" ? "Подготовленный инвентарь для уборки" : stage.image === "check" ? "Специалист очищает оконное стекло" : stage.alt} width={1440} height={960} sizes="(max-width: 700px) 93vw, 31vw" /></div>
+      <div className="process-photo"><Image src={`/images/editorial/${({ agree: "equipment", clean: "kitchen", check: "windows" } as Record<string, string>)[stage.image]}.jpg`} alt={stage.image === "agree" ? "Подготовленный инвентарь для уборки" : stage.image === "check" ? "Специалист очищает оконное стекло" : stage.alt} width={1440} height={960} sizes="(max-width: 700px) 93vw, 31vw" /></div>
       <div className="process-card-copy"><h3>{stage.title}</h3><p>{stage.description}</p><small>{stage.detail}</small></div>
     </li>)}</ol>
   </section>;

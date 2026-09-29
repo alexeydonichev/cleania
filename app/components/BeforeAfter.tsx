@@ -6,8 +6,8 @@ import { useBooking } from "./BookingProvider";
 import type { ServiceKey } from "@/lib/quote";
 
 const examples: Array<{ id: string; label: string; title: string; before: string; after: string; tasks: string[]; service: ServiceKey; beforeImage?: string; afterImage?: string }> = [
-  { id: "living", label: "Гостиная", title: "Снова приятно ходить босиком", before: "Крошки на ковре, пыль и следы обуви на полу.", after: "Чистые доступные поверхности, ковёр после пылесоса и вымытый пол.", beforeImage: "/images/editorial/living-before.webp", afterImage: "/images/editorial/interior.webp", tasks: ["Пылесосим ковёр", "Убираем пыль со столика", "Моем пол подходящим средством", "Протираем доступные плинтусы"], service: "regular" },
-  { id: "hall", label: "Прихожая", title: "Уличная грязь остаётся за порогом", before: "Следы обуви на плитке и отпечатки на двери и зеркале.", after: "Вымытые плитка, дверь и зеркало.", beforeImage: "/images/editorial/hall-before.webp", afterImage: "/images/editorial/hall-after.webp", tasks: ["Собираем песок и сухую грязь", "Моем плитку", "Протираем дверь", "Очищаем зеркало"], service: "deep" },
+  { id: "living", label: "Гостиная", title: "Снова приятно ходить босиком", before: "Крошки на ковре, пыль и следы обуви на полу.", after: "Чистые доступные поверхности, ковёр после пылесоса и вымытый пол.", beforeImage: "/images/editorial/living-before.jpg", afterImage: "/images/editorial/interior.jpg", tasks: ["Пылесосим ковёр", "Убираем пыль со столика", "Моем пол подходящим средством", "Протираем доступные плинтусы"], service: "regular" },
+  { id: "hall", label: "Прихожая", title: "Уличная грязь остаётся за порогом", before: "Следы обуви на плитке и отпечатки на двери и зеркале.", after: "Вымытые плитка, дверь и зеркало.", beforeImage: "/images/editorial/hall-before.jpg", afterImage: "/images/editorial/hall-after.jpg", tasks: ["Собираем песок и сухую грязь", "Моем плитку", "Протираем дверь", "Очищаем зеркало"], service: "deep" },
   {
     id: "kitchen", label: "Квартира", title: "Кухня без следов готовки",
     before: "Жир на фартуке, крошки и следы на фасадах.",
