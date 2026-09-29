@@ -4,6 +4,8 @@ import { useBooking } from "./BookingProvider";
 import MotionPanel from "./MotionPanel";
 import PriceAmount from "./PriceAmount";
 import { isPreviewDeployment } from "@/lib/deployment";
+import { readAttribution } from "@/lib/attribution";
+import { trackConversion } from "@/lib/analytics";
 import ContactLinks from "./ContactLinks";
 import SoftSelect from "./SoftSelect";
 import { focusVisible, scrollToContent } from "@/lib/motion";
@@ -87,6 +89,8 @@ export default function OrderCalculator() {
   function setCount(key: ExtraKey, count: number) { update({ extras: [...input.extras.filter(item => item !== key), ...Array<ExtraKey>(Math.max(0, Math.min(extrasCatalog[key].max, count))).fill(key)] }); }
   function moveTo(next: number) {
     if (next === step || sendingRef.current) return;
+    if (step === 0 && next > 0) trackConversion("calculator_start");
+    if (next === 2) trackConversion("calculator_complete");
     setDirection(next > step ? 1 : -1);
     setStep(next); setError(""); setMessageFallback(false);
     window.requestAnimationFrame(() => {
@@ -109,7 +113,7 @@ export default function OrderCalculator() {
     if (pricingStatus !== "ready") { setError("Не удалось проверить тарифы. Обновите их перед отправкой."); return; }
     sendingRef.current = true; setIsSubmitting(true);
     try {
-      const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total }) });
+      const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total, attribution: readAttribution() }) });
       const data = await response.json() as { error?: string; orderNumber?: string; estimate?: number; uploadToken?: string };
       if (!response.ok) { if (response.status === 409) refreshPricing(); if (response.status === 503) setMessageFallback(true); throw new Error(data.error || "Не удалось отправить заявку. Попробуйте ещё раз."); }
       if (!data.orderNumber || data.estimate === undefined) throw new Error("Не получили номер заявки. Свяжитесь с нами через страницу контактов.");
@@ -122,6 +126,7 @@ export default function OrderCalculator() {
         } catch { warning = "Заявка сохранена, но фото не загрузились. Передайте их менеджеру при подтверждении — новую заявку создавать не нужно."; }
       }
       setSuccess({ order: data.orderNumber, total: data.estimate, warning, phone, city, area: input.area });
+      trackConversion("full_order_submit");
       window.requestAnimationFrame(() => focusVisible(document.getElementById("order-success")));
     } catch (err) { setError(err instanceof Error ? err.message : "Не удалось отправить заявку. Ваши данные остались в форме."); }
     finally { sendingRef.current = false; setIsSubmitting(false); }

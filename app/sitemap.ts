@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
 import { articles } from "@/lib/articles";
 import { serviceCatalog, siteUrl } from "@/lib/site";
+import { locations } from "@/lib/locations";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUpdatedAt = new Date("2026-09-26T00:00:00+07:00");
+  const siteUpdatedAt = new Date("2026-09-30T00:00:00+07:00");
   return [
     { url: siteUrl, lastModified: siteUpdatedAt, changeFrequency: "weekly", priority: 1 },
+    ...Object.keys(locations).map(slug => ({ url: `${siteUrl}/locations/${slug}`, lastModified: siteUpdatedAt, changeFrequency: "monthly" as const, priority: 0.8 })),
     ...Object.keys(serviceCatalog).map((slug) => ({
       url: `${siteUrl}/services/${slug}`,
       lastModified: siteUpdatedAt,

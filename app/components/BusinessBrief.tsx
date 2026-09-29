@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { isPreviewDeployment } from "@/lib/deployment";
 import ContactLinks from "./ContactLinks";
+import { readAttribution } from "@/lib/attribution";
+import { trackConversion } from "@/lib/analytics";
 
 export default function BusinessBrief() {
   const [state, setState] = useState<"idle" | "sending" | "success" | "error">(
@@ -32,7 +34,7 @@ export default function BusinessBrief() {
       const response = await fetch("/api/business-leads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, attribution: readAttribution() }),
       });
       const result = (await response.json()) as { error?: string };
       if (!response.ok) {
@@ -40,6 +42,7 @@ export default function BusinessBrief() {
         throw new Error(result.error || "Не удалось отправить заявку");
       }
       setState("success");
+      trackConversion("business_submit");
       setMessage(
         "Бриф отправлен. Менеджер подготовит вопросы для точной сметы.",
       );

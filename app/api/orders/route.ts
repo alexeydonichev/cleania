@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
 import { dispatchOrderNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { attributionNote } from "@/lib/attribution";
 
 import { calculateQuote, extrasCatalog, isServiceCompatibleWithProperty, maxQuoteArea, needsSiteSurvey, propertyTypes, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey, type PropertyType } from "@/lib/quote";
 
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
           name,
           phone,
           city,
-          [`Объект: ${propertyTypes[propertyType].label}`, comment].filter(Boolean).join("\n") || null,
+          [`Объект: ${propertyTypes[propertyType].label}`, comment, attributionNote(body.attribution)].filter(Boolean).join("\n") || null,
           now,
           now,
           now,

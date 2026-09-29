@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { siteUrl } from "@/lib/site";
 import { isPreviewDeployment } from "@/lib/deployment";
 import { brandName } from "@/lib/brand";
+import SiteAnalytics from "./components/SiteAnalytics";
+import "./growth.css";
 import "./globals.css";
 import "./cleania.css";
 import "./motion.css";
@@ -13,6 +15,10 @@ import "./soft-select.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || "fA1SKHmtGW7cWpD0yGHS_reujPSMt0fAnujFjrCT2Ps",
+    yandex: process.env.YANDEX_SITE_VERIFICATION || undefined,
+  },
   title: {
     default: `Клининг в Новосибирске и Бердске — расчёт уборки онлайн | ${brandName}`,
     template: `%s — ${brandName}`,
@@ -86,7 +92,7 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('cleania-reduced-motion')==='true')document.documentElement.dataset.motion='reduced'}catch(e){}" }} /></head>
-      <body>{isPreviewDeployment && <div className="deployment-note"><span>Демонстрация {brandName}</span><p>Калькулятор работает · отправка формы ещё не подключена</p></div>}{children}</body>
+      <body>{isPreviewDeployment && <div className="deployment-note"><span>Демонстрация {brandName}</span><p>Калькулятор работает · отправка формы ещё не подключена</p></div>}{children}<SiteAnalytics /></body>
     </html>
   );
 }

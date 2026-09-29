@@ -10,7 +10,7 @@ test("presentation deployment permits only the public pricing GET", () => {
 });
 
 test("orders, uploads and CRM endpoints fail closed in presentation mode", () => {
-  for (const path of ["/api/orders", "/api/orders/CL-test/files", "/api/business-leads", "/api/crm/pricing", "/api/crm/crews", "/api/crm/files/test", "/api/pricing/", "/api/pricing/../orders"]) {
+  for (const path of ["/api/orders", "/api/callback-requests", "/api/orders/CL-test/files", "/api/business-leads", "/api/crm/pricing", "/api/crm/crews", "/api/crm/files/test", "/api/pricing/", "/api/pricing/../orders"]) {
     for (const method of ["GET", "POST", "PUT", "PATCH", "DELETE"]) {
       assert.equal(previewApiAllowed(path, method), false, `${method} ${path}`);
     }

@@ -94,6 +94,7 @@ function customerNotes(order: Pick<Order, "notes">) {
 }
 const sourceLabels: Record<string, string> = {
   website: "Сайт",
+  callback: "Обратный звонок",
   business_page: "B2B-форма",
   direct: "Прямой",
   referral: "Рекомендации",
@@ -503,7 +504,7 @@ export default function CrmDashboard({
               <section className="crm-panel business-leads">
                 <div className="crm-panel-head">
                   <div>
-                    <span>B2B-заявки без заказа</span>
+                    <span>Обращения без заказа</span>
                     <b>Требуют квалификации</b>
                   </div>
                 </div>

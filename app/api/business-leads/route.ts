@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
 import { dispatchLeadNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { attributionNote } from "@/lib/attribution";
 
 export async function POST(request: Request) {
   try {
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
     const db = rawDb();
     const now = new Date().toISOString();
     const leadId = crypto.randomUUID();
-    const notes = `${objectType}, ${area} м², ${schedule}${comment ? `. ${comment}` : ""}`;
+    const notes = [`${objectType}, ${area} м², ${schedule}${comment ? `. ${comment}` : ""}`, attributionNote(body.attribution)].filter(Boolean).join("\n");
     await db.batch([
       db
         .prepare(

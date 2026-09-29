@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import ArticleCard from "@/app/components/ArticleCard";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
@@ -38,7 +39,7 @@ export async function generateMetadata({
       modifiedTime: `${article.modifiedAt}T00:00:00+07:00`,
       images: [
         {
-          url: "/brand/social-preview-blue.png",
+          url: article.image || "/brand/social-preview-blue.png",
           width: 1200,
           height: 630,
           alt: `${article.title} — ${brandName}`,
@@ -49,7 +50,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: article.seoTitle,
       description: article.description,
-      images: ["/brand/social-preview-blue.png"],
+      images: [article.image || "/brand/social-preview-blue.png"],
     },
   };
 }
@@ -72,6 +73,7 @@ export default async function ArticlePage({
         "@type": "BlogPosting",
         "@id": `${articleUrl}#article`,
         headline: article.title,
+        ...(article.image ? { image: `${siteUrl}${article.image}` } : {}),
         description: article.description,
         url: articleUrl,
         mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
@@ -120,16 +122,19 @@ export default async function ArticlePage({
         <h1>{article.title}</h1>
         <p>{article.description}</p>
         <div className="article-page-meta">
+          <span>Редакция БлескПРО</span>
           <time dateTime={article.modifiedAt}>
             Обновлено {formatArticleDate(article.modifiedAt)}
           </time>
           <span>{article.readTime}</span>
         </div>
+        {article.image && <Image className="article-cover" src={article.image} alt={article.title} width={1440} height={960} priority sizes="(max-width:750px) 93vw, 85vw" />}
+        <nav className="article-toc" aria-label="Содержание статьи">{article.sections.map((section, index) => <a key={section.heading} href={`#part-${index + 1}`}>{section.heading}</a>)}</nav>
       </section>
       <section className="section shell article-content-grid">
         <article className="article-body">
-          {article.sections.map((section) => (
-            <section key={section.heading}>
+          {article.sections.map((section, index) => (
+            <section id={`part-${index + 1}`} key={section.heading}>
               <h2>{section.heading}</h2>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

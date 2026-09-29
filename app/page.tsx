@@ -9,6 +9,8 @@ import { articles } from "@/lib/articles";
 import CleaningProcess from "./components/CleaningProcess";
 import BeforeAfter from "./components/BeforeAfter";
 import ArticleCard from "./components/ArticleCard";
+import CallbackRequest from "./components/CallbackRequest";
+import EditorialGallery from "./components/EditorialGallery";
 
 const faqs = [
   ["Стоимость в калькуляторе окончательная?", "Это предварительный расчёт по выбранным параметрам. До выезда согласуем адрес, состояние и дополнительные работы, затем подтвердим стоимость. Работы вне согласованного списка обсуждаем отдельно."],
@@ -40,6 +42,7 @@ export default function Home() {
     <a className="skip-link" href="#calculator">Перейти к расчёту уборки</a>
     <PublicHeader />
     <HeroShowcase />
+    <div className="shell"><CallbackRequest /></div>
     <section className="section shell" id="services">
       <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Под вашу задачу</p><h2>Чистота бывает разной. <span>Выберите свою.</span></h2></div><p>Освежить квартиру к выходным, добраться до каждого уголка или убрать следы ремонта.</p></div>
       <ServiceOverview />
@@ -56,9 +59,11 @@ export default function Home() {
     </section>
     <CleaningProcess />
     <BeforeAfter />
+    <EditorialGallery />
     <section className="section shell location-section">
       <p className="eyebrow">Рядом с вашим домом</p><div className="location-row"><h2>Новосибирск<span> + </span>Бердск</h2><a className="text-link" href="/contacts">Зона работы и связь</a></div>
       <p>Квартиры и дома в городе, Академгородке и Бердске. Для удалённого адреса заранее согласуем выезд.</p>
+      <nav className="local-links" aria-label="Клининг по городам"><a href="/locations/novosibirsk">Клининг в Новосибирске</a><a href="/locations/berdsk">Уборка квартир и домов в Бердске</a></nav>
     </section>
     <section className="section shell knowledge-section" aria-labelledby="knowledge-title">
       <div className="section-heading home-heading compact-heading"><div><p className="eyebrow">Гид по чистоте</p><h2 id="knowledge-title">Полезное <span>об уборке.</span></h2></div><p>Понятно разбираем состав работ, цену, подготовку к приезду и частые сценарии без пустых обещаний.</p></div>

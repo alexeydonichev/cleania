@@ -5,7 +5,9 @@ import { useId, useState } from "react";
 import { useBooking } from "./BookingProvider";
 import type { ServiceKey } from "@/lib/quote";
 
-const examples: Array<{ id: string; label: string; title: string; before: string; after: string; tasks: string[]; service: ServiceKey }> = [
+const examples: Array<{ id: string; label: string; title: string; before: string; after: string; tasks: string[]; service: ServiceKey; beforeImage?: string; afterImage?: string }> = [
+  { id: "living", label: "Гостиная", title: "Снова приятно ходить босиком", before: "Крошки на ковре, пыль и следы обуви на полу.", after: "Чистые доступные поверхности, ковёр после пылесоса и вымытый пол.", beforeImage: "/images/editorial/living-before.webp", afterImage: "/images/editorial/interior.webp", tasks: ["Пылесосим ковёр", "Убираем пыль со столика", "Моем пол подходящим средством", "Протираем доступные плинтусы"], service: "regular" },
+  { id: "hall", label: "Прихожая", title: "Уличная грязь остаётся за порогом", before: "Следы обуви на плитке и отпечатки на двери и зеркале.", after: "Вымытые плитка, дверь и зеркало.", beforeImage: "/images/editorial/hall-before.webp", afterImage: "/images/editorial/hall-after.webp", tasks: ["Собираем песок и сухую грязь", "Моем плитку", "Протираем дверь", "Очищаем зеркало"], service: "deep" },
   {
     id: "kitchen", label: "Квартира", title: "Кухня без следов готовки",
     before: "Жир на фартуке, крошки и следы на фасадах.",
@@ -55,16 +57,16 @@ export default function BeforeAfter() {
       {examples.map((item, index) => <button key={item.id} type="button" role="tab" id={`${instance}-tab-${index}`} aria-controls={`${instance}-panel`} aria-selected={active === index} tabIndex={active === index ? 0 : -1} onClick={() => select(index)} onKeyDown={event => {
         if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
         event.preventDefault();
-        const next = event.key === "Home" ? 0 : event.key === "End" ? 2 : (active + (event.key === "ArrowRight" ? 1 : 2)) % examples.length;
+        const next = event.key === "Home" ? 0 : event.key === "End" ? examples.length - 1 : (active + (event.key === "ArrowRight" ? 1 : examples.length - 1)) % examples.length;
         select(next); document.getElementById(`${instance}-tab-${next}`)?.focus();
       }}>{item.label}</button>)}
     </div>
     <div className="case-panel" role="tabpanel" id={`${instance}-panel`} aria-labelledby={`${instance}-tab-${active}`}>
       <div className="case-comparison">
         <div className="compare-stage" aria-busy={!ready && !failed}>
-          <Image key={`${example.id}-after`} src={`/images/cases/${example.id}-after.webp`} alt={`После уборки: ${example.after}`} fill priority={active === 0} sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "after")} onError={() => setFailed(true)} />
+          <Image key={`${example.id}-after`} src={example.afterImage || `/images/cases/${example.id}-after.webp`} alt={`После уборки: ${example.after}`} fill sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "after")} onError={() => setFailed(true)} />
           <div className="compare-before" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-            <Image key={`${example.id}-before`} src={`/images/cases/${example.id}-before.webp`} alt={`До уборки: ${example.before}`} fill priority={active === 0} sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "before")} onError={() => setFailed(true)} />
+            <Image key={`${example.id}-before`} src={example.beforeImage || `/images/cases/${example.id}-before.webp`} alt={`До уборки: ${example.before}`} fill sizes="(max-width: 850px) 93vw, 65vw" onLoad={() => markLoaded(example.id, "before")} onError={() => setFailed(true)} />
           </div>
           {!ready && <div className="compare-loading" role="status">{failed ? "Изображения не загрузились. Обновите страницу." : "Загружаем сравнение…"}</div>}
           <span className="compare-label compare-label-before" aria-hidden="true">До</span><span className="compare-label compare-label-after" aria-hidden="true">После</span>

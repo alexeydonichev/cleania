@@ -11,7 +11,7 @@ export const serviceCatalog = {
     price: "от 2 490 ₽",
     duration: "от 2 часов",
     image:
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1600&q=86",
+      "/images/editorial/floor.webp",
     includes: [
       "Протираем доступные поверхности и пыль",
       "Моем фасады кухни и рабочие поверхности",
@@ -34,7 +34,7 @@ export const serviceCatalog = {
     price: "от 4 490 ₽",
     duration: "от 4 часов",
     image:
-      "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=1600&q=86",
+      "/images/editorial/kitchen.webp",
     includes: [
       "Удаляем пыль со всех доступных поверхностей",
       "Обезжириваем кухонный фартук и фасады",
@@ -57,7 +57,7 @@ export const serviceCatalog = {
     price: "от 6 990 ₽",
     duration: "от 6 часов",
     image:
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=86",
+      "/images/editorial/equipment.webp",
     includes: [
       "Обеспыливаем стены, потолки и горизонтали",
       "Обеспыливаем рамы и подоконники; мойку стёкол добавляем отдельно",
@@ -80,7 +80,7 @@ export const serviceCatalog = {
     price: "от 1 900 ₽",
     duration: "от 1,5 часов",
     image:
-      "https://images.unsplash.com/photo-1528740561666-dc2479dc08ab?auto=format&fit=crop&w=1600&q=86",
+      "/images/editorial/windows.webp",
     includes: [
       "Стекло с двух доступных сторон",
       "Рамы, ручки и уплотнители",
