@@ -3,6 +3,9 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
 import { serviceCatalog, type ServiceSlug, siteUrl } from "@/lib/site";
+import { publicServices } from "@/lib/cms";
+import { safeJson } from "@/lib/cms-validation";
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return Object.keys(serviceCatalog).map((slug) => ({ slug }));
@@ -14,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const service = serviceCatalog[slug as ServiceSlug];
+  const service = Object.hasOwn(serviceCatalog,slug) ? (await publicServices())[slug as ServiceSlug] : undefined;
   if (!service) return {};
   const path = `/services/${slug}`;
   return {
@@ -42,7 +45,7 @@ export default async function ServicePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = serviceCatalog[slug as ServiceSlug];
+  const service = Object.hasOwn(serviceCatalog,slug) ? (await publicServices())[slug as ServiceSlug] : undefined;
   if (!service) notFound();
   const isWindowCleaning = slug === "window-cleaning";
   const calculatorService = ({ "regular-cleaning": "regular", "deep-cleaning": "deep", "after-renovation": "renovation" } as const)[slug as Exclude<ServiceSlug, "window-cleaning">];
@@ -182,7 +185,7 @@ export default async function ServicePage({
       <PublicFooter />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
     </main>
   );

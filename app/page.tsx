@@ -5,7 +5,8 @@ import OrderCalculator from "./components/OrderCalculator";
 import { BookingProvider } from "./components/BookingProvider";
 import { PublicFooter, PublicHeader } from "./components/SiteChrome";
 import { ServiceOverview, CleaningDetails } from "./components/CleaningDetails";
-import { articles } from "@/lib/articles";
+import { publicArticles } from "@/lib/cms";
+export const dynamic = "force-dynamic";
 import CleaningProcess from "./components/CleaningProcess";
 import BeforeAfter from "./components/BeforeAfter";
 import ArticleCard from "./components/ArticleCard";
@@ -28,7 +29,8 @@ const faqs = [
   ["Какие средства и инвентарь привозит команда?", "Команда привозит профессиональный инвентарь и базовый набор средств. Если в доме есть ребёнок, животные, чувствительность к запахам или особые покрытия, сообщите об этом заранее — учтём это при согласовании работ."],
 ];
 const faqColumns = [faqs.slice(0, Math.ceil(faqs.length / 2)), faqs.slice(Math.ceil(faqs.length / 2))];
-export default function Home() {
+export default async function Home() {
+  const articles = await publicArticles();
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [

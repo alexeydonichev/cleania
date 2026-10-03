@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { locations, type LocationSlug } from "@/lib/locations";
-import { serviceCatalog, siteUrl } from "@/lib/site";
+import { siteUrl } from "@/lib/site";
+import { publicServices } from "@/lib/cms";
 import { brandName, contactPhone } from "@/lib/brand";
 import { PublicHeader, PublicFooter } from "@/app/components/SiteChrome";
 import ContactLinks from "@/app/components/ContactLinks";
@@ -14,6 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title, description: place.lead, alternates: { canonical: `/locations/${slug}` }, openGraph: { title, description: place.lead, url: `/locations/${slug}`, images: ["/images/editorial/interior.jpg"] } };
 }
 export default async function LocationPage({ params }: { params: Promise<{ slug: string }> }) {
+  const serviceCatalog = await publicServices();
   const { slug } = await params; const place = locations[slug as LocationSlug]; if (!place) notFound();
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "Service", name: `Клининг в ${place.inCity}`, url: `${siteUrl}/locations/${slug}`, serviceType: "Уборка квартир и домов", areaServed: { "@type": "City", name: place.name }, provider: { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: brandName, telephone: contactPhone } },

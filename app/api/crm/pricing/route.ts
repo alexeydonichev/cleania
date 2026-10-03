@@ -4,9 +4,11 @@ import { getAuthorizedCrmUser } from "@/lib/crm-auth";
 
 export async function PATCH(request: Request) {
   const auth = await getAuthorizedCrmUser();
-  if (!auth.allowed)
+  if (!auth.allowed || !["owner", "manager"].includes(auth.role || ""))
     return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
-  const body = (await request.json()) as {
+  const input = await request.json().catch(() => null);
+  if (!input || typeof input !== "object" || Array.isArray(input)) return NextResponse.json({ error: "Проверьте тарифы" }, { status: 400 });
+  const body = input as {
     rules?: Array<{ key?: string; rate?: number; minimum?: number }>;
   };
   const rules = Array.isArray(body.rules) ? body.rules : [];
@@ -14,13 +16,14 @@ export async function PATCH(request: Request) {
     !rules.length ||
     rules.some(
       (rule) =>
-        !["regular", "deep", "renovation", "office"].includes(
+        !rule || typeof rule !== "object" || !["regular", "deep", "renovation", "office"].includes(
           String(rule.key),
         ) ||
         !Number.isFinite(Number(rule.rate)) ||
         Number(rule.rate) < 1 ||
+        Number(rule.rate) > 100000 ||
         !Number.isFinite(Number(rule.minimum)) ||
-        Number(rule.minimum) < 500,
+        Number(rule.minimum) < 500 || Number(rule.minimum) > 10000000,
     )
   )
     return NextResponse.json({ error: "Проверьте тарифы" }, { status: 400 });

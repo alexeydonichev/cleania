@@ -29,6 +29,8 @@ async function authorize(user: ChatGPTUser | null): Promise<CrmAuthorization> {
     .prepare("SELECT role FROM crm_users WHERE lower(email) = ?")
     .bind(email)
     .first<{ role: string }>();
+  if (existing && !["owner", "manager"].includes(existing.role))
+    return { allowed: false, user, role: null };
 
   if (allowlist.length > 0 && !allowlist.includes(email) && !existing)
     return { allowed: false, user, role: null };

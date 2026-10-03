@@ -11,7 +11,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
   const apiRequest = request.nextUrl.pathname === "/api" || request.nextUrl.pathname.startsWith("/api/");
-  if (!isPreviewDeployment || !apiRequest) return NextResponse.next();
+  if (request.nextUrl.pathname.startsWith("/api/crm/") && !["GET", "HEAD"].includes(request.method)) {
+    const origin = request.headers.get("origin");
+    if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Запрос отклонён: обновите страницу кабинета" }, { status: 403 });
+  }
+  if (!isPreviewDeployment || !apiRequest) {
+    const response = NextResponse.next();
+    if (request.nextUrl.pathname === "/crm" || request.nextUrl.pathname.startsWith("/crm/") || request.nextUrl.pathname.startsWith("/api/crm/")) {
+      response.headers.set("Cache-Control", "private, no-store");
+      response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
+    return response;
+  }
   if (previewApiAllowed(request.nextUrl.pathname, request.method)) return NextResponse.next();
   return NextResponse.json(
     { error: "Демонстрационная версия: приём заявок и CRM ещё не подключены. Данные не сохранены." },

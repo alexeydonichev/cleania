@@ -1,68 +1,31 @@
 import { NextResponse } from "next/server";
 import { rawDb } from "@/db/runtime";
-import { getAuthorizedCrmUser } from "@/lib/crm-auth";
-
-const statuses = new Set([
-  "new",
-  "confirmed",
-  "scheduled",
-  "in_progress",
-  "completed",
-  "cancelled",
-]);
-
-export async function PATCH(
-  request: Request,
-  context: { params: Promise<{ id: string }> },
-) {
-  const auth = await getAuthorizedCrmUser();
-  if (!auth.allowed || !auth.user)
-    return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
-  const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
-  const status = String(body.status || "");
-  if (!statuses.has(status))
-    return NextResponse.json({ error: "Некорректный статус" }, { status: 400 });
-  const finalTotal =
-    body.finalTotal === undefined || body.finalTotal === null
-      ? null
-      : Math.max(0, Math.round(Number(body.finalTotal)));
-  const cleanerCost = Math.max(0, Math.round(Number(body.cleanerCost || 0)));
-  const suppliesCost = Math.max(0, Math.round(Number(body.suppliesCost || 0)));
-  const acquisitionCost = Math.max(
-    0,
-    Math.round(Number(body.acquisitionCost || 0)),
-  );
-  const otherCost = Math.max(0, Math.round(Number(body.otherCost || 0)));
-  const now = new Date().toISOString();
-  const result = await rawDb()
-    .prepare(
-      `UPDATE orders SET status = ?, final_total = COALESCE(?, final_total), cleaner_cost = ?, supplies_cost = ?, acquisition_cost = ?, other_cost = ?, updated_at = ? WHERE id = ?`,
-    )
-    .bind(
-      status,
-      finalTotal,
-      cleanerCost,
-      suppliesCost,
-      acquisitionCost,
-      otherCost,
-      now,
-      id,
-    )
-    .run();
-  if (!result.meta.changes)
-    return NextResponse.json({ error: "Заказ не найден" }, { status: 404 });
-  await rawDb()
-    .prepare(
-      `INSERT INTO activities (id, order_id, actor_id, type, body, created_at) VALUES (?, ?, ?, 'status_changed', ?, ?)`,
-    )
-    .bind(
-      crypto.randomUUID(),
-      id,
-      auth.user.userId,
-      `Статус изменён на ${status}`,
-      now,
-    )
-    .run();
-  return NextResponse.json({ ok: true });
+import { crmAccess, apiFailure } from "@/lib/crm-api";
+import { record, textField, numberField, dateField, enumField, orderStatuses } from "@/lib/crm-validation";
+export async function PATCH(request: Request, context: {params:Promise<{id:string}>}) {
+  try {
+    const access=await crmAccess(request); if(access.error)return access.error;
+    const {id}=await context.params; const db=rawDb();
+    const current=await db.prepare("SELECT updated_at FROM orders WHERE id=?").bind(id).first<{updated_at:string}>();
+    if(!current)return NextResponse.json({error:"Заказ не найден"},{status:404});
+    let b,status,payment,date,slot,address,crew,amount,costs,version,note;
+    try {
+      b=record(await request.json()); version=textField(b.version,50,true);
+      status=enumField(b.status,Object.keys(orderStatuses)); payment=enumField(b.paymentStatus,["unpaid","partial","paid"]);
+      date=dateField(b.date); slot=textField(b.slot,50); address=textField(b.address,500); crew=textField(b.crew,100)||null;
+      amount=b.finalTotal === "" || b.finalTotal === null ? null : Math.round(numberField(b.finalTotal));
+      costs=[b.cleanerCost,b.suppliesCost,b.acquisitionCost,b.otherCost].map(v=>Math.round(numberField(v)));
+      note=textField(b.note,4000);
+      if(["scheduled","in_progress"].includes(status)&&(!date||!crew))throw new Error("Для назначения укажите дату и исполнителя");
+    }catch(e){return NextResponse.json({error:e instanceof Error?e.message:"Проверьте данные"},{status:400});}
+    if(current.updated_at!==version)return NextResponse.json({error:"Заказ уже изменён. Обновите данные перед сохранением."},{status:409});
+    if(crew&&!await db.prepare("SELECT id FROM crews WHERE id=? AND status='active'").bind(crew).first())return NextResponse.json({error:"Исполнитель недоступен"},{status:400});
+    const now=new Date().toISOString();
+    const result=await db.batch([
+      db.prepare("UPDATE orders SET status=?,payment_status=?,preferred_date=?,preferred_slot=?,address=?,assigned_crew_id=?,final_total=?,cleaner_cost=?,supplies_cost=?,acquisition_cost=?,other_cost=?,updated_at=? WHERE id=? AND updated_at=?").bind(status,payment,date,slot,address,crew,amount,...costs,now,id,version),
+      db.prepare("INSERT INTO activities(id,order_id,actor_id,type,body,created_at) SELECT ?,?,?, 'order_updated',?,? WHERE changes()>0").bind(crypto.randomUUID(),id,access.auth!.user!.userId,`Заказ обновлён: ${orderStatuses[status as keyof typeof orderStatuses]}.${note?` Комментарий: ${note}`:""}`,now),
+    ]);
+    if(!result[0].meta.changes)return NextResponse.json({error:"Заказ изменён другим сотрудником"},{status:409});
+    return NextResponse.json({ok:true});
+  }catch(e){return apiFailure(e);}
 }

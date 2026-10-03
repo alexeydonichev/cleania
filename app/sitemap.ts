@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { articles } from "@/lib/articles";
+import { publicArticles } from "@/lib/cms";
 import { serviceCatalog, siteUrl } from "@/lib/site";
 import { locations } from "@/lib/locations";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const articles = await publicArticles();
   const siteUpdatedAt = new Date("2026-09-30T00:00:00+07:00");
   return [
     { url: siteUrl, lastModified: siteUpdatedAt, changeFrequency: "weekly", priority: 1 },

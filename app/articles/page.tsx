@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
 import ArticleCard from "@/app/components/ArticleCard";
-import { articles } from "@/lib/articles";
+import { publicArticles } from "@/lib/cms";
+import { safeJson } from "@/lib/cms-validation";
+export const dynamic = "force-dynamic";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -32,7 +34,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const articles = await publicArticles();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -77,7 +80,7 @@ export default function ArticlesPage() {
       <PublicFooter />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
     </main>
   );

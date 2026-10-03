@@ -6,10 +6,11 @@ import { PublicFooter, PublicHeader } from "@/app/components/SiteChrome";
 import {
   articles,
   formatArticleDate,
-  getArticle,
-  getRelatedArticles,
 } from "@/lib/articles";
 import { brandName, brandLogo } from "@/lib/brand";
+import { publicArticles } from "@/lib/cms";
+import { safeJson } from "@/lib/cms-validation";
+export const dynamic = "force-dynamic";
 import { serviceCatalog, type ServiceSlug, siteUrl } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -22,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = (await publicArticles()).find(a => a.slug === slug);
   if (!article) return {};
 
   const path = `/articles/${article.slug}`;
@@ -61,11 +62,12 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const currentArticles = await publicArticles();
+  const article = currentArticles.find(a => a.slug === slug);
   if (!article) notFound();
 
   const articleUrl = `${siteUrl}/articles/${article.slug}`;
-  const relatedArticles = getRelatedArticles(article.slug);
+  const relatedArticles = currentArticles.filter(a => a.slug !== article.slug).slice(0,3);
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -193,7 +195,7 @@ export default async function ArticlePage({
       <PublicFooter />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJson(jsonLd) }}
       />
     </main>
   );

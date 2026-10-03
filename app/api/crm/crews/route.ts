@@ -4,9 +4,11 @@ import { getAuthorizedCrmUser } from "@/lib/crm-auth";
 
 export async function POST(request: Request) {
   const auth = await getAuthorizedCrmUser();
-  if (!auth.allowed)
+  if (!auth.allowed || !["owner", "manager"].includes(auth.role || ""))
     return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
-  const body = (await request.json()) as Record<string, unknown>;
+  const input = await request.json().catch(() => null);
+  if (!input || typeof input !== "object" || Array.isArray(input)) return NextResponse.json({ error: "Проверьте данные сотрудника" }, { status: 400 });
+  const body = input as Record<string, unknown>;
   const name = String(body.name || "")
     .trim()
     .slice(0, 100);
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
     24,
     Math.max(1, Number(body.capacityHours || 8)),
   );
-  if (!name)
+  if (!name || !Number.isFinite(capacityHours))
     return NextResponse.json(
       { error: "Укажите имя сотрудника или название смены" },
       { status: 400 },
