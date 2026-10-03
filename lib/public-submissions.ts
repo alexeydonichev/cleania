@@ -10,7 +10,7 @@ function canonical(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export async function readSubmission(request: Request, kind: "order" | "callback" | "business") {
+export async function readSubmission(request: Request, kind: "order" | "callback" | "business" | "crm-lead") {
   const text = await request.text();
   if (text.length > 32768) throw new SubmissionError("Заявка слишком большая. Сократите комментарий.", 413);
   let parsed: unknown;
@@ -18,7 +18,7 @@ export async function readSubmission(request: Request, kind: "order" | "callback
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new SubmissionError("Проверьте данные заявки.", 400);
   const body = parsed as Record<string, unknown>;
   // Old clients remain compatible; updated forms supply an unpredictable UUID.
-  const requestId = body.requestId === undefined ? crypto.randomUUID() : body.requestId;
+  const requestId = kind === "crm-lead" ? body.id : body.requestId === undefined ? crypto.randomUUID() : body.requestId;
   if (typeof requestId !== "string" || !/^[a-f\d]{8}-[a-f\d]{4}-4[a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$/i.test(requestId)) throw new SubmissionError("Обновите страницу и повторите отправку.", 400);
   const payload = { ...body }; delete payload.requestId;
   const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical(payload)));

@@ -23,7 +23,8 @@ assert.equal((await call("/api/crm/content","POST",{...payload,version:3,action:
 assert.equal((await fetch(`${base}/articles/${slug}`)).status,200);
 const id=crypto.randomUUID(); const intake={id,name:"Локальный тест CRM",phone:"+79990000000",city:"Бердск",notes:"Синтетические данные",source:"direct",consent:true};
 assert.equal((await call("/api/crm/leads","POST",intake)).r.status,201);
-assert.equal((await call("/api/crm/leads","POST",intake)).r.status,201);
+assert.equal((await call("/api/crm/leads","POST",intake)).r.status,200);
+assert.equal((await call("/api/crm/leads","POST",{...intake,name:"Изменённое имя"})).r.status,409,"changed retry must not claim success");
 let snapshot=(await call("/api/crm/workspace")).body;assert.equal(snapshot.leads.filter(l=>l.id===id).length,1,"idempotent intake");
 let l=snapshot.leads.find(l=>l.id===id);
 assert.equal((await call(`/api/crm/leads/${id}`,"PATCH",{status:"contacted",notes:"Связались",version:l.updated_at})).r.status,200);
