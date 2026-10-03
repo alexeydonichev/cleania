@@ -8,6 +8,7 @@ import { readAttribution } from "@/lib/attribution";
 import { trackConversion } from "@/lib/analytics";
 import ContactLinks from "./ContactLinks";
 import SoftSelect from "./SoftSelect";
+import { submissionPayload, type SubmissionAttempt } from "@/lib/submission-client";
 import { focusVisible, scrollToContent } from "@/lib/motion";
 import { extrasCatalog, formatQuoteForMessage, maxQuoteArea, needsSiteSurvey, propertyFor, propertyTypes, money, serviceKeys, todayInNovosibirsk, validPhone, type City, type ConditionKey, type ExtraKey, type FrequencyKey, type PropertyType } from "@/lib/quote";
 
@@ -76,6 +77,7 @@ export default function OrderCalculator() {
   }, []);
   const [success, setSuccess] = useState<{ order: string; total: number; warning: string; phone: string; city: City; area: number } | null>(null);
   const sendingRef = useRef(false);
+  const attempt = useRef<SubmissionAttempt>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
   const consentRef = useRef<HTMLInputElement>(null);
@@ -113,7 +115,7 @@ export default function OrderCalculator() {
     if (pricingStatus !== "ready") { setError("Не удалось проверить тарифы. Обновите их перед отправкой."); return; }
     sendingRef.current = true; setIsSubmitting(true);
     try {
-      const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total, attribution: readAttribution() }) });
+      const response = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(submissionPayload(attempt, { ...input, city, preferredDate: date || null, preferredSlot: slot || null, address: address.trim(), comment: comment.trim(), name: name.trim(), phone: phone.trim(), consent, expectedEstimate: quote.total, attribution: readAttribution() })) });
       const data = await response.json() as { error?: string; orderNumber?: string; estimate?: number; uploadToken?: string };
       if (!response.ok) { if (response.status === 409) refreshPricing(); if (response.status === 503) setMessageFallback(true); throw new Error(data.error || "Не удалось отправить заявку. Попробуйте ещё раз."); }
       if (!data.orderNumber || data.estimate === undefined) throw new Error("Не получили номер заявки. Свяжитесь с нами через страницу контактов.");
@@ -126,6 +128,7 @@ export default function OrderCalculator() {
         } catch { warning = "Заявка сохранена, но фото не загрузились. Передайте их менеджеру при подтверждении — новую заявку создавать не нужно."; }
       }
       setSuccess({ order: data.orderNumber, total: data.estimate, warning, phone, city, area: input.area });
+      attempt.current = null;
       trackConversion("full_order_submit");
       window.requestAnimationFrame(() => focusVisible(document.getElementById("order-success")));
     } catch (err) { setError(err instanceof Error ? err.message : "Не удалось отправить заявку. Ваши данные остались в форме."); }

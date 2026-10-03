@@ -5,11 +5,13 @@ import { readAttribution } from "@/lib/attribution";
 import { trackConversion } from "@/lib/analytics";
 import { isPreviewDeployment } from "@/lib/deployment";
 import ContactLinks from "./ContactLinks";
+import { submissionPayload, type SubmissionAttempt } from "@/lib/submission-client";
 
 export default function CallbackRequest() {
   const [busy, setBusy] = useState(false); const pending = useRef(false);
   const [error, setError] = useState(""); const [sent, setSent] = useState(false);
   const [draft, setDraft] = useState("");
+  const attempt = useRef<SubmissionAttempt>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (pending.current || sent) return;
     const form = new FormData(event.currentTarget);
@@ -18,7 +20,7 @@ export default function CallbackRequest() {
     const text = `Здравствуйте! Прошу перезвонить по поводу уборки. Меня зовут ${name}, телефон ${phone}.`;
     pending.current = true; setBusy(true); setError(""); setDraft("");
     try {
-      const response = await fetch("/api/callback-requests", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, phone, consent: true, attribution: readAttribution() }) });
+      const response = await fetch("/api/callback-requests", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(submissionPayload(attempt, { name, phone, consent: true, attribution: readAttribution() })) });
       const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || "Не удалось отправить заявку.");
       setSent(true); trackConversion("callback_submit");

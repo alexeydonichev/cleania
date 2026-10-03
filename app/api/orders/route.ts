@@ -3,12 +3,16 @@ import { ensureDatabase, rawDb } from "@/db/runtime";
 import { dispatchOrderNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { attributionNote } from "@/lib/attribution";
+import { readSubmission, existingSubmission, saveSubmission, SubmissionError } from "@/lib/public-submissions";
 
 import { calculateQuote, extrasCatalog, isServiceCompatibleWithProperty, maxQuoteArea, needsSiteSurvey, propertyTypes, serviceKeys, todayInNovosibirsk, validPhone, type ServiceKey, type ConditionKey, type FrequencyKey, type ExtraKey, type PropertyType } from "@/lib/quote";
 
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
+    const submission = await readSubmission(request, "order");
+    const existing = await existingSubmission(submission);
+    if (existing) return NextResponse.json(existing, { headers: { "Cache-Control": "no-store" } });
     if (!hasConfiguredNotificationChannel())
       return NextResponse.json(
         { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — расчёт уже готов." },
@@ -20,15 +24,7 @@ export async function POST(request: Request) {
         { error: "Слишком много заявок. Попробуйте немного позже." },
         { status: 429, headers: { "retry-after": String(rateLimit.retryAfter) } },
       );
-    let parsedBody: unknown;
-    try {
-      parsedBody = await request.json();
-    } catch {
-      return NextResponse.json({ error: "Не удалось прочитать параметры заявки" }, { status: 400 });
-    }
-    if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody))
-      return NextResponse.json({ error: "Параметры заявки переданы в неверном формате" }, { status: 400 });
-    const body = parsedBody as Record<string, unknown>;
+    const { body } = submission;
     const service = String(body.service || "") as ServiceKey;
     const requestedPropertyType = String(body.propertyType || "");
     const condition = String(body.condition || "") as ConditionKey;
@@ -129,7 +125,7 @@ export async function POST(request: Request) {
     if (body.expectedEstimate !== undefined && Number(body.expectedEstimate) !== estimate.total) {
       return NextResponse.json({ error: "Тариф обновился. Проверьте новую сумму и отправьте заявку повторно." }, { status: 409 });
     }
-    await db.batch([
+    const saved = await saveSubmission(submission, { ok: true, orderNumber, estimate: estimate.total, uploadToken }, [
       db
         .prepare(
           `INSERT INTO leads (id, name, phone, source, city, notes, status, consent_at, created_at, updated_at) VALUES (?, ?, ?, 'website', ?, ?, 'new', ?, ?, ?)`,
@@ -188,7 +184,7 @@ export async function POST(request: Request) {
       ),
     ]);
 
-    await dispatchOrderNotifications({
+    if (saved.created) await dispatchOrderNotifications({
       orderId,
       orderNumber,
       name,
@@ -201,14 +197,15 @@ export async function POST(request: Request) {
       city,
       address,
       preferredSlot,
-    });
+    }).catch(() => console.error("order_notification_failed"));
 
     return NextResponse.json(
-      { ok: true, orderNumber, estimate: estimate.total, uploadToken },
-      { status: 201 },
+      saved.response,
+      { status: saved.created ? 201 : 200, headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    console.error("order_create_failed", error);
+    if (error instanceof SubmissionError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error("order_create_failed");
     return NextResponse.json(
       { error: "Сервис временно недоступен. Попробуйте ещё раз." },
       { status: 500 },

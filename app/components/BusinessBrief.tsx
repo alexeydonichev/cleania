@@ -1,12 +1,15 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
+import { submissionPayload, type SubmissionAttempt } from "@/lib/submission-client";
 import { isPreviewDeployment } from "@/lib/deployment";
 import ContactLinks from "./ContactLinks";
 import { readAttribution } from "@/lib/attribution";
 import { trackConversion } from "@/lib/analytics";
 
 export default function BusinessBrief() {
+  const attempt = useRef<SubmissionAttempt>(null);
+  const sending = useRef(false);
   const [state, setState] = useState<"idle" | "sending" | "success" | "error">(
     "idle",
   );
@@ -14,7 +17,8 @@ export default function BusinessBrief() {
   const [messengerFallback, setMessengerFallback] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isPreviewDeployment) return;
+    if (isPreviewDeployment || sending.current) return;
+    sending.current = true;
     setState("sending");
     setMessage("");
     setMessengerFallback("");
@@ -34,7 +38,7 @@ export default function BusinessBrief() {
       const response = await fetch("/api/business-leads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...payload, attribution: readAttribution() }),
+        body: JSON.stringify(submissionPayload(attempt, { ...payload, attribution: readAttribution() })),
       });
       const result = (await response.json()) as { error?: string };
       if (!response.ok) {
@@ -47,12 +51,13 @@ export default function BusinessBrief() {
         "Бриф отправлен. Менеджер подготовит вопросы для точной сметы.",
       );
       formElement.reset();
+      attempt.current = null;
     } catch (error) {
       setState("error");
       setMessage(
         error instanceof Error ? error.message : "Не удалось отправить заявку",
       );
-    }
+    } finally { sending.current = false; }
   }
   if (isPreviewDeployment) return <div className="business-form preview-card">
     <p className="eyebrow">Демонстрационная версия</p><h2>Начните с расчёта</h2>

@@ -1,5 +1,12 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+export const publicSubmissions = sqliteTable("public_submissions", {
+  requestKey: text("request_key").primaryKey(),
+  fingerprint: text("fingerprint").notNull(),
+  responseJson: text("response_json").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
 export const cmsDocuments = sqliteTable("cms_documents", {
   id: text("id").primaryKey(),
   kind: text("kind").notNull(),
@@ -88,6 +95,7 @@ export const crews = sqliteTable("crews", {
 export const integrationEvents = sqliteTable("integration_events", {
   id: text("id").primaryKey(),
   orderId: text("order_id"),
+  leadId: text("lead_id"),
   channel: text("channel").notNull(),
   status: text("status").notNull().default("pending"),
   attempts: integer("attempts").notNull().default(0),

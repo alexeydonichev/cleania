@@ -1,0 +1,1 @@
+ALTER TABLE `integration_events` ADD `lead_id` text;

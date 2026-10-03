@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
-import { dispatchLeadNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
+import { dispatchLeadNotifications, hasConfiguredNotificationChannel, leadNotificationStatements } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { attributionNote } from "@/lib/attribution";
+import { validPhone } from "@/lib/quote";
+import { readSubmission, existingSubmission, saveSubmission, SubmissionError } from "@/lib/public-submissions";
 
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
+    const submission = await readSubmission(request, "business");
+    const existing = await existingSubmission(submission);
+    if (existing) return NextResponse.json(existing);
     if (!hasConfiguredNotificationChannel())
       return NextResponse.json(
         { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — обсудим задачу напрямую." },
@@ -18,7 +23,7 @@ export async function POST(request: Request) {
         { error: "Слишком много заявок. Попробуйте немного позже." },
         { status: 429, headers: { "retry-after": String(rateLimit.retryAfter) } },
       );
-    const body = (await request.json()) as Record<string, unknown>;
+    const { body } = submission;
     const name = String(body.name || "")
       .trim()
       .slice(0, 100);
@@ -37,10 +42,10 @@ export async function POST(request: Request) {
       .slice(0, 800);
     if (
       !name ||
-      phone.replace(/\D/g, "").length < 10 ||
+      !validPhone(phone) ||
       !objectType ||
       !schedule ||
-      !Number.isFinite(area) ||
+      !Number.isInteger(area) ||
       area < 20 ||
       area > 4000 ||
       body.consent !== "on"
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
     const now = new Date().toISOString();
     const leadId = crypto.randomUUID();
     const notes = [`${objectType}, ${area} м², ${schedule}${comment ? `. ${comment}` : ""}`, attributionNote(body.attribution)].filter(Boolean).join("\n");
-    await db.batch([
+    const saved = await saveSubmission(submission, { ok: true }, [
       db
         .prepare(
           `INSERT INTO leads (id, name, phone, source, city, status, notes, consent_at, created_at, updated_at) VALUES (?, ?, ?, 'business_page', 'Новосибирск', 'new', ?, ?, ?, ?)`,
@@ -64,14 +69,17 @@ export async function POST(request: Request) {
           `INSERT INTO activities (id, lead_id, type, body, created_at) VALUES (?, ?, 'business_lead_created', ?, ?)`,
         )
         .bind(crypto.randomUUID(), leadId, `B2B-заявка: ${notes}`, now),
+      ...leadNotificationStatements(leadId, now),
     ]);
-    await dispatchLeadNotifications(
+    if (saved.created) await dispatchLeadNotifications(
       "Новая B2B-заявка БлескПРО",
       `Новая B2B-заявка БлескПРО\n${name} · ${phone}\n${notes}`,
-    );
-    return NextResponse.json({ ok: true }, { status: 201 });
+      leadId,
+    ).catch(() => console.error("business_notification_failed"));
+    return NextResponse.json(saved.response, { status: saved.created ? 201 : 200 });
   } catch (error) {
-    console.error("business_lead_create_failed", error);
+    if (error instanceof SubmissionError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error("business_lead_create_failed");
     return NextResponse.json(
       { error: "Сервис временно недоступен" },
       { status: 500 },

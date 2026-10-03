@@ -140,43 +140,60 @@ export async function dispatchOrderNotifications(order: OrderNotice) {
   );
 }
 
-export async function dispatchLeadNotifications(subject: string, text: string) {
+export function leadNotificationStatements(leadId: string, now: string) {
+  return ["telegram", "max", "email"].map(channel => rawDb().prepare("INSERT INTO integration_events (id, lead_id, channel, status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)").bind(crypto.randomUUID(), leadId, channel, now, now));
+}
+
+export async function dispatchLeadNotifications(subject: string, text: string, leadId: string) {
   const runtime = env as RuntimeEnv;
-  const deliveries: Promise<Response>[] = [];
+  const deliveries: { channel: string; send: () => Promise<Response> }[] = [];
   if (runtime.TELEGRAM_BOT_TOKEN && runtime.TELEGRAM_CHAT_ID) {
-    deliveries.push(
+    deliveries.push({ channel: "telegram", send: () =>
       fetch(`https://api.telegram.org/bot${runtime.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ chat_id: runtime.TELEGRAM_CHAT_ID, text }),
         signal: AbortSignal.timeout(5000),
       }),
-    );
+    });
   }
   if (runtime.MAX_BOT_TOKEN && runtime.MAX_CHAT_ID) {
+    const token = runtime.MAX_BOT_TOKEN;
     const url = new URL("https://platform-api2.max.ru/messages");
     url.searchParams.set("chat_id", runtime.MAX_CHAT_ID);
-    deliveries.push(
+    deliveries.push({ channel: "max", send: () =>
       fetch(url, {
         method: "POST",
         headers: {
-          Authorization: runtime.MAX_BOT_TOKEN,
+          Authorization: token,
           "content-type": "application/json",
         },
         body: JSON.stringify({ text, notify: true }),
         signal: AbortSignal.timeout(5000),
       }),
-    );
+    });
   }
   if (runtime.EMAIL_WEBHOOK_URL) {
-    deliveries.push(
-      fetch(runtime.EMAIL_WEBHOOK_URL, {
+    deliveries.push({ channel: "email", send: () =>
+      fetch(runtime.EMAIL_WEBHOOK_URL!, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ subject, text }),
         signal: AbortSignal.timeout(5000),
       }),
-    );
+    });
   }
-  await Promise.allSettled(deliveries);
+  await Promise.all(["telegram", "max", "email"].map(async channel => {
+    const delivery = deliveries.find(item=>item.channel===channel);
+    let status = "not_configured";
+    let error: string | null = null;
+    if (delivery) {
+      try {
+        const response = await delivery.send();
+        status = response.ok ? "sent" : "failed";
+        if (!response.ok) error = `HTTP ${response.status}`;
+      } catch { status = "failed"; error = "Delivery unavailable"; }
+    }
+    await rawDb().prepare("UPDATE integration_events SET status = ?, attempts = attempts + ?, last_error = ?, updated_at = ? WHERE lead_id = ? AND channel = ?").bind(status, delivery ? 1 : 0, error, new Date().toISOString(), leadId, channel).run();
+  }));
 }
