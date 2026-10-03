@@ -1,0 +1,23 @@
+CRM keyboard and post-save follow-up, 2026-10-03
+
+Root cause: CrmWorkspace manually selected every button/input/select/textarea/link,
+including controls inside closed details, and omitted summary. It also unmounted
+the drawer without returning focus and retained the old tab/search after creation.
+
+Changes: CrmDialog uses native showModal for background inertness and initial focus.
+A boundary handler wraps Tab/Shift+Tab through visible, enabled controls, including
+summary and excluding closed details contents. On dismissal, the triggering button
+receives focus (fallback: Add lead). Background scroll is restored on unmount.
+Successful manual intake switches to Leads and clears the previous search.
+
+Observed in Codex browser, local synthetic data:
+- Closed conversion block: Shift+Tab from Close -> summary; Tab -> Close.
+- Open conversion block: Shift+Tab from Close -> Create order; Tab -> Close.
+- Escape with unmodified card: closes; focus returns to the original lead button.
+- At 390x844, create from Orders with a nonmatching search: successful save opens
+  Leads, clears search, shows the new record, focuses Add lead.
+- Screenshot: /private/tmp/bleskpro-focus-saved.jpg.
+
+Not claimed: screen-reader certification, all browsers, physical device keyboard,
+200% zoom, or complete accessibility compliance. The separate phone-error wording
+and inline field feedback issue from the audit remains to be improved.
