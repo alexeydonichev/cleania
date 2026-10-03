@@ -14,6 +14,13 @@ async function send(body,authenticated=true) {
 }
 assert.equal((await send(payload,false)).status,403);
 assert.equal((await send({...payload,id:"------------------------------------"})).status,400);
+const invalidPhone=await send({...payload,phone:"123"});
+assert.equal(invalidPhone.status,400);
+assert.equal(invalidPhone.body.error,"Введите полный российский номер: +7 (999) 123-45-67.");
+const missingConsent=await send({...payload,consent:false});
+assert.equal(missingConsent.status,400);
+assert.equal(missingConsent.body.error,"Подтвердите согласие клиента на обработку контактов");
+assert.equal(sql(`SELECT count(*) FROM leads WHERE id='${id}'`),"0","invalid intake cannot save a lead");
 const attempts=await Promise.all([send(payload),send(payload),send(payload)]);
 assert.deepEqual(attempts.map(a=>a.status).sort(),[200,200,201]);
 for(const attempt of attempts) assert.deepEqual(attempt.body,{ok:true,id});

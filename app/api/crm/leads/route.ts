@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { rawDb } from "@/db/runtime";
 import { crmAccess, apiFailure } from "@/lib/crm-api";
-import { textField, enumField } from "@/lib/crm-validation";
+import { textField, enumField, crmPhoneError } from "@/lib/crm-validation";
 import { validPhone } from "@/lib/quote";
 import { readSubmission, existingSubmission, saveSubmission, SubmissionError } from "@/lib/public-submissions";
 
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
       notes = textField(body.notes, 4000);
       source = enumField(body.source, ["direct", "referral", "maps", "ads"]);
       id = textField(body.id, 50, true);
-      if (!validPhone(phone) || body.consent !== true) throw new Error("Проверьте телефон и подтвердите согласие клиента");
+      if (!validPhone(phone)) throw new Error(crmPhoneError);
+      if (body.consent !== true) throw new Error("Подтвердите согласие клиента на обработку контактов");
     } catch (error) {
       return NextResponse.json({ error: error instanceof Error ? error.message : "Проверьте поля" }, { status: 400 });
     }

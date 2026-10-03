@@ -1,3 +1,4 @@
+export const crmPhoneError = "Введите полный российский номер: +7 (999) 123-45-67.";
 export const orderStatuses = { new: "Новая", confirmed: "Подтверждена", scheduled: "Назначена", in_progress: "В работе", completed: "Завершена", cancelled: "Отменена" };
 export const leadStatuses = { new: "Новое", contacted: "Связались", qualified: "Согласовываем", closed: "Закрыто" };
 export function record(value: unknown): Record<string, unknown> {

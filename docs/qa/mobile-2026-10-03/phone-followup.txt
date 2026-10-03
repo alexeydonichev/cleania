@@ -1,0 +1,20 @@
+CRM phone validation follow-up — 2026-10-03
+
+Root cause: manual intake used a single server error for invalid phone OR missing
+consent, and the form did not associate the error with its phone field.
+
+Local browser at localhost:3004/crm, viewport 390x844:
+- Synthetic name, phone 123, consent checked: inline Russian phone guidance.
+- Focus returned to phone; aria-invalid=true; aria-describedby=crm-phone-error.
+- Name and checked consent remained unchanged.
+- Corrected phone to +7 (999) 000-00-00; saved successfully and appeared in Leads.
+- Focus returned to Add Lead after successful save.
+
+check-crm-intake.mjs now asserts distinct 400 responses for invalid phone and
+missing consent and confirms invalid intake inserts no lead. Existing concurrent
+retry, transaction rollback and legacy-conflict checks remain in place.
+ESLint, TypeScript and 61 unit tests passed.
+
+Scope: local synthetic data only. Production authenticated UI not verified.
+Actual phone ownership is not verified. Notifications still require setup;
+public intake remains gated until a delivery channel is configured.
