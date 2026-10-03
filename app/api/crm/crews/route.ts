@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { rawDb } from "@/db/runtime";
-import { getAuthorizedCrmUser } from "@/lib/crm-auth";
+import { crmAccess, apiFailure } from "@/lib/crm-api";
 
 export async function POST(request: Request) {
-  const auth = await getAuthorizedCrmUser();
-  if (!auth.allowed || !["owner", "manager"].includes(auth.role || ""))
-    return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
+  try {
+  const access = await crmAccess(request);
+  if (access.error) return access.error;
   const input = await request.json().catch(() => null);
   if (!input || typeof input !== "object" || Array.isArray(input)) return NextResponse.json({ error: "Проверьте данные сотрудника" }, { status: 400 });
   const body = input as Record<string, unknown>;
@@ -51,4 +51,5 @@ export async function POST(request: Request) {
     },
     { status: 201 },
   );
+  } catch (error) { return apiFailure(error); }
 }
