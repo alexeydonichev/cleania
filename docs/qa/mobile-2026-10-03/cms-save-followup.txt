@@ -1,0 +1,26 @@
+CMS save race — 2026-10-03
+
+Root cause: save() sends the current content, then replaces editor state with
+the returned draft. Inputs were still editable during the request, so newer
+keystrokes could be silently replaced by the older response.
+
+Fix: one native disabled fieldset locks all content controls during a save;
+the existing busy lock covers document switching and submit actions. The status
+announces saving. beforeunload also guards pending operations. A new untouched
+article no longer falsely claims it has already been saved.
+
+Local browser verification, synthetic article only:
+- Temporarily delayed local POST /api/crm/content by 20 seconds.
+- Saved title "Тест сохранения CMS" as draft.
+- During request: aria-busy=true; zero enabled input/textarea/select/button
+  controls inside cms-fields; document and action buttons disabled.
+- On success: draft-saved message, exact title retained, controls enabled.
+- Removed temporary delay; confirmed route has no Git diff.
+- Empty title returned validation error, retained editor state and reenabled
+  controls; corrected title then saved successfully.
+- Local CRM/CMS integration suite passed, including publication, rollback,
+  version conflict, private draft, authorization and script escaping.
+- ESLint, TypeScript and 61 unit tests passed.
+
+No production content was changed by these tests. This verifies save-race
+prevention, not crash recovery/autosave or all navigation paths.
