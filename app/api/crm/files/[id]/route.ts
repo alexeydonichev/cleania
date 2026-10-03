@@ -27,7 +27,7 @@ export async function GET(
     headers: {
       "content-type": file.content_type,
       "content-disposition": `inline; filename*=UTF-8''${encodeURIComponent(file.file_name)}`,
-      "cache-control": "private, max-age=300",
+      "cache-control": "private, no-store",
       "x-content-type-options": "nosniff",
     },
   });
