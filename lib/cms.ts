@@ -1,5 +1,6 @@
 import { rawDb } from "@/db/runtime";
 import { env } from "@/lib/runtime-env";
+import { isPreviewDeployment } from "./deployment";
 import { articles, type Article } from "./articles";
 import { serviceCatalog } from "./site";
 export type CmsDocument = { id: string; kind: "article" | "service"; draft: string; published: string | null; previous: string | null; version: number; updated_at: string };
@@ -7,9 +8,10 @@ export async function cmsRows(): Promise<CmsDocument[]> {
   return (await rawDb().prepare("SELECT id,kind,draft,published,previous,version,updated_at FROM cms_documents ORDER BY updated_at DESC").all<CmsDocument>()).results;
 }
 async function publishedRows() {
-  if (!env.DB) return [];
-  // An unavailable CMS must not erase the existing public site.
-  try { return await cmsRows(); } catch { console.error("CMS unavailable: using bundled content"); return []; }
+  if (!env.DB && isPreviewDeployment) return [];
+  // Do not resurrect withdrawn articles or overwrite edited terms with bundled
+  // content during an outage. The error boundary offers retry and direct contact.
+  return await cmsRows();
 }
 export async function publicArticles() {
   const result = new Map(articles.map(a => [a.slug, a]));

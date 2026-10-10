@@ -16,7 +16,7 @@ export default async function CrmPage(){
   if(isPreviewDeployment || !env.DB)return <Unavailable text="База заявок пока не подключена к этому окружению. Данные клиентов здесь не отображаются."/>;
   const auth=await requireCrmUser("/crm");
   if(!auth.allowed||!auth.user||!["owner","manager"].includes(auth.role||""))return <Unavailable text="Этот аккаунт не добавлен владельцем. Войдите под разрешённой учётной записью."/>;
-  const initial=await loadWorkspace().catch(()=>null);
+  const initial=await loadWorkspace({view:"orders",filter:"active"}).catch(()=>null);
   if(!initial)return <Unavailable text="Не удалось загрузить данные. Обновите страницу через минуту. Сохранённые заявки не удалены."/>;
-  return <CrmWorkspace initial={initial} user={{name:auth.user.displayName,role:auth.role!,signOut:chatGPTSignOutPath("/")}} today={todayInNovosibirsk()} notifications={hasConfiguredNotificationChannel()}/>;
+  return <CrmWorkspace initial={initial} user={{id:auth.user.userId,name:auth.user.displayName,role:auth.role!,signOut:chatGPTSignOutPath("/")}} today={todayInNovosibirsk()} notifications={hasConfiguredNotificationChannel()}/>;
 }

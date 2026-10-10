@@ -15,8 +15,9 @@ const originalRules=initial.pricing.map(({key,rate,minimum})=>({key,rate,minimum
 assert.equal(originalRules.length,4);
 const originalTotals=initial.orders.map(({id,estimate_total,final_total})=>({id,estimate_total,final_total}));
 try {
-  const rules=originalRules.map(r=>r.key==="regular"?{...r,rate:137,minimum:6100}:r);
+  const rules=originalRules.map(r=>({...r,version:initial.pricing.find(p=>p.key===r.key).updated_at,...(r.key==="regular"?{rate:137,minimum:6100}:{})}));
   assert.equal((await call("/api/crm/pricing","PATCH",{rules})).status,200);
+  assert.equal((await call("/api/crm/pricing","PATCH",{rules})).status,409,"stale tariff submission rejected");
   const current=await workspace();
   assert.deepEqual(current.orders.map(({id,estimate_total,final_total})=>({id,estimate_total,final_total})),originalTotals,"tariff edit cannot recalculate saved orders");
   const publicPricing=await(await fetch(base+"/api/pricing",{cache:"no-store"})).json();
@@ -28,7 +29,8 @@ try {
   assert.equal((await call("/api/crm/pricing","PATCH",{rules:[{key:"regular",rate:0,minimum:6100}]})).status,400);
   assert.equal((await workspace()).pricing.find(r=>r.key==="regular").rate,137);
 } finally {
-  assert.equal((await call("/api/crm/pricing","PATCH",{rules:originalRules})).status,200,"restore local pricing");
+  const latest=await workspace();
+  assert.equal((await call("/api/crm/pricing","PATCH",{rules:originalRules.map(r=>({...r,version:latest.pricing.find(p=>p.key===r.key).updated_at}))})).status,200,"restore local pricing");
 }
 const restored=(await workspace()).pricing.map(({key,rate,minimum})=>({key,rate,minimum}));
 assert.deepEqual(restored,originalRules);

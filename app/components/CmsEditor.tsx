@@ -2,21 +2,33 @@
 import { useEffect, useRef, useState } from "react";
 import type { CmsDocument } from "@/lib/cms";
 import type { Article } from "@/lib/articles";
+import { readRecovery, recoveryKey, type CmsRecovery } from "@/lib/cms-recovery";
 type Content = Record<string, unknown>;
 const pictures = ["kitchen","floor","windows","bathroom","equipment","interior","hall-after"].map(n=>`/images/editorial/${n}.jpg`);
-export default function CmsEditor() {
+export default function CmsEditor({ownerId}:{ownerId:string}) {
   const [docs,setDocs]=useState<CmsDocument[]>([]),[selected,setSelected]=useState<CmsDocument|null>(null),[content,setContent]=useState<Content>({}),[message,setMessage]=useState(""),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false),[preview,setPreview]=useState(false);
   const lock=useRef(false);
+  const [recovery,setRecovery]=useState<CmsRecovery|null>(null),[backupStatus,setBackupStatus]=useState("");
+  useEffect(()=>{
+    if(!selected||!dirty)return;
+    try { localStorage.setItem(recoveryKey(ownerId,selected.id),JSON.stringify({id:selected.id,version:selected.version,savedAt:new Date().toISOString(),content}));setBackupStatus("Копия правок сохранена на этом устройстве. На сайте изменений нет."); }
+    catch {setBackupStatus("Не удалось сохранить копию на устройстве. Сохраните черновик перед выходом.");}
+  },[selected,content,dirty,ownerId]);
+  function findRecovery(doc:CmsDocument){
+    setBackupStatus("");
+    try { const copy=readRecovery(localStorage.getItem(recoveryKey(ownerId,doc.id)),doc.id);setRecovery(copy&&JSON.stringify(copy.content)!==doc.draft?copy:null); }
+    catch {setRecovery(null);}
+  }
   useEffect(()=>{let active=true;fetch("/api/crm/content").then(async r=>{const d=await r.json() as {error?:string;documents:CmsDocument[]};if(!r.ok)throw new Error(d.error);if(active)setDocs(d.documents);}).catch(e=>{if(active)setMessage(e.message||"Не удалось загрузить материалы");});return()=>{active=false;};},[]);
   useEffect(()=>{const guard=(e:BeforeUnloadEvent)=>{if(dirty||busy){e.preventDefault();e.returnValue="";}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard);},[dirty,busy]);
-  function open(doc:CmsDocument){if(dirty&&!window.confirm("Открыть другой материал? Несохранённые правки будут потеряны."))return;setSelected(doc);setContent(JSON.parse(doc.draft));setDirty(false);setPreview(false);setMessage("");}
+  function open(doc:CmsDocument){if(dirty&&!window.confirm("Открыть другой материал? Проверьте статус копии правок перед выходом."))return;setSelected(doc);setContent(JSON.parse(doc.draft));setDirty(false);setPreview(false);setMessage("");findRecovery(doc);}
   function change(key:string,value:unknown){setContent(c=>({...c,[key]:value}));setDirty(true);}
-  function create(){if(dirty&&!window.confirm("Создать статью без сохранения текущих правок?"))return;const date=new Date().toISOString().slice(0,10);const data={slug:"",title:"",seoTitle:"",description:"",excerpt:"",category:"Советы по уборке",readTime:"3 минуты",publishedAt:date,modifiedAt:date,image:pictures[0],sections:[{heading:"",paragraphs:[""],bullets:[]}],relatedServices:[]};setSelected({id:"article:",kind:"article",draft:JSON.stringify(data),published:null,previous:null,version:0,updated_at:""});setContent(data);setDirty(false);setPreview(false);}
+  function create(){if(dirty&&!window.confirm("Создать статью без сохранения текущих правок?"))return;const date=new Date().toISOString().slice(0,10);const data={slug:"",title:"",seoTitle:"",description:"",excerpt:"",category:"Советы по уборке",readTime:"3 минуты",publishedAt:date,modifiedAt:date,image:pictures[0],sections:[{heading:"",paragraphs:[""],bullets:[]}],relatedServices:[]};setSelected({id:"article:",kind:"article",draft:JSON.stringify(data),published:null,previous:null,version:0,updated_at:""});setContent(data);setDirty(false);setPreview(false);findRecovery({id:"article:",kind:"article",draft:JSON.stringify(data),published:null,previous:null,version:0,updated_at:""});}
   async function save(action:string){
     if(!selected||lock.current)return;
     if(action!=="save"&&!window.confirm(action==="publish"?"Опубликовать изменения на сайте?":action==="hide"?"Убрать статью из публичного раздела? Сохранённый текст останется в CMS.":"Вернуть предыдущую опубликованную версию?"))return;
     lock.current=true;setBusy(true);setMessage("");
-    try{const slug=selected.id==="article:"?String(content.slug):selected.id.split(":")[1];const response=await fetch("/api/crm/content",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:selected.kind,slug,content,version:selected.version,action})});const result=await response.json() as {error?:string;documents:CmsDocument[]};if(!response.ok)throw new Error(result.error);setDocs(result.documents);const doc=result.documents.find((d:CmsDocument)=>d.id===`${selected.kind}:${slug}`);if(!doc)throw new Error("Сохранено, но список не обновился");setSelected(doc);setContent(JSON.parse(doc.draft));setDirty(false);setMessage(action==="save"?"Черновик сохранён. Сайт не изменён.":"Изменения опубликованы.");}catch(e){setMessage(e instanceof Error?e.message:"Нет связи. Ваши правки остаются здесь.");}finally{lock.current=false;setBusy(false);}
+    try{const slug=selected.id==="article:"?String(content.slug):selected.id.split(":")[1];const response=await fetch("/api/crm/content",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:selected.kind,slug,content,version:selected.version,action})});const result=await response.json() as {error?:string;documents:CmsDocument[]};if(!response.ok)throw new Error(result.error);setDocs(result.documents);const doc=result.documents.find((d:CmsDocument)=>d.id===`${selected.kind}:${slug}`);if(!doc)throw new Error("Сохранено, но список не обновился");try{const key=recoveryKey(ownerId,selected.id);const copy=readRecovery(localStorage.getItem(key),selected.id);if(copy&&JSON.stringify(copy.content)===JSON.stringify(content))localStorage.removeItem(key);}catch{}setRecovery(null);setBackupStatus("");setSelected(doc);setContent(JSON.parse(doc.draft));setDirty(false);setMessage(action==="save"?"Черновик сохранён. Сайт не изменён.":"Изменения опубликованы.");}catch(e){setMessage(e instanceof Error?e.message:"Нет связи. Ваши правки остаются здесь.");}finally{lock.current=false;setBusy(false);}
   }
   function field(key:string,label:string,multi=false){return <label key={key}>{label}{multi?<textarea rows={3} value={String(content[key]??"")} onChange={e=>change(key,e.target.value)}/>:<input value={String(content[key]??"")} onChange={e=>change(key,e.target.value)}/>}</label>;}
   const sections=(content.sections||[]) as Article["sections"];
@@ -24,6 +36,8 @@ export default function CmsEditor() {
     {message&&<p role="status" className="desk-message">{message}</p>}
     {!selected?<div className="desk-empty"><h2>Сайт под вашим контролем</h2><p>Выберите услугу или статью слева. Сохраняйте правки в черновик, проверяйте и публикуйте отдельно.</p></div>:<>
       <div className="desk-section-title"><div><h2>{selected.kind==="article"?"Редактор статьи":"Страница услуги"}</h2><small role="status">{busy?"Сохраняем изменения…":dirty?"Есть несохранённые правки":selected.id==="article:"?"Новая статья — ещё не сохранена":"Все правки сохранены"}</small></div><button onClick={()=>setPreview(!preview)}>{preview?"Редактировать":"Предпросмотр"}</button></div>
+      {recovery&&<div className="desk-warning"><p>Найдена копия правок от {new Date(recovery.savedAt).toLocaleString("ru-RU")}.{recovery.version!==selected.version?" Серверная версия уже изменилась. Сравните тексты перед сохранением.":""}</p><button disabled={busy} onClick={()=>{setContent(recovery.content);setDirty(true);setRecovery(null);}}>Восстановить правки</button><button disabled={busy} onClick={()=>{setRecovery(null);}}>Оставить серверный текст</button></div>}
+      {backupStatus&&<p role="status" className="desk-muted">{backupStatus}</p>}
       {preview?<article className="cms-preview"><h1>{String(content.title||content.name||"")}</h1><p>{String(content.excerpt||content.description||"")}</p>{sections.map((s,i)=><section key={i}><h2>{s.heading}</h2>{s.paragraphs.map((p,j)=><p key={j}>{p}</p>)}<ul>{s.bullets?.map((p,j)=><li key={j}>{p}</li>)}</ul></section>)}{selected.kind==="service"&&<><p>{String(content.price)} · {String(content.duration)}</p><h3>Что входит</h3><ul>{(content.includes as string[]).map((p,i)=><li key={i}>{p}</li>)}</ul></>}</article>:<fieldset className="cms-fields cms-edit-lock" disabled={busy} aria-label="Содержимое материала" aria-busy={busy}>
         {selected.kind==="article"?<>
           {selected.id==="article:"?field("slug","Адрес статьи (латиницей, через дефис)"):<p className="desk-muted">Адрес: /articles/{selected.id.split(":")[1]}</p>}
