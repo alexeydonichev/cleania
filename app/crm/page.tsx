@@ -4,7 +4,6 @@ import { isPreviewDeployment } from "@/lib/deployment";
 import { requireCrmUser } from "@/lib/crm-auth";
 import { loadWorkspace } from "@/lib/crm-data";
 import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
-import { hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { todayInNovosibirsk } from "@/lib/quote";
 import BrandLogo from "@/app/components/BrandLogo";
 import CrmWorkspace from "@/app/components/CrmWorkspace";
@@ -18,5 +17,5 @@ export default async function CrmPage(){
   if(!auth.allowed||!auth.user||!["owner","manager"].includes(auth.role||""))return <Unavailable text="Этот аккаунт не добавлен владельцем. Войдите под разрешённой учётной записью."/>;
   const initial=await loadWorkspace({view:"orders",filter:"active"}).catch(()=>null);
   if(!initial)return <Unavailable text="Не удалось загрузить данные. Обновите страницу через минуту. Сохранённые заявки не удалены."/>;
-  return <CrmWorkspace initial={initial} user={{id:auth.user.userId,name:auth.user.displayName,role:auth.role!,signOut:chatGPTSignOutPath("/")}} today={todayInNovosibirsk()} notifications={hasConfiguredNotificationChannel()}/>;
+  return <CrmWorkspace initial={initial} user={{id:auth.user.userId,name:auth.user.displayName,role:auth.role!,signOut:chatGPTSignOutPath("/")}} today={todayInNovosibirsk()}/>;
 }

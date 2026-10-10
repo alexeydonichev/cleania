@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
-import { dispatchLeadNotifications, hasConfiguredNotificationChannel, leadNotificationStatements } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { attributionNote } from "@/lib/attribution";
 import { validPhone } from "@/lib/quote";
@@ -12,11 +11,6 @@ export async function POST(request: Request) {
     const submission = await readSubmission(request, "business");
     const existing = await existingSubmission(submission);
     if (existing) return NextResponse.json(existing);
-    if (!hasConfiguredNotificationChannel())
-      return NextResponse.json(
-        { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — обсудим задачу напрямую." },
-        { status: 503, headers: { "retry-after": "300" } },
-      );
     const rateLimit = await checkRateLimit(request, "business-leads", 4);
     if (!rateLimit.allowed)
       return NextResponse.json(
@@ -69,13 +63,7 @@ export async function POST(request: Request) {
           `INSERT INTO activities (id, lead_id, type, body, created_at) VALUES (?, ?, 'business_lead_created', ?, ?)`,
         )
         .bind(crypto.randomUUID(), leadId, `B2B-заявка: ${notes}`, now),
-      ...leadNotificationStatements(leadId, now),
     ]);
-    if (saved.created) await dispatchLeadNotifications(
-      "Новая B2B-заявка БлескПРО",
-      `Новая B2B-заявка БлескПРО\n${name} · ${phone}\n${notes}`,
-      leadId,
-    ).catch(() => console.error("business_notification_failed"));
     return NextResponse.json(saved.response, { status: saved.created ? 201 : 200 });
   } catch (error) {
     if (error instanceof SubmissionError) return NextResponse.json({ error: error.message }, { status: error.status });

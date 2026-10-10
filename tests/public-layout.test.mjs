@@ -119,10 +119,18 @@ test('CRM stores the selected object type alongside the service', () => {
   const api = read('app/api/orders/route.ts');
   assert.match(api, /requestedPropertyType/);
   assert.match(api, /Объект: \$\{propertyTypes\[propertyType\]\.label\}/);
-  assert.match(api, /propertyType: propertyTypes\[propertyType\]\.label/);
   const dashboard = read('app/components/CrmDashboard.tsx');
   assert.match(dashboard, /function objectTypeLabel/);
   assert.match(dashboard, /<b>Тип объекта:<\/b>/);
+});
+
+test('public intake is CRM-only regardless of notification configuration', () => {
+  for (const route of ['orders', 'callback-requests', 'business-leads']) {
+    const api = read(`app/api/${route}/route.ts`);
+    assert.match(api, /saveSubmission/);
+    assert.doesNotMatch(api, /lib\/notifications|dispatch\w*Notifications|integration_events|hasConfiguredNotificationChannel/);
+  }
+  assert.match(read('app/components/CrmWorkspace.tsx'), /Заявки с сайта сохраняются только в CRM/);
 });
 
 test('the order API cannot bypass a required survey or fall back to stale display prices', () => {

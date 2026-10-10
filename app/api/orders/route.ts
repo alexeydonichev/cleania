@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { ensureDatabase, rawDb } from "@/db/runtime";
-import { dispatchOrderNotifications, hasConfiguredNotificationChannel } from "@/lib/notifications";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { attributionNote } from "@/lib/attribution";
 import { readSubmission, existingSubmission, saveSubmission, SubmissionError } from "@/lib/public-submissions";
@@ -13,11 +12,6 @@ export async function POST(request: Request) {
     const submission = await readSubmission(request, "order");
     const existing = await existingSubmission(submission);
     if (existing) return NextResponse.json(existing, { headers: { "Cache-Control": "no-store" } });
-    if (!hasConfiguredNotificationChannel())
-      return NextResponse.json(
-        { error: "Приём заявок временно настраивается. Напишите нам в Telegram или MAX — расчёт уже готов." },
-        { status: 503, headers: { "retry-after": "300" } },
-      );
     const rateLimit = await checkRateLimit(request, "orders", 6);
     if (!rateLimit.allowed)
       return NextResponse.json(
@@ -175,29 +169,8 @@ export async function POST(request: Request) {
           `Новая заявка ${orderNumber} с сайта`,
           now,
         ),
-      ...["telegram", "max", "email"].map((channel) =>
-        db
-          .prepare(
-            `INSERT INTO integration_events (id, order_id, channel, status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)`,
-          )
-          .bind(crypto.randomUUID(), orderId, channel, now, now),
-      ),
     ]);
 
-    if (saved.created) await dispatchOrderNotifications({
-      orderId,
-      orderNumber,
-      name,
-      phone,
-      service,
-      propertyType: propertyTypes[propertyType].label,
-      area,
-      estimate: estimate.total,
-      preferredDate,
-      city,
-      address,
-      preferredSlot,
-    }).catch(() => console.error("order_notification_failed"));
 
     return NextResponse.json(
       saved.response,

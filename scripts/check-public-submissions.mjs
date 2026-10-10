@@ -1,4 +1,4 @@
-// LOCAL ONLY: start dev on :3004 with EMAIL_WEBHOOK_URL=http://127.0.0.1:3014.
+// LOCAL ONLY: start dev on :3004. No notification configuration is required.
 // No external notification provider is contacted by this fixture.
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -28,11 +28,10 @@ try {
     assert.equal(sql(`SELECT count(*) FROM public_submissions WHERE request_key='${kind}:${body.requestId}'`),"1");
     assert.equal(sql(`SELECT count(*) FROM leads WHERE name='${payload.name}'`),"1");
     const predicate=kind==="order"?`order_id IN (SELECT id FROM orders WHERE lead_id IN (SELECT id FROM leads WHERE name='${payload.name}'))`:`lead_id IN (SELECT id FROM leads WHERE name='${payload.name}')`;
-    assert.equal(sql(`SELECT count(*) FROM integration_events WHERE ${predicate}`),"3");
-    assert.equal(sql(`SELECT count(*) FROM integration_events WHERE ${predicate} AND channel='email' AND status='failed' AND attempts=1`),"1","failed delivery is durable and not retried by duplicate submission");
+    assert.equal(sql(`SELECT count(*) FROM integration_events WHERE ${predicate}`),"0","CRM-only creates no delivery events");
     assert.equal(sql(`SELECT count(*) FROM activities WHERE lead_id IN (SELECT id FROM leads WHERE name='${payload.name}')`),"1");
   }
-  assert.equal(notificationCalls,3,"exactly one attempted notification per accepted submission");
+  assert.equal(notificationCalls,0,"CRM-only makes no notification requests");
   const rollbackKey=crypto.randomUUID();
   const trigger=`test_submission_${run.replaceAll("-","")}`;
   sql(`CREATE TRIGGER ${trigger} BEFORE INSERT ON leads WHEN NEW.name='Тест rollback ${run}' BEGIN SELECT RAISE(ABORT,'local test failure'); END;`);
@@ -44,7 +43,7 @@ try {
   const login=await fetch(base+"/signin-with-chatgpt?return_to=%2Fcrm",{redirect:"manual"});
   const cookie=login.headers.get("set-cookie")?.split(";")[0];assert.ok(cookie);
   const workspace=await(await fetch(base+"/api/crm/workspace",{headers:{cookie}})).json();
-  assert.ok(workspace.deliveries.some(item=>item.status==="failed"));
+  for (const [kind] of cases) assert.ok(JSON.stringify(workspace).includes(`Тест ${kind} ${run}`), `${kind} visible in CRM`);
   assert.equal(JSON.stringify(workspace).includes("upload_token"),false);
-  console.log(JSON.stringify({result:"PASS",run,checks:["three forms","simultaneous repeats","identical receipts","payload conflict","one lead and activity","one notification attempt","delivery failure visible","atomic rollback","CRM access"]}));
+  console.log(JSON.stringify({result:"PASS",run,checks:["three forms","simultaneous repeats","identical receipts","payload conflict","one lead and activity","no notification requests","no delivery events","atomic rollback","CRM access"]}));
 } finally { await new Promise(resolve=>server.close(resolve)); }
